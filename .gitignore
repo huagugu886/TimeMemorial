@@ -13,6 +13,6 @@ local.properties
 *.iml
 .DS_Store
 
-# Signing
+# Signing (keep debug keystore for CI)
 *.jks
-*.keystore
+!debug.keystore
