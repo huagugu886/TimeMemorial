@@ -31,11 +31,12 @@ class AddFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.webView.apply {
+            clearCache(true)
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = true
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            settings.cacheMode = WebSettings.LOAD_DEFAULT
+            settings.cacheMode = WebSettings.LOAD_NO_CACHE
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
             settings.setSupportZoom(false)
@@ -43,7 +44,7 @@ class AddFragment : Fragment() {
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
 
-            loadUrl("file:///android_asset/add_page.html")
+            loadUrl("file:///android_asset/add_page.html?v=2")
         }
     }
 
