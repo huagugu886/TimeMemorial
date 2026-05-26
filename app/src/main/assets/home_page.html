@@ -31,7 +31,6 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  padding-bottom: calc(60px + var(--safe-bottom));
   overflow-x: hidden;
 }
 
@@ -304,36 +303,6 @@ body {
   pointer-events: auto !important;
 }
 .fab:active { transform: scale(0.9) !important; }
-
-/* ========== 底部导航 ========== */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: calc(56px + var(--safe-bottom));
-  padding-bottom: var(--safe-bottom);
-  background: var(--card-bg);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-top: 1px solid #F0F0F0;
-  z-index: 100;
-}
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 10px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 6px 12px;
-  border: none;
-  background: none;
-  transition: color 0.2s;
-}
-.nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; }
-.nav-item.active { color: var(--primary); }
 
 /* ========== 添加弹窗 ========== */
 .modal-overlay {
@@ -639,22 +608,6 @@ textarea.form-input {
 
 <!-- ========== FAB按钮 ========== -->
 <button class="fab" id="fabBtn">＋</button>
-
-<!-- ========== 底部导航 ========== -->
-<div class="bottom-nav">
-  <button class="nav-item active">
-    <span class="nav-icon">🏠</span>
-    <span>首页</span>
-  </button>
-  <button class="nav-item" onclick="showToast('日历 - 开发中')">
-    <span class="nav-icon">📅</span>
-    <span>日历</span>
-  </button>
-  <button class="nav-item" onclick="showToast('设置 - 开发中')">
-    <span class="nav-icon">⚙️</span>
-    <span>设置</span>
-  </button>
-</div>
 
 <!-- ========== 添加纪念日弹窗 ========== -->
 <div class="modal-overlay" id="addModal">
