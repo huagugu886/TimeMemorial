@@ -2,67 +2,95 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>新建纪念日</title>
     <style>
         :root {
-            --primary: #6C63FF;
-            --primary-light: #8B83FF;
-            --bg: #F8F9FE;
+            --primary: #FF6B81;
+            --primary-light: #FF9EB5;
+            --bg: #F8F8F8;
             --card: #FFFFFF;
-            --text: #1A1A2E;
-            --text-secondary: #6B7280;
-            --border: #E5E7EB;
-            --radius: 12px;
+            --text: #333333;
+            --text-secondary: #888888;
+            --border: #EEEEEE;
+            --tag-love: #FF6B81;
+            --tag-birthday: #FFB347;
+            --tag-life: #4ECDC4;
+            --tag-work: #6C5CE7;
+            --tag-memorial: #FF6B9D;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
-            font-family: -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            padding: 20px;
-            padding-bottom: 40px;
-            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 100px;
         }
 
-        .page-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 24px;
+        .page-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px;
             color: var(--text);
         }
 
-        .form-group { margin-bottom: 20px; }
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
 
         .form-label {
+            display: block;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             color: var(--text-secondary);
             margin-bottom: 8px;
-            display: block;
         }
 
         .form-input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 16px;
             border: 1.5px solid var(--border);
-            border-radius: var(--radius);
+            border-radius: 12px;
             font-size: 16px;
             color: var(--text);
             background: var(--card);
             outline: none;
             transition: border-color 0.2s;
-            -webkit-appearance: none;
         }
 
-        .form-input:focus { border-color: var(--primary); }
-        .form-input::placeholder { color: #9CA3AF; }
+        .form-input:focus {
+            border-color: var(--primary);
+        }
 
         textarea.form-input {
-            resize: vertical;
             min-height: 100px;
+            resize: vertical;
             font-family: inherit;
         }
 
@@ -71,445 +99,567 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            align-items: center;
         }
 
         .tag-option {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 6px;
-            padding: 10px 16px;
+            padding: 8px 16px;
             border: 1.5px solid var(--border);
             border-radius: 20px;
             font-size: 14px;
-            color: var(--text-secondary);
-            background: var(--card);
             cursor: pointer;
             transition: all 0.2s;
+            background: var(--card);
             user-select: none;
-            -webkit-user-select: none;
         }
 
-        .tag-option:active { transform: scale(0.95); }
+        .tag-option:hover {
+            border-color: var(--primary-light);
+        }
 
         .tag-option.active {
             border-color: var(--primary);
-            background: rgba(108, 99, 255, 0.08);
-            color: var(--primary);
-            font-weight: 600;
+            background: #FFF0F3;
         }
 
-        /* 添加分类按钮 */
+        .tag-option.tag-love.active { border-color: var(--tag-love); background: #FFF0F3; }
+        .tag-option.tag-birthday.active { border-color: var(--tag-birthday); background: #FFF5E6; }
+        .tag-option.tag-life.active { border-color: var(--tag-life); background: #E6FAF8; }
+        .tag-option.tag-work.active { border-color: var(--tag-work); background: #F0EDFF; }
+        .tag-option.tag-memorial.active { border-color: var(--tag-memorial); background: #FFE6F0; }
+
+        .tag-option.custom.active {
+            border-color: var(--custom-color, var(--primary));
+            background: color-mix(in srgb, var(--custom-color, var(--primary)) 10%, white);
+        }
+
         .tag-add-btn {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             width: 40px;
             height: 40px;
             border: 1.5px dashed var(--border);
             border-radius: 20px;
-            font-size: 20px;
-            color: var(--text-secondary);
-            background: transparent;
+            font-size: 18px;
             cursor: pointer;
+            color: var(--text-secondary);
+            background: var(--card);
             transition: all 0.2s;
-            flex-shrink: 0;
         }
 
-        .tag-add-btn:active { transform: scale(0.9); }
         .tag-add-btn:hover {
             border-color: var(--primary);
             color: var(--primary);
         }
 
-        /* 添加分类弹窗 */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 100;
-            justify-content: center;
+        /* 封面图片 */
+        .cover-upload {
+            width: 100%;
+            height: 180px;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            padding: 20px;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--card);
+            position: relative;
+            overflow: hidden;
         }
 
-        .modal-overlay.show { display: flex; }
+        .cover-upload:hover {
+            border-color: var(--primary);
+        }
+
+        .cover-upload.has-image {
+            border-style: solid;
+        }
+
+        .cover-upload .upload-icon {
+            font-size: 32px;
+            color: var(--text-secondary);
+        }
+
+        .cover-upload .upload-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .cover-upload img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cover-upload .remove-cover {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cover-upload.has-image .remove-cover { display: flex; }
+        .cover-upload.has-image .upload-icon,
+        .cover-upload.has-image .upload-text { display: none; }
+
+        /* 精选开关 */
+        .featured-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--card);
+            border-radius: 12px;
+        }
+
+        .featured-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 28px;
+            background: #E0E0E0;
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        /* 保存按钮 */
+        .save-btn {
+            width: calc(100% - 40px);
+            margin: 0 20px;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .save-btn:hover {
+            background: #E05568;
+        }
+
+        .save-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 自定义分类弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
 
         .modal-content {
             background: var(--card);
             border-radius: 16px;
             padding: 24px;
-            width: 100%;
-            max-width: 340px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            width: calc(100% - 48px);
+            max-width: 360px;
         }
 
         .modal-title {
             font-size: 18px;
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 20px;
             text-align: center;
+        }
+
+        .modal-field {
+            margin-bottom: 16px;
+        }
+
+        .modal-field label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
         }
 
         .emoji-picker {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            justify-content: center;
-            margin-bottom: 16px;
         }
 
         .emoji-option {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 22px;
             border: 1.5px solid var(--border);
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s;
             background: var(--card);
         }
 
-        .emoji-option:active { transform: scale(0.9); }
+        .emoji-option:hover {
+            border-color: var(--primary-light);
+        }
 
         .emoji-option.active {
             border-color: var(--primary);
-            background: rgba(108, 99, 255, 0.08);
-            transform: scale(1.1);
+            background: #FFF0F3;
         }
-
-        .modal-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 16px;
-            outline: none;
-            margin-bottom: 16px;
-            -webkit-appearance: none;
-        }
-
-        .modal-input:focus { border-color: var(--primary); }
 
         .color-picker {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
         }
 
         .color-option {
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            border: 2.5px solid transparent;
             cursor: pointer;
-            transition: all 0.15s;
+            border: 3px solid transparent;
+            transition: all 0.2s;
         }
 
-        .color-option:active { transform: scale(0.9); }
+        .color-option:hover {
+            transform: scale(1.1);
+        }
 
         .color-option.active {
             border-color: var(--text);
-            transform: scale(1.15);
         }
 
-        .modal-buttons {
+        .modal-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .modal-input:focus {
+            border-color: var(--primary);
+        }
+
+        .modal-actions {
             display: flex;
             gap: 12px;
+            margin-top: 20px;
         }
 
         .modal-btn {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border: none;
-            border-radius: var(--radius);
+            border-radius: 10px;
             font-size: 15px;
-            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .modal-btn:active { transform: scale(0.97); }
-
-        .modal-btn-cancel {
+        .modal-btn.cancel {
             background: var(--bg);
             color: var(--text-secondary);
         }
 
-        .modal-btn-confirm {
+        .modal-btn.confirm {
             background: var(--primary);
-            color: #fff;
+            color: white;
         }
 
-        /* 保存按钮 */
-        .save-btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: var(--radius);
-            background: var(--primary);
-            color: #fff;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 10px;
-            -webkit-appearance: none;
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 300;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
         }
 
-        .save-btn:active { transform: scale(0.98); opacity: 0.9; }
-
-        /* 分类标签颜色 */
-        .tag-love { --tag-color: #FF6B9D; }
-        .tag-birthday { --tag-color: #FF9F43; }
-        .tag-life { --tag-color: #54A0FF; }
-        .tag-work { --tag-color: #5F27CD; }
-        .tag-memorial { --tag-color: #EE5A24; }
-
-        .tag-option.active.tag-love { border-color: #FF6B9D; background: rgba(255,107,157,0.08); color: #FF6B9D; }
-        .tag-option.active.tag-birthday { border-color: #FF9F43; background: rgba(255,159,67,0.08); color: #FF9F43; }
-        .tag-option.active.tag-life { border-color: #54A0FF; background: rgba(84,160,255,0.08); color: #54A0FF; }
-        .tag-option.active.tag-work { border-color: #5F27CD; background: rgba(95,39,205,0.08); color: #5F27CD; }
-        .tag-option.active.tag-memorial { border-color: #EE5A24; background: rgba(238,90,36,0.08); color: #EE5A24; }
+        .toast.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
-    <div class="page-title">✨ 新建纪念日</div>
-
-    <!-- 标题 -->
-    <div class="form-group">
-        <label class="form-label">📌 标题</label>
-        <input type="text" class="form-input" id="titleInput" placeholder="给这一天起个名字…">
+    <div class="page-header">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <span class="page-title">新建纪念日</span>
     </div>
 
-    <!-- 日期 -->
-    <div class="form-group">
-        <label class="form-label">📅 日期</label>
-        <input type="date" class="form-input" id="dateInput">
-    </div>
-
-    <!-- 分类 -->
-    <div class="form-group">
-        <label class="form-label">🏷️ 分类</label>
-        <div class="tag-selector" id="tagSelector">
-            <div class="tag-option tag-love" data-tag="love">💕 恋爱</div>
-            <div class="tag-option tag-birthday" data-tag="birthday">🎂 生日</div>
-            <div class="tag-option tag-life" data-tag="life">🌟 生活</div>
-            <div class="tag-option tag-work" data-tag="work">💼 工作</div>
-            <div class="tag-option tag-memorial" data-tag="memorial">🎉 纪念</div>
-            <!-- 自定义分类会动态插入到这里 -->
-            <div class="tag-add-btn" id="addCategoryBtn" title="添加分类">＋</div>
+    <div class="form-section">
+        <div class="form-group">
+            <label class="form-label">标题</label>
+            <input class="form-input" id="titleInput" placeholder="给这一天起个名字" maxlength="30">
         </div>
-    </div>
 
-    <!-- 备注 -->
-    <div class="form-group">
-        <label class="form-label">📝 备注</label>
-        <textarea class="form-input" id="noteInput" placeholder="写下你的故事…"></textarea>
-    </div>
+        <div class="form-group">
+            <label class="form-label">日期</label>
+            <input class="form-input" id="dateInput" type="date">
+        </div>
 
-    <!-- 保存按钮 -->
-    <button class="save-btn" id="saveBtn">💾 保存纪念日</button>
+        <div class="form-group">
+            <label class="form-label">分类</label>
+            <div class="tag-selector" id="tagSelector">
+                <div class="tag-option tag-love" data-key="love" onclick="selectTag(this)">💕 恋爱</div>
+                <div class="tag-option tag-birthday" data-key="birthday" onclick="selectTag(this)">🎂 生日</div>
+                <div class="tag-option tag-life" data-key="life" onclick="selectTag(this)">🌟 生活</div>
+                <div class="tag-option tag-work" data-key="work" onclick="selectTag(this)">💼 工作</div>
+                <div class="tag-option tag-memorial" data-key="memorial" onclick="selectTag(this)">🎉 纪念</div>
+                <button class="tag-add-btn" id="addCategoryBtn" onclick="openAddModal()">＋</button>
+            </div>
+        </div>
 
-    <!-- 添加分类弹窗 -->
-    <div class="modal-overlay" id="addCategoryModal">
-        <div class="modal-content">
-            <div class="modal-title">✨ 添加自定义分类</div>
+        <div class="form-group">
+            <label class="form-label">备注</label>
+            <textarea class="form-input" id="noteInput" placeholder="记录这一天的故事..."></textarea>
+        </div>
 
-            <div class="emoji-picker" id="emojiPicker"></div>
+        <div class="form-group">
+            <label class="form-label">封面图片</label>
+            <div class="cover-upload" id="coverUpload" onclick="document.getElementById('coverFileInput').click()">
+                <span class="upload-icon">📷</span>
+                <span class="upload-text">添加封面图片</span>
+                <img id="coverPreview" style="display:none">
+                <button class="remove-cover" onclick="removeCover(event)">✕</button>
+                <input type="file" id="coverFileInput" accept="image/*" style="display:none" onchange="handleCoverUpload(event)">
+            </div>
+        </div>
 
-            <input type="text" class="modal-input" id="categoryNameInput" placeholder="输入分类名称（如：旅行）" maxlength="10">
-
-            <div class="color-picker" id="colorPicker"></div>
-
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">取消</button>
-                <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">确认添加</button>
+        <div class="form-group">
+            <div class="featured-row">
+                <span class="featured-label">⭐ 标记为精选</span>
+                <div class="toggle-switch" id="featuredToggle" onclick="toggleFeatured()"></div>
             </div>
         </div>
     </div>
 
+    <button class="save-btn" onclick="saveMemory()">保存</button>
+
+    <!-- 自定义分类弹窗 -->
+    <div class="modal-overlay" id="addCategoryModal">
+        <div class="modal-content">
+            <div class="modal-title">✨ 添加自定义分类</div>
+            <div class="modal-field">
+                <label>选择图标</label>
+                <div class="emoji-picker" id="emojiPicker">
+                    <div class="emoji-option active" data-emoji="❤️" onclick="selectEmoji(this)">❤️</div>
+                    <div class="emoji-option" data-emoji="💍" onclick="selectEmoji(this)">💍</div>
+                    <div class="emoji-option" data-emoji="🏠" onclick="selectEmoji(this)">🏠</div>
+                    <div class="emoji-option" data-emoji="🎓" onclick="selectEmoji(this)">🎓</div>
+                    <div class="emoji-option" data-emoji="✈️" onclick="selectEmoji(this)">✈️</div>
+                    <div class="emoji-option" data-emoji="👶" onclick="selectEmoji(this)">👶</div>
+                    <div class="emoji-option" data-emoji="🐱" onclick="selectEmoji(this)">🐱</div>
+                    <div class="emoji-option" data-emoji="🎮" onclick="selectEmoji(this)">🎮</div>
+                    <div class="emoji-option" data-emoji="🎵" onclick="selectEmoji(this)">🎵</div>
+                    <div class="emoji-option" data-emoji="💪" onclick="selectEmoji(this)">💪</div>
+                    <div class="emoji-option" data-emoji="📚" onclick="selectEmoji(this)">📚</div>
+                    <div class="emoji-option" data-emoji="🎯" onclick="selectEmoji(this)">🎯</div>
+                </div>
+            </div>
+            <div class="modal-field">
+                <label>分类名称</label>
+                <input class="modal-input" id="categoryNameInput" placeholder="例如：相识、相遇" maxlength="10">
+            </div>
+            <div class="modal-field">
+                <label>选择颜色</label>
+                <div class="color-picker" id="colorPicker">
+                    <div class="color-option active" data-color="#FF6B81" style="background:#FF6B81" onclick="selectColor(this)"></div>
+                    <div class="color-option" data-color="#FFB347" style="background:#FFB347" onclick="selectColor(this)"></div>
+                    <div class="color-option" data-color="#4ECDC4" style="background:#4ECDC4" onclick="selectColor(this)"></div>
+                    <div class="color-option" data-color="#6C5CE7" style="background:#6C5CE7" onclick="selectColor(this)"></div>
+                    <div class="color-option" data-color="#FF6B9D" style="background:#FF6B9D" onclick="selectColor(this)"></div>
+                    <div class="color-option" data-color="#A8E6CF" style="background:#A8E6CF" onclick="selectColor(this)"></div>
+                    <div class="color-option" data-color="#88D8B0" style="background:#88D8B0" onclick="selectColor(this)"></div>
+                    <div class="color-option" data-color="#FFD93D" style="background:#FFD93D" onclick="selectColor(this)"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeAddModal()">取消</button>
+                <button class="modal-btn confirm" id="modalConfirmBtn" onclick="confirmAddCategory()">确认添加</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
     <script>
-        // ========== 配置 ==========
-        const DEFAULT_CATEGORIES = [
-            { key: 'love', emoji: '💕', name: '恋爱', color: '#FF6B9D', cssClass: 'tag-love' },
-            { key: 'birthday', emoji: '🎂', name: '生日', color: '#FF9F43', cssClass: 'tag-birthday' },
-            { key: 'life', emoji: '🌟', name: '生活', color: '#54A0FF', cssClass: 'tag-life' },
-            { key: 'work', emoji: '💼', name: '工作', color: '#5F27CD', cssClass: 'tag-work' },
-            { key: 'memorial', emoji: '🎉', name: '纪念', color: '#EE5A24', cssClass: 'tag-memorial' }
-        ];
+        let selectedTag = null;
+        let selectedEmoji = '❤️';
+        let selectedColor = '#FF6B81';
+        let coverImageBase64 = null;
+        let isFeatured = false;
 
-        const EMOJI_OPTIONS = [
-            '💕', '🎂', '🌟', '💼', '🎉', '✈️', '🏠', '📚', '🎮', '🎵',
-            '🏆', '💡', '🌈', '🍀', '🌙', '☀️', '🎄', '🎂', '🐱', '🐶',
-            '📷', '🎨', '⚽', '🎸', '💎', '🧸', '🎁', '🌸', '🎂', '❤️'
-        ];
+        // 初始化日期
+        const today = new Date();
+        const dateStr = today.getFullYear() + '-' +
+            String(today.getMonth() + 1).padStart(2, '0') + '-' +
+            String(today.getDate()).padStart(2, '0');
+        document.getElementById('dateInput').value = dateStr;
 
-        const COLOR_OPTIONS = [
-            '#FF6B9D', '#FF9F43', '#54A0FF', '#5F27CD', '#EE5A24',
-            '#636E72', '#00B894', '#E17055', '#0984E3', '#A29BFE',
-            '#FD79A8', '#00CEC9', '#FDCB6E', '#E84393', '#6C5CE7'
-        ];
+        // 加载自定义分类
+        loadCustomCategories();
 
-        const STORAGE_KEY = 'custom_categories';
-        const MEMORIES_KEY = 'memories';
-
-        // ========== 状态 ==========
-        let selectedTag = '';
-        let selectedEmoji = '✈️';
-        let selectedColor = '#54A0FF';
-
-        // ========== 初始化 ==========
-        function init() {
-            // 设置日期默认值为今天
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('dateInput').value = today;
-
-            // 加载自定义分类
-            loadCustomCategories();
-
-            // 绑定事件
-            bindEvents();
-
-            // 初始化弹窗
-            initEmojiPicker();
-            initColorPicker();
+        // 回退
+        function goBack() {
+            window.location.href = 'home_page.html';
         }
 
-        // ========== 加载自定义分类 ==========
-        function loadCustomCategories() {
-            const customs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const selector = document.getElementById('tagSelector');
-            const addBtn = document.getElementById('addCategoryBtn');
-
-            // 移除已有的自定义分类标签
-            selector.querySelectorAll('.tag-option[data-custom]').forEach(el => el.remove());
-
-            // 添加自定义分类标签
-            customs.forEach(cat => {
-                const div = document.createElement('div');
-                div.className = 'tag-option';
-                div.dataset.tag = cat.key;
-                div.dataset.custom = 'true';
-                div.textContent = cat.emoji + ' ' + cat.name;
-                div.style.cssText = `
-                    --tag-color: ${cat.color};
-                `;
-                // 点击选中样式
-                div.addEventListener('click', function() {
-                    selector.querySelectorAll('.tag-option').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedTag = this.dataset.tag;
-                });
-                selector.insertBefore(div, addBtn);
-            });
+        // 选择标签
+        function selectTag(el) {
+            document.querySelectorAll('.tag-option').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            selectedTag = el.dataset.key;
         }
 
-        // ========== 绑定事件 ==========
-        function bindEvents() {
-            const selector = document.getElementById('tagSelector');
-
-            // 预设分类点击
-            selector.addEventListener('click', function(e) {
-                const option = e.target.closest('.tag-option');
-                if (!option || option.dataset.custom) return;
-
-                selector.querySelectorAll('.tag-option').forEach(t => t.classList.remove('active'));
-                option.classList.add('active');
-                selectedTag = option.dataset.tag;
-            });
-
-            // 添加分类按钮
-            document.getElementById('addCategoryBtn').addEventListener('click', function() {
-                document.getElementById('addCategoryModal').classList.add('show');
-                document.getElementById('categoryNameInput').value = '';
-                document.getElementById('categoryNameInput').focus();
-            });
-
-            // 弹窗取消
-            document.getElementById('modalCancelBtn').addEventListener('click', function() {
-                document.getElementById('addCategoryModal').classList.remove('show');
-            });
-
-            // 弹窗确认
-            document.getElementById('modalConfirmBtn').addEventListener('click', addCustomCategory);
-
-            // 点击遮罩关闭
-            document.getElementById('addCategoryModal').addEventListener('click', function(e) {
-                if (e.target === this) this.classList.remove('show');
-            });
-
-            // 保存纪念日
-            document.getElementById('saveBtn').addEventListener('click', saveMemory);
-
-            // 输入框回车保存
-            document.getElementById('categoryNameInput').addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') addCustomCategory();
-            });
+        // 封面图片上传
+        function handleCoverUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('图片不能超过 5MB');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                coverImageBase64 = e.target.result;
+                const preview = document.getElementById('coverPreview');
+                preview.src = coverImageBase64;
+                preview.style.display = 'block';
+                document.getElementById('coverUpload').classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
         }
 
-        // ========== 初始化 Emoji 选择器 ==========
-        function initEmojiPicker() {
-            const picker = document.getElementById('emojiPicker');
-            EMOJI_OPTIONS.forEach(emoji => {
-                const div = document.createElement('div');
-                div.className = 'emoji-option' + (emoji === selectedEmoji ? ' active' : '');
-                div.textContent = emoji;
-                div.addEventListener('click', function() {
-                    picker.querySelectorAll('.emoji-option').forEach(e => e.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedEmoji = this.textContent;
-                });
-                picker.appendChild(div);
-            });
+        function removeCover(event) {
+            event.stopPropagation();
+            coverImageBase64 = null;
+            const preview = document.getElementById('coverPreview');
+            preview.src = '';
+            preview.style.display = 'none';
+            document.getElementById('coverUpload').classList.remove('has-image');
+            document.getElementById('coverFileInput').value = '';
         }
 
-        // ========== 初始化颜色选择器 ==========
-        function initColorPicker() {
-            const picker = document.getElementById('colorPicker');
-            COLOR_OPTIONS.forEach(color => {
-                const div = document.createElement('div');
-                div.className = 'color-option' + (color === selectedColor ? ' active' : '');
-                div.style.background = color;
-                div.addEventListener('click', function() {
-                    picker.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedColor = this.style.background;
-                });
-                picker.appendChild(div);
-            });
+        // 精选开关
+        function toggleFeatured() {
+            isFeatured = !isFeatured;
+            document.getElementById('featuredToggle').classList.toggle('active', isFeatured);
         }
 
-        // ========== 添加自定义分类 ==========
-        function addCustomCategory() {
+        // 自定义分类弹窗
+        function openAddModal() {
+            const customs = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+            if (customs.length >= 10) {
+                showToast('最多添加 10 个自定义分类');
+                return;
+            }
+            document.getElementById('addCategoryModal').classList.add('show');
+            document.getElementById('categoryNameInput').value = '';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addCategoryModal').classList.remove('show');
+        }
+
+        function selectEmoji(el) {
+            document.querySelectorAll('.emoji-option').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+            selectedEmoji = el.dataset.emoji;
+        }
+
+        function selectColor(el) {
+            document.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            selectedColor = el.dataset.color;
+        }
+
+        function confirmAddCategory() {
             const name = document.getElementById('categoryNameInput').value.trim();
             if (!name) {
-                alert('请输入分类名称');
+                showToast('请输入分类名称');
                 return;
             }
 
-            const customs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const customs = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+            const defaultKeys = ['love', 'birthday', 'life', 'work', 'memorial'];
+            const allNames = defaultKeys.map(k => {
+                const el = document.querySelector(`.tag-option[data-key="${k}"]`);
+                return el ? el.textContent.trim() : '';
+            }).concat(customs.map(c => c.emoji + ' ' + c.name));
 
-            // 检查重名
-            const allNames = [...DEFAULT_CATEGORIES.map(c => c.name), ...customs.map(c => c.name)];
-            if (allNames.includes(name)) {
-                alert('该分类已存在');
+            if (allNames.includes(selectedEmoji + ' ' + name)) {
+                showToast('分类已存在');
                 return;
             }
 
-            // 检查数量限制
-            if (customs.length >= 10) {
-                alert('自定义分类最多 10 个');
-                return;
-            }
-
-            // 创建新分类
             const newCategory = {
                 key: 'custom_' + Date.now(),
                 emoji: selectedEmoji,
@@ -518,71 +668,80 @@
             };
 
             customs.push(newCategory);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(customs));
+            localStorage.setItem('custom_categories', JSON.stringify(customs));
 
-            // 刷新分类列表
-            loadCustomCategories();
-
-            // 关闭弹窗
-            document.getElementById('addCategoryModal').classList.remove('show');
-
-            // 自动选中新分类
-            const selector = document.getElementById('tagSelector');
-            selector.querySelectorAll('.tag-option').forEach(t => t.classList.remove('active'));
-            const newEl = selector.querySelector(`[data-tag="${newCategory.key}"]`);
-            if (newEl) {
-                newEl.classList.add('active');
-                selectedTag = newCategory.key;
-            }
-
-            // 长按删除提示
-            setTimeout(() => {
-                alert('💡 提示：在首页长按分类标签可删除自定义分类');
-            }, 300);
+            addCategoryToUI(newCategory);
+            closeAddModal();
+            showToast('分类添加成功');
         }
 
-        // ========== 保存纪念日 ==========
+        function addCategoryToUI(category) {
+            const selector = document.getElementById('tagSelector');
+            const addBtn = document.getElementById('addCategoryBtn');
+
+            const el = document.createElement('div');
+            el.className = 'tag-option custom';
+            el.dataset.key = category.key;
+            el.style.setProperty('--custom-color', category.color);
+            el.textContent = category.emoji + ' ' + category.name;
+            el.onclick = function() { selectTag(el); };
+
+            selector.insertBefore(el, addBtn);
+        }
+
+        function loadCustomCategories() {
+            const customs = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+            customs.forEach(c => addCategoryToUI(c));
+        }
+
+        // 保存
         function saveMemory() {
             const title = document.getElementById('titleInput').value.trim();
             const date = document.getElementById('dateInput').value;
             const note = document.getElementById('noteInput').value.trim();
 
             if (!title) {
-                alert('请输入标题');
-                document.getElementById('titleInput').focus();
+                showToast('请输入标题');
                 return;
             }
-
             if (!date) {
-                alert('请选择日期');
+                showToast('请选择日期');
                 return;
             }
 
-            // 获取选中的分类
-            const activeTag = document.querySelector('.tag-option.active');
-            const tagKey = activeTag ? activeTag.dataset.tag : 'life';
-
-            // 构建记忆对象
             const memory = {
                 id: Date.now().toString(),
                 title: title,
                 date: date,
-                category: tagKey,
+                category: selectedTag || 'love',
                 note: note,
+                cover: coverImageBase64 || null,
+                featured: isFeatured,
                 createdAt: new Date().toISOString()
             };
 
-            // 保存到 localStorage
-            const memories = JSON.parse(localStorage.getItem(MEMORIES_KEY) || '[]');
+            const memories = JSON.parse(localStorage.getItem('memories') || '[]');
             memories.push(memory);
-            localStorage.setItem(MEMORIES_KEY, JSON.stringify(memories));
+            localStorage.setItem('memories', JSON.stringify(memories));
 
-            // 返回首页
-            window.location.href = 'home_page.html';
+            showToast('保存成功 ✨');
+            setTimeout(() => {
+                window.location.href = 'home_page.html';
+            }, 800);
         }
 
-        // 启动
-        init();
+        // Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1500);
+        }
+
+        // 点击弹窗背景关闭
+        document.getElementById('addCategoryModal').addEventListener('click', function(e) {
+            if (e.target === this) closeAddModal();
+        });
     </script>
 </body>
 </html>
