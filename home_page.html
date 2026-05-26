@@ -735,13 +735,8 @@ const categoryMap = {
   other:    { label: '📌 其他', cls: 'tag-other',     color: '#636E72' }
 };
 
-// 默认示例数据（首次加载时使用）
-const defaultData = [
-  { id: 1, title: '我们的第一次旅行', desc: '一起去了海边，看了人生中最美的日落', date: '2024-02-14', category: 'travel', image: '', favorite: true },
-  { id: 2, title: '在一起100天', desc: '从相识到相知，每一天都值得纪念', date: '2024-06-21', category: 'love', image: '', favorite: true },
-  { id: 3, title: '妈妈的生日', desc: '祝妈妈永远健康快乐', date: '2023-08-15', category: 'birthday', image: '', favorite: false },
-  { id: 4, title: '入职第一天', desc: '新起点，新征程', date: '2025-03-01', category: 'work', image: '', favorite: false }
-];
+// 默认数据为空，由用户自己添加
+const defaultData = [];
 
 function loadData() {
   try {
