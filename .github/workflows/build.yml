@@ -21,7 +21,17 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          # 手动安装 Android SDK，避免依赖 setup-android action
+          if [ ! -d "$ANDROID_HOME" ]; then
+            export ANDROID_HOME=$HOME/android-sdk
+            mkdir -p $ANDROID_HOME/cmdline-tools
+            cd $ANDROID_HOME/cmdline-tools
+            wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+            unzip -q cmdline-tools.zip
+            mv cmdline-tools latest
+            export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+          fi
 
       - name: Accept SDK licenses
         run: yes | sdkmanager --licenses || true
