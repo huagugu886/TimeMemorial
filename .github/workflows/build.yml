@@ -28,7 +28,7 @@ jobs:
 
       - name: Install SDK platforms & build-tools
         run: |
-          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Fix local.properties
         run: |
@@ -40,17 +40,8 @@ jobs:
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon
 
-      - name: Build Release APK
-        run: gradle assembleRelease --no-daemon
-
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: TimeMemorial-debug
           path: app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: TimeMemorial-release
-          path: app/build/outputs/apk/release/app-release.apk
