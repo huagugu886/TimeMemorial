@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>新建纪念日</title>
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --primary-light: #8B83FF;
+            --bg: #F8F9FE;
+            --card: #FFFFFF;
+            --text: #1A1A2E;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 40px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 16px;
+            color: var(--text);
+            background: var(--card);
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+
+        .form-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .tag-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag-option {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--card);
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag-option.active {
+            border-color: var(--primary);
+            background: rgba(108, 99, 255, 0.08);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: opacity 0.2s;
+        }
+
+        .save-btn:active {
+            opacity: 0.85;
+        }
+
+        .date-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .date-row .form-input {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-title">✨ 新建纪念日</div>
+
+    <div class="form-group">
+        <label class="form-label">标题</label>
+        <input class="form-input" type="text" id="title" placeholder="给这个日子起个名字...">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">日期</label>
+        <div class="date-row">
+            <input class="form-input" type="date" id="date" value="">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">分类</label>
+        <div class="tag-selector">
+            <div class="tag-option active" data-tag="恋爱">💕 恋爱</div>
+            <div class="tag-option" data-tag="生日">🎂 生日</div>
+            <div class="tag-option" data-tag="生活">🌟 生活</div>
+            <div class="tag-option" data-tag="工作">💼 工作</div>
+            <div class="tag-option" data-tag="纪念">🎉 纪念</div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">备注（选填）</label>
+        <textarea class="form-input" id="description" placeholder="记录一些细节..."></textarea>
+    </div>
+
+    <button class="save-btn" id="saveBtn">保存纪念日</button>
+
+    <script>
+        // 设置默认日期为今天
+        const today = new Date();
+        document.getElementById('date').value = today.toISOString().split('T')[0];
+
+        // 标签选择
+        document.querySelectorAll('.tag-option').forEach(tag => {
+            tag.addEventListener('click', () => {
+                document.querySelectorAll('.tag-option').forEach(t => t.classList.remove('active'));
+                tag.classList.add('active');
+            });
+        });
+
+        // 保存
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const title = document.getElementById('title').value.trim();
+            const date = document.getElementById('date').value;
+            const tag = document.querySelector('.tag-option.active')?.dataset.tag || '生活';
+            const desc = document.getElementById('description').value.trim();
+
+            if (!title) {
+                alert('请输入标题');
+                return;
+            }
+            if (!date) {
+                alert('请选择日期');
+                return;
+            }
+
+            // 保存到 localStorage
+            const events = JSON.parse(localStorage.getItem('memorial_events') || '[]');
+            events.push({
+                id: Date.now(),
+                title,
+                date,
+                tag,
+                description: desc,
+                createdAt: new Date().toISOString()
+            });
+            localStorage.setItem('memorial_events', JSON.stringify(events));
+
+            // 清空表单
+            document.getElementById('title').value = '';
+            document.getElementById('description').value = '';
+            today.setMinutes(today.getTimezoneOffset() * -1);
+            document.getElementById('date').value = today.toISOString().split('T')[0];
+            document.querySelectorAll('.tag-option').forEach(t => t.classList.remove('active'));
+            document.querySelector('.tag-option').classList.add('active');
+
+            alert('✨ 保存成功！');
+        });
+    </script>
+</body>
+</html>
