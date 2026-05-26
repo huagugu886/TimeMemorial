@@ -10,7 +10,7 @@ repositories {
 
 android {
     namespace = "com.timememorial.app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.timememorial.app"
