@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/**/*.apk
           retention-days: 7
 
       - name: Upload Release APK
@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: app/build/outputs/apk/release/app-release.apk
+          path: app/build/outputs/apk/**/*.apk
           retention-days: 30
 
   release:
@@ -98,6 +98,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           name: "TimeMemorial v${{ steps.version.outputs.version }}"
           body: |
             ## TimeMemorial v${{ steps.version.outputs.version }}
@@ -107,8 +108,6 @@ jobs:
             
             ### 🔄 更新内容
             - 自动构建发布
-          files: |
-            app/build/outputs/apk/release/app-release.apk
-            app/build/outputs/apk/debug/app-debug.apk
+          files: app/build/outputs/apk/**/*.apk
           draft: false
           prerelease: false
