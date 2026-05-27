@@ -1102,7 +1102,7 @@ function renderFeatured() {
     const cat = categoryMap[m.category] || categoryMap.other;
     const pos = m.imagePosition != null ? m.imagePosition : 50;
     const imgHtml = m.image
-      ? `<img class="card-img" src="${m.image}" style="object-position:center ${pos}%;" alt="">`
+      ? `<img class="card-img" src="${resolveImageSrc(m.image)}" style="object-position:center ${pos}%;" alt="">`
       : `<div class="card-img" style="background:${coverBg(m.id)};display:flex;align-items:center;justify-content:center;font-size:32px;">${cat.label.charAt(0)}${cat.label.charAt(1)}</div>`;
     return `
       <div class="featured-card" onclick="openDetail(${m.id})">
@@ -1136,7 +1136,7 @@ function renderList() {
     const absDays = Math.abs(days);
     const pos = m.imagePosition != null ? m.imagePosition : 50;
     const imgHtml = m.image
-      ? `<img class="card-cover" src="${m.image}" style="object-position:center ${pos}%;" alt="">`
+      ? `<img class="card-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${pos}%;" alt="">`
       : `<div class="card-cover" style="background:${coverBg(m.id)};display:flex;align-items:center;justify-content:center;font-size:48px;color:rgba(255,255,255,0.6);">${cat.label.slice(0,2)}</div>`;
     const tagsHtml = `
       <span class="tag" style="background:${cat.color}">${cat.label}</span>
