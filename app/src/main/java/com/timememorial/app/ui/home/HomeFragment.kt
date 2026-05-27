@@ -44,7 +44,10 @@ class HomeFragment : Fragment() {
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
 
-            loadUrl("file:///android_asset/home_page.html?v=5")
+            // 注册 Native 桥接
+            addJavascriptInterface(WebBridge(requireContext()), "nativeBridge")
+
+            loadUrl("file:///android_asset/home_page.html?v=6")
         }
     }
 

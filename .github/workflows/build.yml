@@ -2,7 +2,6 @@ name: Build & Release
 
 on:
   push:
-    branches: [ main ]
     tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
@@ -41,6 +40,7 @@ jobs:
         run: ./gradlew lint || true
 
       - name: Upload Debug APK
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
@@ -48,6 +48,7 @@ jobs:
           retention-days: 7
 
       - name: Upload Release APK
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
@@ -57,7 +58,7 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     steps:

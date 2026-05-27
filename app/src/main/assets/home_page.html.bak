@@ -1206,8 +1206,7 @@ document.getElementById('detailDeleteBtn').addEventListener('click', () => {
   if (!m) return;
   if (!confirm(`确定删除「${m.title}」吗？`)) return;
 
-  if (m.image && !m.image.startsWith('data:') && window.nativeBridge) nativeBridge.deleteImage(m.image);
-  memorials = memorials.filter(x => x.id !== currentDetailId);
+    memorials = memorials.filter(x => x.id !== currentDetailId);
   saveData(memorials);
   document.getElementById('detailModal').classList.remove('show');
   document.body.classList.remove('modal-open');
