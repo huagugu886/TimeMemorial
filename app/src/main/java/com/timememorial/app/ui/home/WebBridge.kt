@@ -3,15 +3,17 @@ package com.timememorial.app.ui.home
 import android.content.Context
 import android.util.Base64
 import android.webkit.JavascriptInterface
+import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStreamReader
 import java.util.UUID
 
 /**
- * WebView JS 桥接：图片存取
+ * WebView JS 桥接：图片存取 + IPC 文件通信
  *
- * JS 端通过 window.nativeBridge.saveImage(base64) 保存图片，
- * 返回文件名（相对路径），加载时用 nativeBridge.getImagePath(name) 获取绝对路径。
+ * 图片：JS 端通过 window.nativeBridge.saveImage(base64) 保存图片
+ * IPC：JS 端通过 window.nativeBridge.writeIpcFile/readIpcFile 与 Termux 通信
  */
 class WebBridge(private val context: Context) {
 
@@ -122,6 +124,52 @@ class WebBridge(private val context: Context) {
         } catch (e: Exception) {
             e.printStackTrace()
             0
+        }
+    }
+
+    // ========== IPC 文件读写（Termux 通信管道）==========
+
+    /**
+     * 将文本内容写入指定文件路径
+     * 用于向 /sdcard/Download/.bash_ipc/cmd.json 写入命令
+     */
+    @JavascriptInterface
+    fun writeIpcFile(path: String, content: String): Boolean {
+        return try {
+            val file = File(path)
+            file.parentFile?.mkdirs()
+            file.writeText(content)
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    /**
+     * 读取指定文件的文本内容
+     * 用于从 /sdcard/Download/.bash_ipc/result.json 读取结果
+     */
+    @JavascriptInterface
+    fun readIpcFile(path: String): String {
+        return try {
+            val file = File(path)
+            if (file.exists()) file.readText() else ""
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        }
+    }
+
+    /**
+     * 删除指定文件
+     */
+    @JavascriptInterface
+    fun deleteIpcFile(path: String): Boolean {
+        return try {
+            File(path).delete()
+        } catch (e: Exception) {
+            false
         }
     }
 }

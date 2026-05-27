@@ -758,6 +758,24 @@ textarea.form-input {
 }
 .toggle-switch.on::after { transform: translateX(20px); }
 
+/* ========== 键盘适配 ========== */
+/* 键盘弹出时隐藏底栏 */
+body.keyboard-open #bottomNav {
+  transform: translateY(100%);
+  pointer-events: none;
+}
+#bottomNav {
+  transition: transform 0.25s ease;
+}
+/* 弹窗内输入框聚焦时确保不被遮挡 */
+.modal-sheet {
+  max-height: 100dvh;
+  overflow-y: auto;
+}
+.modal-overlay {
+  padding-bottom: env(keyboard-inset-height, 0px);
+}
+
 /* 提交按钮 */
 .submit-btn {
   width: 100%;
@@ -1613,6 +1631,48 @@ renderTabs();
 renderCategoryGrid();
 renderFeatured();
 renderList();
+
+// ========== 键盘检测 ==========
+(function() {
+  const body = document.body;
+  let initialHeight = window.innerHeight;
+  const THRESHOLD = 120; // 键盘弹出的最小高度变化
+
+  // 方案1: visualViewport API (Android WebView 61+)
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      const heightDiff = initialHeight - window.visualViewport.height;
+      if (heightDiff > THRESHOLD) {
+        body.classList.add('keyboard-open');
+      } else {
+        body.classList.remove('keyboard-open');
+      }
+    });
+  }
+
+  // 方案2: focus/blur 兜底
+  document.addEventListener('focusin', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      body.classList.add('keyboard-open');
+    }
+  });
+  document.addEventListener('focusout', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      setTimeout(() => {
+        if (!document.activeElement || 
+            (document.activeElement.tagName !== 'INPUT' && 
+             document.activeElement.tagName !== 'TEXTAREA')) {
+          body.classList.remove('keyboard-open');
+        }
+      }, 100);
+    }
+  });
+
+  // 页面加载时更新基准高度
+  window.addEventListener('load', () => {
+    initialHeight = window.innerHeight;
+  });
+})();
 </script>
 
 <!-- 删除确认弹窗 -->
