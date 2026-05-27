@@ -722,6 +722,7 @@ textarea.form-input {
   animation: toastIn 0.3s ease;
 }
 @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+.modal-open { overflow: hidden; position: fixed; width: 100%; }
 </style>
 </head>
 <body>
@@ -1164,15 +1165,18 @@ document.getElementById('fabBtn').addEventListener('click', () => {
     document.getElementById('previewContainer').classList.remove('show');
     document.getElementById('uploadArea').style.display = '';
     document.getElementById('favToggle').classList.remove('on');
+    document.body.classList.add('modal-open');
     addModal.classList.add('show');
   }
 });
 
 // ========== 事件：关闭弹窗 ==========
 document.getElementById('closeModal').addEventListener('click', () => {
+    document.body.classList.remove('modal-open');
   addModal.classList.remove('show');
 });
 addModal.addEventListener('click', e => {
+    document.body.classList.remove('modal-open');
   if (e.target === addModal) addModal.classList.remove('show');
 });
 
@@ -1257,6 +1261,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
   memorials.unshift(newItem);
   saveData(memorials);
 
+  document.body.classList.remove('modal-open');
   addModal.classList.remove('show');
   renderFeatured();
   renderList();

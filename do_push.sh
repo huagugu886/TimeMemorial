@@ -1,5 +1,5 @@
 #!/bin/bash
-# TimeMemorial - 一键推送到 GitHub 并发布 Release
+# TimeMemorial - 一键推送到 GitHub 并自动发布 Release
 # 用法: 在 Termux 中运行 bash /sdcard/Download/TimeMemorial/do_push.sh
 
 set -e
@@ -9,30 +9,24 @@ echo "🚀 TimeMemorial Release Push"
 echo "============================"
 
 echo ""
-echo "[1/5] Git Status:"
+echo "[1/4] Git Status:"
 git status --short
 
 echo ""
-echo "[2/5] Staging all changes..."
+echo "[2/4] Staging all changes..."
 git add -A
 
 echo ""
-echo "[3/5] Committing..."
+echo "[3/4] Committing..."
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-git commit -m "feat: v1.1.0 - $TIMESTAMP" || echo "没有新改动需要提交"
+git commit -m "feat: v1.2.0 fix signing & auto-release - $TIMESTAMP" || echo "没有新改动需要提交"
 
 echo ""
-echo "[4/5] Pushing to GitHub main..."
+echo "[4/4] Pushing to GitHub main..."
 git push origin main
 
 echo ""
-echo "[5/5] Creating and pushing tag v1.1.0..."
-git tag -d v1.1.0 2>/dev/null || true
-git tag v1.1.0
-git push origin v1.1.0 --force
-
-echo ""
 echo "✅ 推送完成！"
-echo "📦 GitHub Actions 将自动编译并发布 Release"
+echo "📦 GitHub Actions 将自动编译 Debug + Release APK 并发布 Release"
 echo "🔗 查看进度: https://github.com/huagugu886/TimeMemorial/actions"
 echo "🔗 Release 页面: https://github.com/huagugu886/TimeMemorial/releases"
