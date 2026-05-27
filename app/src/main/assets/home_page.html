@@ -420,6 +420,22 @@ textarea.form-input {
   background: rgba(124, 92, 252, 0.08);
   color: var(--primary);
 }
+.cat-option-add {
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px dashed var(--primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+.cat-option-add:hover, .cat-option-add:active {
+  opacity: 1;
+  background: rgba(124, 92, 252, 0.06);
+}
 
 /* 图片上传 */
 .image-upload-area {
@@ -721,16 +737,8 @@ textarea.form-input {
   <input type="text" id="searchInput" placeholder="搜索纪念日...">
 </div>
 
-<!-- ========== 分类标签 ========== -->
-<div class="tabs" id="tabs">
-  <div class="tab active" data-filter="all">全部</div>
-  <div class="tab" data-filter="favorite">❤️ 收藏</div>
-  <div class="tab" data-filter="birthday">🎂 生日</div>
-  <div class="tab" data-filter="travel">✈️ 旅行</div>
-  <div class="tab" data-filter="work">💼 工作</div>
-  <div class="tab" data-filter="love">💕 恋爱</div>
-  <div class="tab" data-filter="other">📌 其他</div>
-</div>
+<!-- ========== 分类标签（动态渲染） ========== -->
+<div class="tabs" id="tabs"></div>
 
 <!-- ========== 精选回忆 ========== -->
 <div class="section-header">
@@ -796,13 +804,7 @@ textarea.form-input {
       <!-- 分类 -->
       <div class="form-group">
         <label>分类 <span class="required">*</span></label>
-        <div class="category-grid" id="categoryGrid">
-          <div class="cat-option active" data-cat="love">💕 恋爱</div>
-          <div class="cat-option" data-cat="birthday">🎂 生日</div>
-          <div class="cat-option" data-cat="travel">✈️ 旅行</div>
-          <div class="cat-option" data-cat="work">💼 工作</div>
-          <div class="cat-option" data-cat="other">📌 其他</div>
-        </div>
+        <div class="category-grid" id="categoryGrid"></div>
       </div>
 
       <!-- 图片上传 -->
@@ -838,13 +840,67 @@ textarea.form-input {
 // ========== 数据层 ==========
 const STORAGE_KEY = 'time_memorial_data';
 
-const categoryMap = {
+const CUSTOM_CATS_KEY = 'time_memorial_custom_cats';
+const CUSTOM_COLORS = ['#FF6B9D','#FF9F43','#54A0FF','#5F27CD','#636E72','#00B894','#E17055','#0984E3','#6C5CE7','#FD79A8'];
+
+function loadCustomCats() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_CATS_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveCustomCats(cats) { localStorage.setItem(CUSTOM_CATS_KEY, JSON.stringify(cats)); }
+
+const builtinCategoryMap = {
   love:     { label: '💕 恋爱', cls: 'tag-love',     color: '#FF6B9D' },
   birthday: { label: '🎂 生日', cls: 'tag-birthday',  color: '#FF9F43' },
   travel:   { label: '✈️ 旅行', cls: 'tag-travel',   color: '#54A0FF' },
   work:     { label: '💼 工作', cls: 'tag-work',      color: '#5F27CD' },
   other:    { label: '📌 其他', cls: 'tag-other',     color: '#636E72' }
 };
+
+let customCats = loadCustomCats();
+let categoryMap = { ...builtinCategoryMap, ...customCats };
+
+function renderTabs() {
+  const tabsEl = document.getElementById('tabs');
+  const fixedTabs = [
+    { filter: 'all', label: '全部' },
+    { filter: 'favorite', label: '❤️ 收藏' }
+  ];
+  let html = fixedTabs.map((t, i) =>
+    `<div class="tab${i === 0 ? ' active' : ''}" data-filter="${t.filter}">${t.label}</div>`
+  ).join('');
+  Object.keys(categoryMap).forEach(key => {
+    const cat = categoryMap[key];
+    html += `<div class="tab" data-filter="${key}">${cat.label}</div>`;
+  });
+  tabsEl.innerHTML = html;
+}
+
+function renderCategoryGrid() {
+  const grid = document.getElementById('categoryGrid');
+  let html = '';
+  Object.keys(categoryMap).forEach((key, idx) => {
+    html += `<div class="cat-option${key === selectedCategory ? ' active' : ''}" data-cat="${key}">${categoryMap[key].label}</div>`;
+  });
+  html += `<div class="cat-option-add" id="addCatBtn">＋ 新分类</div>`;
+  grid.innerHTML = html;
+}
+
+document.addEventListener('click', e => {
+  const addBtn = e.target.closest('#addCatBtn');
+  if (!addBtn) return;
+  const name = prompt('输入新分类名称（如：🎬 电影）');
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  const key = 'custom_' + Date.now();
+  const color = CUSTOM_COLORS[Object.keys(customCats).length % CUSTOM_COLORS.length];
+  customCats[key] = { label: trimmed, cls: 'tag-other', color };
+  saveCustomCats(customCats);
+  categoryMap = { ...builtinCategoryMap, ...customCats };
+  selectedCategory = key;
+  renderCategoryGrid();
+  renderTabs();
+  showToast('✅ 分类已添加');
+});
 
 // 默认示例数据（首次加载时使用）
 const defaultData = [
@@ -1207,6 +1263,8 @@ document.getElementById('submitBtn').addEventListener('click', () => {
 });
 
 // ========== 初始化 ==========
+renderTabs();
+renderCategoryGrid();
 renderFeatured();
 renderList();
 </script>
