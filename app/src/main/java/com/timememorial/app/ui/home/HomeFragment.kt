@@ -5,14 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.timememorial.app.R
 import com.timememorial.app.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
@@ -47,19 +44,7 @@ class HomeFragment : Fragment() {
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
 
-            // 添加 JS 接口，让网页可以调用导航
-            addJavascriptInterface(NavigationBridge(), "Android")
-
-            loadUrl("file:///android_asset/home_page.html?v=3")
-        }
-    }
-
-    inner class NavigationBridge {
-        @JavascriptInterface
-        fun navigateToAdd() {
-            activity?.runOnUiThread {
-                findNavController().navigate(R.id.nav_add)
-            }
+            loadUrl("file:///android_asset/home_page.html?v=4")
         }
     }
 
