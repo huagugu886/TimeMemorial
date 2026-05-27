@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- 拍照临时存储 -->
+    <external-files-path
+        name="camera_photos"
+        path="Pictures/" />
+    <!-- 应用内部图片存储 -->
+    <files-path
+        name="app_images"
+        path="images/" />
+</paths>
