@@ -832,6 +832,84 @@ textarea.form-input {
   color: #fff; box-shadow: 0 4px 12px rgba(124, 92, 252, 0.3);
 }
 .dc-ok:active { transform: scale(0.96); }
+
+/* ========== 自定义分类弹窗 ========== */
+.cc-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  display: none; align-items: center; justify-content: center;
+}
+.cc-overlay.show { display: flex; }
+.cc-box {
+  background: #fff;
+  border-radius: 20px;
+  width: 85%; max-width: 320px;
+  padding: 28px 24px 20px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(124, 92, 252, 0.18);
+  transform: scale(0.9); opacity: 0;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.cc-overlay.show .cc-box { transform: scale(1); opacity: 1; }
+.cc-box .cc-icon { font-size: 40px; margin-bottom: 8px; }
+.cc-box h4 { font-size: 18px; font-weight: 700; color: #1A1A2E; margin-bottom: 6px; }
+.cc-box .cc-hint { font-size: 13px; color: #6B7280; margin-bottom: 18px; }
+.cc-input {
+  width: 100%; padding: 14px 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 14px;
+  font-size: 16px; font-weight: 500;
+  color: #1A1A2E;
+  background: #F8F9FA;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+.cc-input::placeholder { color: #C4C4C4; font-weight: 400; }
+.cc-input:focus {
+  border-color: #7C5CFC;
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.12);
+  background: #fff;
+}
+.cc-colors-label {
+  font-size: 13px; font-weight: 600; color: #6B7280;
+  text-align: left; margin: 16px 0 10px;
+}
+.cc-colors {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  justify-content: center; margin-bottom: 20px;
+}
+.cc-color {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.cc-color:hover { transform: scale(1.15); }
+.cc-color.active {
+  border-color: #1A1A2E;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transform: scale(1.15);
+}
+.cc-btns { display: flex; gap: 12px; }
+.cc-btns button {
+  flex: 1; padding: 13px; border-radius: 14px;
+  font-size: 15px; font-weight: 600; border: none;
+  cursor: pointer; transition: all 0.2s;
+}
+.cc-cancel { background: #F5F5FA; color: #6B7280; }
+.cc-cancel:active { background: #E5E5EA; }
+.cc-ok {
+  background: linear-gradient(135deg, #7C5CFC, #A78BFA);
+  color: #fff; box-shadow: 0 4px 12px rgba(124, 92, 252, 0.3);
+}
+.cc-ok:active { transform: scale(0.96); }
+.cc-ok:disabled {
+  opacity: 0.5; cursor: not-allowed;
+  box-shadow: none;
+}
 </style>
 </head>
 <body>
@@ -960,6 +1038,22 @@ textarea.form-input {
 <!-- ========== Toast提示 ========== -->
 <div class="toast" id="toast"></div>
 
+<!-- ========== 自定义分类弹窗 ========== -->
+<div class="cc-overlay" id="ccOverlay">
+  <div class="cc-box">
+    <div class="cc-icon">🏷️</div>
+    <h4>新建分类</h4>
+    <div class="cc-hint">给你的分类起个名字吧</div>
+    <input class="cc-input" id="ccInput" placeholder="例如：🎬 电影" maxlength="10" autocomplete="off">
+    <div class="cc-colors-label">选择颜色</div>
+    <div class="cc-colors" id="ccColors"></div>
+    <div class="cc-btns">
+      <button class="cc-cancel" id="ccCancel">取消</button>
+      <button class="cc-ok" id="ccOk" disabled>添加</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ========== 数据层 ==========
 const STORAGE_KEY = 'time_memorial_data';
@@ -1012,18 +1106,17 @@ function renderCategoryGrid() {
 document.addEventListener('click', e => {
   const addBtn = e.target.closest('#addCatBtn');
   if (!addBtn) return;
-  const name = prompt('输入新分类名称（如：🎬 电影）');
-  if (!name || !name.trim()) return;
-  const trimmed = name.trim();
-  const key = 'custom_' + Date.now();
-  const color = CUSTOM_COLORS[Object.keys(customCats).length % CUSTOM_COLORS.length];
-  customCats[key] = { label: trimmed, cls: 'tag-other', color };
-  saveCustomCats(customCats);
-  categoryMap = { ...builtinCategoryMap, ...customCats };
-  selectedCategory = key;
-  renderCategoryGrid();
-  renderTabs();
-  showToast('✅ 分类已添加');
+  showCustomCatPrompt().then(result => {
+    if (!result) return;
+    const key = 'custom_' + Date.now();
+    customCats[key] = { label: result.name, cls: 'tag-other', color: result.color };
+    saveCustomCats(customCats);
+    categoryMap = { ...builtinCategoryMap, ...customCats };
+    selectedCategory = key;
+    renderCategoryGrid();
+    renderTabs();
+    showToast('✅ 分类已添加');
+  });
 });
 
 // 默认示例数据（首次加载时使用）
@@ -1079,6 +1172,62 @@ function daysBetween(dateStr) {
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ========== 自定义分类弹窗 ==========
+(function initCCColors() {
+  const container = document.getElementById('ccColors');
+  CUSTOM_COLORS.forEach((c, i) => {
+    const d = document.createElement('div');
+    d.className = 'cc-color' + (i === 0 ? ' active' : '');
+    d.style.background = c;
+    d.dataset.color = c;
+    d.addEventListener('click', () => {
+      container.querySelectorAll('.cc-color').forEach(x => x.classList.remove('active'));
+      d.classList.add('active');
+    });
+    container.appendChild(d);
+  });
+})();
+
+function showCustomCatPrompt() {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('ccOverlay');
+    const input = document.getElementById('ccInput');
+    const okBtn = document.getElementById('ccOk');
+    const cancelBtn = document.getElementById('ccCancel');
+    overlay.classList.add('show');
+    input.value = '';
+    okBtn.disabled = true;
+    setTimeout(() => input.focus(), 300);
+
+    const validate = () => { okBtn.disabled = !input.value.trim(); };
+    input.addEventListener('input', validate);
+
+    const cleanup = () => {
+      overlay.classList.remove('show');
+      input.removeEventListener('input', validate);
+      input.removeEventListener('keydown', onKey);
+      cancelBtn.removeEventListener('click', onCancel);
+      okBtn.removeEventListener('click', onOk);
+      overlay.removeEventListener('click', onBg);
+    };
+    const onCancel = () => { cleanup(); resolve(null); };
+    const onOk = () => {
+      if (!input.value.trim()) return;
+      const name = input.value.trim();
+      const activeColor = document.querySelector('#ccColors .cc-color.active');
+      const color = activeColor ? activeColor.dataset.color : CUSTOM_COLORS[0];
+      cleanup(); resolve({ name, color });
+    };
+    const onBg = (e) => { if (e.target === overlay) { cleanup(); resolve(null); } };
+    const onKey = (e) => { if (e.key === 'Enter') onOk(); if (e.key === 'Escape') onCancel(); };
+
+    cancelBtn.addEventListener('click', onCancel);
+    okBtn.addEventListener('click', onOk);
+    overlay.addEventListener('click', onBg);
+    input.addEventListener('keydown', onKey);
+  });
 }
 
 function showConfirm(text) {
