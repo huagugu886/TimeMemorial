@@ -87,9 +87,9 @@ class WebBridge(private val context: Context) {
      */
     @JavascriptInterface
     fun getImageBase64(fileName: String): String {
-        val file = File(imagesDir, fileName)
+        val file = File(imageDir, fileName)
         if (!file.exists()) return ""
-        val bytes = file.readBytes()
+        val bytes = file.inputStream().use { it.readBytes() }
         val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
         val ext = file.extension.lowercase()
         val mime = when (ext) {
