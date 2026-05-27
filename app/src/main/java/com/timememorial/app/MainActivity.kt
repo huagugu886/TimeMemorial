@@ -3,6 +3,7 @@ package com.timememorial.app
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.WindowCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.timememorial.app.databinding.ActivityMainBinding
@@ -19,6 +20,9 @@ class MainActivity : AppCompatActivity() {
             if (isDark) AppCompatDelegate.MODE_NIGHT_YES
             else AppCompatDelegate.MODE_NIGHT_NO
         )
+
+        // 沉浸式状态栏：让内容绘制到状态栏下方
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)

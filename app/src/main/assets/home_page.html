@@ -37,7 +37,7 @@ body {
 /* ========== 头部 ========== */
 .header {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  padding: 48px 20px 24px;
+  padding: calc(env(safe-area-inset-top, 20px) + 12px) 20px 24px;
   border-radius: 0 0 28px 28px;
   position: relative;
   overflow: hidden;
