@@ -1088,23 +1088,27 @@ document.getElementById('sortBtn').addEventListener('click', () => {
   renderList();
 });
 
-// ========== 事件：FAB 打开弹窗 ==========
-const addModal = document.getElementById('addModal');
+// ========== 事件：FAB 导航到 AddFragment ==========
 document.getElementById('fabBtn').addEventListener('click', () => {
-  // 重置表单
-  document.getElementById('titleInput').value = '';
-  document.getElementById('dateInput').value = new Date().toISOString().slice(0, 10);
-  document.getElementById('descInput').value = '';
-  selectedCategory = 'love';
-  selectedImage = '';
-  isFavorite = false;
-  document.querySelectorAll('.cat-option').forEach(c => {
-    c.classList.toggle('active', c.dataset.cat === 'love');
-  });
-  document.getElementById('previewContainer').classList.remove('show');
-  document.getElementById('uploadArea').style.display = '';
-  document.getElementById('favToggle').classList.remove('on');
-  addModal.classList.add('show');
+  if (window.Android && window.Android.navigateToAdd) {
+    window.Android.navigateToAdd();
+  } else {
+    // 降级方案：如果不在 Android 环境，打开内置弹窗
+    const addModal = document.getElementById('addModal');
+    document.getElementById('titleInput').value = '';
+    document.getElementById('dateInput').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('descInput').value = '';
+    selectedCategory = 'love';
+    selectedImage = '';
+    isFavorite = false;
+    document.querySelectorAll('.cat-option').forEach(c => {
+      c.classList.toggle('active', c.dataset.cat === 'love');
+    });
+    document.getElementById('previewContainer').classList.remove('show');
+    document.getElementById('uploadArea').style.display = '';
+    document.getElementById('favToggle').classList.remove('on');
+    addModal.classList.add('show');
+  }
 });
 
 // ========== 事件：关闭弹窗 ==========

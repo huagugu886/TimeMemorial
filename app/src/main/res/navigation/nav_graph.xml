@@ -10,6 +10,11 @@
         android:label="首页" />
 
     <fragment
+        android:id="@+id/nav_add"
+        android:name="com.timememorial.app.ui.add.AddFragment"
+        android:label="添加纪念日" />
+
+    <fragment
         android:id="@+id/nav_calendar"
         android:name="com.timememorial.app.ui.calendar.CalendarFragment"
         android:label="日历" />
