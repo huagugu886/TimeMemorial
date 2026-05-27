@@ -506,6 +506,78 @@ textarea.form-input {
   justify-content: center;
 }
 
+/* ========== 封面位置选择器 ========== */
+.position-picker {
+  display: none;
+  margin-top: 12px;
+  background: #F8F9FA;
+  border-radius: 14px;
+  padding: 14px;
+}
+.position-picker.show { display: block; }
+.position-picker-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.position-preview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 12px;
+  background: #E5E7EB;
+}
+.position-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: object-position 0.15s ease;
+}
+.position-preview .crop-hint {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+.position-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.position-slider-row .pos-icon {
+  font-size: 14px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.position-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #E5E7EB;
+  outline: none;
+}
+.position-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(124,92,252,0.3);
+}
+
 /* 收藏开关 */
 .favorite-toggle {
   display: flex;
@@ -821,6 +893,19 @@ textarea.form-input {
           <img id="previewImg" src="">
           <button class="remove-img" id="removeImg">✕</button>
         </div>
+        <!-- 封面位置选择 -->
+        <div class="position-picker" id="positionPicker">
+          <div class="position-picker-label">📐 调整封面展示位置</div>
+          <div class="position-preview">
+            <img id="positionPreviewImg" src="">
+            <div class="crop-hint">封面裁剪预览</div>
+          </div>
+          <div class="position-slider-row">
+            <span class="pos-icon">⬆️</span>
+            <input type="range" class="position-slider" id="positionSlider" min="0" max="100" value="50">
+            <span class="pos-icon">⬇️</span>
+          </div>
+        </div>
       </div>
 
       <!-- 收藏 -->
@@ -931,6 +1016,7 @@ let sortOrder = 'asc'; // asc=最早的在前, desc=最新的在前
 let searchQuery = '';
 let selectedCategory = 'love';
 let selectedImage = '';
+let imagePosition = 50; // 0=顶部, 50=居中, 100=底部
 let isFavorite = false;
 
 // ========== 工具函数 ==========
@@ -1003,8 +1089,9 @@ function renderFeatured() {
   }
   container.innerHTML = favs.map(m => {
     const cat = categoryMap[m.category] || categoryMap.other;
+    const pos = m.imagePosition != null ? m.imagePosition : 50;
     const imgHtml = m.image
-      ? `<img class="card-img" src="${m.image}" alt="">`
+      ? `<img class="card-img" src="${m.image}" style="object-position:center ${pos}%;" alt="">`
       : `<div class="card-img" style="background:${coverBg(m.id)};display:flex;align-items:center;justify-content:center;font-size:32px;">${cat.label.charAt(0)}${cat.label.charAt(1)}</div>`;
     return `
       <div class="featured-card" onclick="openDetail(${m.id})">
@@ -1036,8 +1123,9 @@ function renderList() {
     const days = daysBetween(m.date);
     const daysLabel = days >= 0 ? '天前' : '天后';
     const absDays = Math.abs(days);
+    const pos = m.imagePosition != null ? m.imagePosition : 50;
     const imgHtml = m.image
-      ? `<img class="card-cover" src="${m.image}" alt="">`
+      ? `<img class="card-cover" src="${m.image}" style="object-position:center ${pos}%;" alt="">`
       : `<div class="card-cover" style="background:${coverBg(m.id)};display:flex;align-items:center;justify-content:center;font-size:48px;color:rgba(255,255,255,0.6);">${cat.label.slice(0,2)}</div>`;
     const tagsHtml = `
       <span class="tag" style="background:${cat.color}">${cat.label}</span>
@@ -1073,8 +1161,9 @@ function openDetail(id) {
   const absDays = Math.abs(days);
 
   // 封面
+  const detailPos = m.imagePosition != null ? m.imagePosition : 50;
   document.getElementById('detailCover').innerHTML = m.image
-    ? `<img class="detail-cover" src="${m.image}" alt="">`
+    ? `<img class="detail-cover" src="${m.image}" style="object-position:center ${detailPos}%;" alt="">`
     : `<div class="detail-cover-placeholder" style="background:${coverBg(m.id)};">${cat.label.slice(0,2)}</div>`;
 
   // 标题
@@ -1162,6 +1251,7 @@ document.getElementById('fabBtn').addEventListener('click', () => {
     document.getElementById('descInput').value = '';
     selectedCategory = 'love';
     selectedImage = '';
+    imagePosition = 50;
     isFavorite = false;
     document.querySelectorAll('.cat-option').forEach(c => {
       c.classList.toggle('active', c.dataset.cat === 'love');
@@ -1216,15 +1306,29 @@ imageInput.addEventListener('change', e => {
     previewImg.src = selectedImage;
     previewContainer.classList.add('show');
     uploadArea.style.display = 'none';
+    // 显示位置选择器
+    imagePosition = 50;
+    document.getElementById('positionSlider').value = 50;
+    document.getElementById('positionPreviewImg').src = selectedImage;
+    document.getElementById('positionPreviewImg').style.objectPosition = 'center 50%';
+    document.getElementById('positionPicker').classList.add('show');
   };
   reader.readAsDataURL(file);
 });
 
 document.getElementById('removeImg').addEventListener('click', () => {
   selectedImage = '';
+  imagePosition = 50;
   previewContainer.classList.remove('show');
   uploadArea.style.display = '';
   imageInput.value = '';
+  document.getElementById('positionPicker').classList.remove('show');
+});
+
+// ========== 事件：位置滑块 ==========
+document.getElementById('positionSlider').addEventListener('input', function() {
+  imagePosition = parseInt(this.value);
+  document.getElementById('positionPreviewImg').style.objectPosition = `center ${imagePosition}%`;
 });
 
 // ========== 事件：收藏开关 ==========
@@ -1259,6 +1363,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     desc,
     category: selectedCategory,
     image: selectedImage,
+    imagePosition: imagePosition,
     favorite: isFavorite
   };
 
