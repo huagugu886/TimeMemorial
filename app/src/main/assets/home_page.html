@@ -795,6 +795,42 @@ textarea.form-input {
 }
 @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 .modal-open { overflow: hidden; position: fixed; width: 100%; }
+
+/* ========== 删除确认弹窗 ========== */
+.dc-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  display: none; align-items: center; justify-content: center;
+}
+.dc-overlay.show { display: flex; }
+.dc-box {
+  background: #fff;
+  border-radius: 20px;
+  width: 80%; max-width: 300px;
+  padding: 28px 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(124, 92, 252, 0.15);
+  transform: scale(0.9); opacity: 0;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dc-overlay.show .dc-box { transform: scale(1); opacity: 1; }
+.dc-box .dc-icon { font-size: 40px; margin-bottom: 12px; }
+.dc-box h4 { font-size: 17px; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
+.dc-box p { font-size: 14px; color: #6B7280; margin-bottom: 24px; line-height: 1.5; }
+.dc-btns { display: flex; gap: 12px; }
+.dc-btns button {
+  flex: 1; padding: 12px; border-radius: 12px;
+  font-size: 15px; font-weight: 600; border: none;
+  cursor: pointer; transition: all 0.2s;
+}
+.dc-cancel { background: #F5F5FA; color: #6B7280; }
+.dc-cancel:active { background: #E5E5EA; }
+.dc-ok {
+  background: linear-gradient(135deg, #7C5CFC, #A78BFA);
+  color: #fff; box-shadow: 0 4px 12px rgba(124, 92, 252, 0.3);
+}
+.dc-ok:active { transform: scale(0.96); }
 </style>
 </head>
 <body>
@@ -1044,6 +1080,26 @@ function formatDate(dateStr) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
+function showConfirm(text) {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('dcOverlay');
+    document.getElementById('dcText').textContent = text;
+    overlay.classList.add('show');
+    const cleanup = () => {
+      overlay.classList.remove('show');
+      document.getElementById('dcCancel').removeEventListener('click', onCancel);
+      document.getElementById('dcOk').removeEventListener('click', onOk);
+      overlay.removeEventListener('click', onBg);
+    };
+    const onCancel = () => { cleanup(); resolve(false); };
+    const onOk = () => { cleanup(); resolve(true); };
+    const onBg = (e) => { if (e.target === overlay) { cleanup(); resolve(false); } };
+    document.getElementById('dcCancel').addEventListener('click', onCancel);
+    document.getElementById('dcOk').addEventListener('click', onOk);
+    overlay.addEventListener('click', onBg);
+  });
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1211,11 +1267,12 @@ document.getElementById('detailModal').addEventListener('click', e => {
 });
 
 // 删除纪念日
-document.getElementById('detailDeleteBtn').addEventListener('click', () => {
+document.getElementById('detailDeleteBtn').addEventListener('click', async () => {
   if (currentDetailId == null) return;
   const m = memorials.find(x => x.id === currentDetailId);
   if (!m) return;
-  if (!confirm(`确定删除「${m.title}」吗？`)) return;
+  const confirmed = await showConfirm(`确定要删除「${m.title}」吗？`);
+  if (!confirmed) return;
 
   if (m.image && !m.image.startsWith('data:') && window.nativeBridge) nativeBridge.deleteImage(m.image);
   memorials = memorials.filter(x => x.id !== currentDetailId);
@@ -1407,5 +1464,19 @@ renderCategoryGrid();
 renderFeatured();
 renderList();
 </script>
+
+<!-- 删除确认弹窗 -->
+<div class="dc-overlay" id="dcOverlay">
+  <div class="dc-box">
+    <div class="dc-icon">🗑️</div>
+    <h4>确认删除</h4>
+    <p id="dcText"></p>
+    <div class="dc-btns">
+      <button class="dc-cancel" id="dcCancel">取消</button>
+      <button class="dc-ok" id="dcOk">删除</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
