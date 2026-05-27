@@ -1642,7 +1642,10 @@ renderList();
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', () => {
       const heightDiff = initialHeight - window.visualViewport.height;
-      if (heightDiff > THRESHOLD) {
+      // 当输入框获焦时，强制保持 keyboard-open，防止竞态移除
+      const hasInputFocus = document.activeElement &&
+        (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
+      if (heightDiff > THRESHOLD || hasInputFocus) {
         body.classList.add('keyboard-open');
       } else {
         body.classList.remove('keyboard-open');
