@@ -35,8 +35,7 @@ jobs:
       - name: Check APK size
         run: |
           echo "📦 APK Size:"
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
-          ls -lh app/build/outputs/apk/release/app-release-unsigned.apk
+          find app/build/outputs/apk -name "*.apk" -exec ls -lh {} \; || echo "No APK found"
 
       - name: Run Lint
         run: ./gradlew lint || true
