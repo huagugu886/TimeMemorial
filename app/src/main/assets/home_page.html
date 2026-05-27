@@ -1093,16 +1093,19 @@ function openDetail(id) {
   document.getElementById('detailInfo').innerHTML = infoHtml;
 
   document.getElementById('detailModal').classList.add('show');
+  document.body.classList.add('modal-open');
 }
 
 // 关闭详情
 document.getElementById('detailClose').addEventListener('click', () => {
   document.getElementById('detailModal').classList.remove('show');
+  document.body.classList.remove('modal-open');
   currentDetailId = null;
 });
 document.getElementById('detailModal').addEventListener('click', e => {
   if (e.target === document.getElementById('detailModal')) {
     document.getElementById('detailModal').classList.remove('show');
+    document.body.classList.remove('modal-open');
     currentDetailId = null;
   }
 });
@@ -1117,6 +1120,7 @@ document.getElementById('detailDeleteBtn').addEventListener('click', () => {
   memorials = memorials.filter(x => x.id !== currentDetailId);
   saveData(memorials);
   document.getElementById('detailModal').classList.remove('show');
+  document.body.classList.remove('modal-open');
   currentDetailId = null;
   renderFeatured();
   renderList();
