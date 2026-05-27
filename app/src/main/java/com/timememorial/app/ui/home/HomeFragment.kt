@@ -44,7 +44,7 @@ class HomeFragment : Fragment() {
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
 
-            loadUrl("file:///android_asset/home_page.html?v=4")
+            loadUrl("file:///android_asset/home_page.html?v=5")
         }
     }
 
