@@ -1019,6 +1019,17 @@ let selectedImage = '';
 let imagePosition = 50; // 0=顶部, 50=居中, 100=底部
 let isFavorite = false;
 
+// 解析图片路径：文件名 → nativeBridge 路径，base64 → 直接返回
+function resolveImageSrc(img) {
+  if (!img) return '';
+  if (img.startsWith('data:')) return img;
+  if (window.nativeBridge) {
+    const path = nativeBridge.getImagePath(img);
+    return path ? 'file://' + path : '';
+  }
+  return img;
+}
+
 // ========== 工具函数 ==========
 function daysBetween(dateStr) {
   const now = new Date();
@@ -1163,7 +1174,7 @@ function openDetail(id) {
   // 封面
   const detailPos = m.imagePosition != null ? m.imagePosition : 50;
   document.getElementById('detailCover').innerHTML = m.image
-    ? `<img class="detail-cover" src="${m.image}" style="object-position:center ${detailPos}%;" alt="">`
+    ? `<img class="detail-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${detailPos}%;" alt="">`
     : `<div class="detail-cover-placeholder" style="background:${coverBg(m.id)};">${cat.label.slice(0,2)}</div>`;
 
   // 标题
