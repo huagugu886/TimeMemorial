@@ -36,23 +36,20 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         binding.bottomNav.setupWithNavController(navController)
 
-        // 关键修复：让底栏只响应系统导航栏 insets，不跟随键盘(IME)移动
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
+        // 根布局：只加状态栏 top padding，让内容不被状态栏遮挡
+        // bottom 不加——底栏自己处理导航栏 insets
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // 只应用系统导航栏的 padding，忽略 IME insets
-            view.updatePadding(bottom = systemBars.bottom)
-            // 返回不含 IME 的 insets，阻止键盘影响底栏
-            insets.inset(0, 0, 0, insets.getInsets(WindowInsetsCompat.Type.ime()).bottom)
+            view.updatePadding(top = systemBars.top)
+            insets
         }
 
-        // Fragment 内容区域需要响应 IME insets 来正确滚动
-        ViewCompat.setOnApplyWindowInsetsListener(binding.navHostFragment) { view, insets ->
+        // 底栏：只响应导航栏，忽略键盘(IME)——防止键盘弹出时底栏上移
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.updatePadding(
-                top = systemBars.top,
-                bottom = systemBars.bottom
-            )
-            insets
+            view.updatePadding(bottom = systemBars.bottom)
+            // 消费 IME insets，阻止它继续向上传播影响底栏位置
+            insets.inset(0, 0, 0, insets.getInsets(WindowInsetsCompat.Type.ime()).bottom)
         }
     }
 }
