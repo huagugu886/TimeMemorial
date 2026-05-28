@@ -444,6 +444,14 @@ textarea.form-input {
 .cat-option.deletable {
   animation: catShake 0.3s ease-in-out;
 }
+.edit-banner {
+  display: none; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 16px; margin: 0 0 8px; border-radius: 10px;
+  background: #FEF3C7; color: #92400E; font-size: 12px; font-weight: 500;
+  animation: editBannerIn .3s ease;
+}
+.edit-banner.show { display: flex; }
+@keyframes editBannerIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
 @keyframes catPopIn {
   0% { transform: scale(0); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
@@ -1078,6 +1086,7 @@ body.keyboard-open #bottomNav {
       <!-- 分类 -->
       <div class="form-group">
         <label>分类 <span class="required">*</span></label>
+        <div class="edit-banner" id="editBanner">⚠️ 长按分类可删除，点击 × 即可移除</div>
         <div class="category-grid" id="categoryGrid"></div>
       </div>
 
@@ -1220,6 +1229,7 @@ function enterCatEditMode() {
   if (catEditMode) return;
   catEditMode = true;
   document.querySelectorAll('.cat-option').forEach(el => el.classList.add('deletable'));
+  document.getElementById('editBanner').classList.add('show');
   clearTimeout(catEditTimer);
   catEditTimer = setTimeout(() => { exitCatEditMode(); }, 3000);
 }
@@ -1228,6 +1238,7 @@ function exitCatEditMode() {
   catEditMode = false;
   clearTimeout(catEditTimer);
   document.querySelectorAll('.cat-option').forEach(el => el.classList.remove('deletable'));
+  document.getElementById('editBanner').classList.remove('show');
 }
 
 async function requestDeleteCat(key) {
@@ -1259,7 +1270,7 @@ async function requestDeleteCat(key) {
   renderList();
   renderFavs();
   exitCatEditMode();
-  showToast(count > 0 ? `已删除「${cat.label}」及 ${count} 条纪念日` : `已删除「${cat.label}」`);
+  setTimeout(() => showToast(count > 0 ? `已删除「${cat.label}」及 ${count} 条纪念日` : `已删除「${cat.label}」`), 50);
 }
 
 document.addEventListener('click', e => {
@@ -1274,7 +1285,7 @@ document.addEventListener('click', e => {
     selectedCategory = key;
     renderCategoryGrid();
     renderTabs();
-    showToast('✅ 分类已添加');
+    setTimeout(() => showToast('✅ 分类已添加'), 50);
   });
 });
 
@@ -1419,10 +1430,22 @@ function showConfirm(text) {
 
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if (!t) { console.warn('toast element not found'); return; }
+  console.log('[showToast]', msg);
   t.textContent = msg;
   t.style.display = 'block';
+  t.style.opacity = '1';
+  t.style.transform = 'translate(-50%, -50%) scale(1)';
+  // 强制重触发动画：完全移除属性 → 重排 → 重新赋值
+  t.style.removeProperty('animation');
+  void t.offsetWidth; // 触发重排
+  t.style.animation = 'toastIn 0.3s ease forwards';
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.style.display = 'none'; }, 1800);
+  t._timer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translate(-50%, -50%) scale(0.9)';
+    setTimeout(() => { t.style.display = 'none'; }, 300);
+  }, 1500);
 }
 
 function showAlert(text) {
@@ -1608,7 +1631,7 @@ document.getElementById('detailDeleteBtn').addEventListener('click', async () =>
   const confirmed = await showConfirm(`确定要删除「${m.title}」吗？`);
   if (!confirmed) return;
 
-  if (m.image && !m.image.startsWith('data:') && window.nativeBridge) nativeBridge.deleteImage(m.image);
+  if (m.image && !m.image.startsWith('data:') && window.nativeBridge) { try { nativeBridge.deleteImage(m.image); } catch(e) { console.warn('deleteImage failed:', e); } }
   memorials = memorials.filter(x => x.id !== currentDetailId);
   saveData(memorials);
   document.getElementById('detailModal').classList.remove('show');
@@ -1616,7 +1639,7 @@ document.getElementById('detailDeleteBtn').addEventListener('click', async () =>
   currentDetailId = null;
   renderFeatured();
   renderList();
-  showToast('🗑️ 已删除');
+  setTimeout(() => showToast('🗑️ 已删除'), 50);
 });
 
 // ========== 事件：分类标签 ==========
