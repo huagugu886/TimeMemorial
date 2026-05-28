@@ -1,6 +1,7 @@
 package com.timememorial.app
 
 import android.os.Bundle
+import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
@@ -36,20 +37,34 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         binding.bottomNav.setupWithNavController(navController)
 
-        // 根布局：只加状态栏 top padding，让内容不被状态栏遮挡
-        // bottom 不加——底栏自己处理导航栏 insets
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.updatePadding(top = systemBars.top)
-            insets
-        }
-
-        // 底栏：只响应导航栏，忽略键盘(IME)——防止键盘弹出时底栏上移
+        // 底栏：只吃导航栏底部 insets，阻止键盘(IME)把它顶上去
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updatePadding(bottom = systemBars.bottom)
-            // 消费 IME insets，阻止它继续向上传播影响底栏位置
-            insets.inset(0, 0, 0, insets.getInsets(WindowInsetsCompat.Type.ime()).bottom)
+            // 消费 IME insets，不让键盘影响底栏
+            WindowInsetsCompat.Builder(insets)
+                .setInsets(WindowInsetsCompat.Type.ime(), androidx.core.graphics.Insets.NONE)
+                .build()
+        }
+
+        // 键盘弹出时，用 JS 把当前聚焦的输入框滚到可见区域
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            if (imeHeight > 0) {
+                val fragment = navHostFragment.childFragmentManager
+                    .primaryNavigationFragment
+                if (fragment?.view is WebView) {
+                    (fragment.view as WebView).evaluateJavascript(
+                        """
+                        var el = document.activeElement;
+                        if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+                            el.scrollIntoView({block: 'center', behavior: 'smooth'});
+                        }
+                        """.trimIndent(), null
+                    )
+                }
+            }
+            insets
         }
     }
 }
