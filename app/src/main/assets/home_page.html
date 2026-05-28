@@ -1193,6 +1193,7 @@ function renderCategoryGrid() {
 // ========== 长按删除分类 ==========
 let catLongPressTimer = null;
 let catEditMode = false;
+let catEditTimer = null;
 
 function bindCatLongPress(el) {
   let moved = false;
@@ -1219,10 +1220,13 @@ function enterCatEditMode() {
   if (catEditMode) return;
   catEditMode = true;
   document.querySelectorAll('.cat-option').forEach(el => el.classList.add('deletable'));
+  clearTimeout(catEditTimer);
+  catEditTimer = setTimeout(() => { exitCatEditMode(); }, 3000);
 }
 
 function exitCatEditMode() {
   catEditMode = false;
+  clearTimeout(catEditTimer);
   document.querySelectorAll('.cat-option').forEach(el => el.classList.remove('deletable'));
 }
 
@@ -1255,7 +1259,7 @@ async function requestDeleteCat(key) {
   renderList();
   renderFavs();
   exitCatEditMode();
-  showAlert(count > 0 ? `已删除「${cat.label}」及 ${count} 条纪念日` : `已删除「${cat.label}」`);
+  showToast(count > 0 ? `已删除「${cat.label}」及 ${count} 条纪念日` : `已删除「${cat.label}」`);
 }
 
 document.addEventListener('click', e => {
@@ -1272,6 +1276,14 @@ document.addEventListener('click', e => {
     renderTabs();
     showToast('✅ 分类已添加');
   });
+});
+
+// 点击空白处退出分类编辑模式
+document.addEventListener('click', e => {
+  if (!catEditMode) return;
+  if (!e.target.closest('.cat-option')) {
+    exitCatEditMode();
+  }
 });
 
 // 默认示例数据（首次加载时使用）
