@@ -416,6 +416,42 @@ textarea.form-input {
   border: 1.5px solid transparent;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+}
+.cat-option .cat-delete {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #EF4444;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(239,68,68,0.4);
+  cursor: pointer;
+  z-index: 5;
+  line-height: 1;
+  animation: catPopIn 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.cat-option.deletable .cat-delete {
+  display: flex;
+}
+.cat-option.deletable {
+  animation: catShake 0.3s ease-in-out;
+}
+@keyframes catPopIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes catShake {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
 }
 .cat-option.active {
   border-color: var(--primary);
@@ -851,6 +887,37 @@ body.keyboard-open #bottomNav {
 }
 .dc-ok:active { transform: scale(0.96); }
 
+/* ========== 操作结果弹窗 ========== */
+.al-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  display: none; align-items: center; justify-content: center;
+}
+.al-overlay.show { display: flex; }
+.al-box {
+  background: #fff;
+  border-radius: 20px;
+  width: 80%; max-width: 300px;
+  padding: 28px 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(52, 199, 89, 0.15);
+  transform: scale(0.9); opacity: 0;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.al-overlay.show .al-box { transform: scale(1); opacity: 1; }
+.al-box .al-icon { font-size: 40px; margin-bottom: 12px; }
+.al-box h4 { font-size: 17px; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
+.al-box p { font-size: 14px; color: #6B7280; margin-bottom: 24px; line-height: 1.5; }
+.al-btn-ok {
+  width: 100%; padding: 12px; border-radius: 12px;
+  font-size: 15px; font-weight: 600; border: none;
+  cursor: pointer; transition: all 0.2s;
+  background: linear-gradient(135deg, #34C759, #30D158);
+  color: #fff; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+.al-btn-ok:active { transform: scale(0.96); }
+
 /* ========== 自定义分类弹窗 ========== */
 .cc-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -1115,10 +1182,80 @@ function renderCategoryGrid() {
   const grid = document.getElementById('categoryGrid');
   let html = '';
   Object.keys(categoryMap).forEach((key, idx) => {
-    html += `<div class="cat-option${key === selectedCategory ? ' active' : ''}" data-cat="${key}">${categoryMap[key].label}</div>`;
+    html += `<div class="cat-option${key === selectedCategory ? ' active' : ''}" data-cat="${key}">${categoryMap[key].label}<span class="cat-delete" onclick="event.stopPropagation();requestDeleteCat('${key}')">✕</span></div>`;
   });
   html += `<div class="cat-option-add" id="addCatBtn">＋ 新分类</div>`;
   grid.innerHTML = html;
+  // 绑定长按事件
+  grid.querySelectorAll('.cat-option').forEach(el => bindCatLongPress(el));
+}
+
+// ========== 长按删除分类 ==========
+let catLongPressTimer = null;
+let catEditMode = false;
+
+function bindCatLongPress(el) {
+  let moved = false;
+  const start = (e) => {
+    moved = false;
+    catLongPressTimer = setTimeout(() => {
+      if (moved) return;
+      enterCatEditMode();
+      el.classList.add('deletable');
+      if (navigator.vibrate) navigator.vibrate(30);
+    }, 500);
+  };
+  const end = () => { clearTimeout(catLongPressTimer); };
+  const move = () => { moved = true; clearTimeout(catLongPressTimer); };
+  el.addEventListener('touchstart', start, { passive: true });
+  el.addEventListener('touchend', end);
+  el.addEventListener('touchmove', move);
+  el.addEventListener('mousedown', start);
+  el.addEventListener('mouseup', end);
+  el.addEventListener('mouseleave', end);
+}
+
+function enterCatEditMode() {
+  if (catEditMode) return;
+  catEditMode = true;
+  document.querySelectorAll('.cat-option').forEach(el => el.classList.add('deletable'));
+}
+
+function exitCatEditMode() {
+  catEditMode = false;
+  document.querySelectorAll('.cat-option').forEach(el => el.classList.remove('deletable'));
+}
+
+async function requestDeleteCat(key) {
+  const cat = categoryMap[key];
+  if (!cat) return;
+  // 统计关联纪念日数量
+  const count = memorials.filter(m => m.category === key).length;
+  const msg = count > 0
+    ? `删除分类「${cat.label}」后，首页中属于该分类的 ${count} 条纪念日也将一并删除，确认吗？`
+    : `确认删除分类「${cat.label}」吗？`;
+  const confirmed = await showConfirm(msg);
+  if (!confirmed) { exitCatEditMode(); return; }
+  // 删除关联纪念日
+  memorials = memorials.filter(m => m.category !== key);
+  saveData();
+  // 删除自定义分类 / 内置分类置灰标记
+  if (key.startsWith('custom_')) {
+    delete customCats[key];
+    saveCustomCats(customCats);
+    categoryMap = { ...builtinCategoryMap, ...customCats };
+  } else {
+    // 内置分类：从 categoryMap 中移除（本次会话内）
+    delete categoryMap[key];
+  }
+  // 如果当前选中的是被删分类，重置为 love
+  if (selectedCategory === key) selectedCategory = 'love';
+  renderCategoryGrid();
+  renderTabs();
+  renderList();
+  renderFavs();
+  exitCatEditMode();
+  showAlert(count > 0 ? `已删除「${cat.label}」及 ${count} 条纪念日` : `已删除「${cat.label}」`);
 }
 
 document.addEventListener('click', e => {
@@ -1274,6 +1411,23 @@ function showToast(msg) {
   t.style.display = 'block';
   clearTimeout(t._timer);
   t._timer = setTimeout(() => { t.style.display = 'none'; }, 1800);
+}
+
+function showAlert(text) {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('alOverlay');
+    document.getElementById('alText').textContent = text;
+    overlay.classList.add('show');
+    const cleanup = () => {
+      overlay.classList.remove('show');
+      document.getElementById('alOk').removeEventListener('click', onOk);
+      overlay.removeEventListener('click', onBg);
+    };
+    const onOk = () => { cleanup(); resolve(); };
+    const onBg = e => { if (e.target === overlay) { cleanup(); resolve(); } };
+    document.getElementById('alOk').addEventListener('click', onOk);
+    overlay.addEventListener('click', onBg);
+  });
 }
 
 function getFilteredData() {
@@ -1688,6 +1842,16 @@ renderList();
       <button class="dc-cancel" id="dcCancel">取消</button>
       <button class="dc-ok" id="dcOk">删除</button>
     </div>
+  </div>
+</div>
+
+<!-- 操作结果弹窗 -->
+<div class="al-overlay" id="alOverlay">
+  <div class="al-box">
+    <div class="al-icon">✅</div>
+    <h4>操作成功</h4>
+    <p id="alText"></p>
+    <button class="al-btn-ok" id="alOk">好的</button>
   </div>
 </div>
 
