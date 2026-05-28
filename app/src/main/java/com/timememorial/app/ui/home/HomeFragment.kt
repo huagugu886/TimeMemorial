@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.webkit.WebViewClient
 import android.os.Environment
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -127,7 +128,21 @@ class HomeFragment : Fragment() {
             // 注册 Native 桥接
             addJavascriptInterface(WebBridge(requireContext()), "nativeBridge")
 
-            loadUrl("file:///android_asset/home_page.html?v=7")
+            // 注入状态栏高度 CSS 变量，让弹窗正确避让状态栏
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    val sbHeight = resources.getIdentifier(
+                        "status_bar_height", "dimen", "android"
+                    ).let { if (it > 0) resources.getDimensionPixelSize(it) else 48 }
+                    view?.evaluateJavascript(
+                        "document.documentElement.style.setProperty('--sb-height', '${sbHeight}px')",
+                        null
+                    )
+                }
+            }
+
+            loadUrl("file:///android_asset/home_page.html?v=8")
         }
     }
 
