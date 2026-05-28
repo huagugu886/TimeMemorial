@@ -1,4 +1,4 @@
-ls = memorials.filter<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -304,6 +304,7 @@ body {
 }
 .fab:active { transform: scale(0.9) !important; }
 body:has(.modal-overlay.show) .fab { display: none !important; }
+body:has(.detail-overlay.show) .fab { display: none !important; }
 
 /* ========== 添加弹窗 ========== */
 .modal-overlay {
@@ -323,7 +324,7 @@ body:has(.modal-overlay.show) .fab { display: none !important; }
   background: var(--card-bg);
   border-radius: 24px 24px 0 0;
   width: 100%;
-  max-height: 90vh;
+  max-height: calc(92vh - var(--sb-height, 48px));
   overflow-y: auto;
   padding: 0;
   animation: slideUp 0.3s ease;
@@ -415,6 +416,50 @@ textarea.form-input {
   border: 1.5px solid transparent;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+}
+.cat-option .cat-delete {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #EF4444;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(239,68,68,0.4);
+  cursor: pointer;
+  z-index: 5;
+  line-height: 1;
+  animation: catPopIn 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.cat-option.deletable .cat-delete {
+  display: flex;
+}
+.cat-option.deletable {
+  animation: catShake 0.3s ease-in-out;
+}
+.edit-banner {
+  display: none; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 16px; margin: 0 0 8px; border-radius: 10px;
+  background: #FEF3C7; color: #92400E; font-size: 12px; font-weight: 500;
+  animation: editBannerIn .3s ease;
+}
+.edit-banner.show { display: flex; }
+@keyframes editBannerIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes catPopIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes catShake {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
 }
 .cat-option.active {
   border-color: var(--primary);
@@ -757,6 +802,24 @@ textarea.form-input {
 }
 .toggle-switch.on::after { transform: translateX(20px); }
 
+/* ========== 键盘适配 ========== */
+/* 键盘弹出时隐藏底栏 */
+body.keyboard-open #bottomNav {
+  transform: translateY(100%);
+  pointer-events: none;
+}
+#bottomNav {
+  transition: transform 0.25s ease;
+}
+/* 弹窗内输入框聚焦时确保不被遮挡 */
+.modal-sheet {
+  max-height: calc(100dvh - var(--sb-height, 48px));
+  overflow-y: auto;
+}
+.modal-overlay {
+  padding-bottom: env(keyboard-inset-height, 0px);
+}
+
 /* 提交按钮 */
 .submit-btn {
   width: 100%;
@@ -790,11 +853,160 @@ textarea.form-input {
   border-radius: 12px;
   font-size: 14px;
   z-index: 999;
-  display: none;
-  animation: toastIn 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
-@keyframes toastIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+.toast.show {
+  opacity: 1;
+  pointer-events: auto;
+}
 .modal-open { overflow: hidden; position: fixed; width: 100%; }
+
+/* ========== 删除确认弹窗 ========== */
+.dc-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  display: none; align-items: center; justify-content: center;
+}
+.dc-overlay.show { display: flex; }
+.dc-box {
+  background: #fff;
+  border-radius: 20px;
+  width: 80%; max-width: 300px;
+  padding: 28px 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(124, 92, 252, 0.15);
+  transform: scale(0.9); opacity: 0;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dc-overlay.show .dc-box { transform: scale(1); opacity: 1; }
+.dc-box .dc-icon { font-size: 40px; margin-bottom: 12px; }
+.dc-box h4 { font-size: 17px; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
+.dc-box p { font-size: 14px; color: #6B7280; margin-bottom: 24px; line-height: 1.5; }
+.dc-btns { display: flex; gap: 12px; }
+.dc-btns button {
+  flex: 1; padding: 12px; border-radius: 12px;
+  font-size: 15px; font-weight: 600; border: none;
+  cursor: pointer; transition: all 0.2s;
+}
+.dc-cancel { background: #F5F5FA; color: #6B7280; }
+.dc-cancel:active { background: #E5E5EA; }
+.dc-ok {
+  background: linear-gradient(135deg, #7C5CFC, #A78BFA);
+  color: #fff; box-shadow: 0 4px 12px rgba(124, 92, 252, 0.3);
+}
+.dc-ok:active { transform: scale(0.96); }
+
+/* ========== 操作结果弹窗 ========== */
+.al-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  display: none; align-items: center; justify-content: center;
+}
+.al-overlay.show { display: flex; }
+.al-box {
+  background: #fff;
+  border-radius: 20px;
+  width: 80%; max-width: 300px;
+  padding: 28px 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(52, 199, 89, 0.15);
+  transform: scale(0.9); opacity: 0;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.al-overlay.show .al-box { transform: scale(1); opacity: 1; }
+.al-box .al-icon { font-size: 40px; margin-bottom: 12px; }
+.al-box h4 { font-size: 17px; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
+.al-box p { font-size: 14px; color: #6B7280; margin-bottom: 24px; line-height: 1.5; }
+.al-btn-ok {
+  width: 100%; padding: 12px; border-radius: 12px;
+  font-size: 15px; font-weight: 600; border: none;
+  cursor: pointer; transition: all 0.2s;
+  background: linear-gradient(135deg, #34C759, #30D158);
+  color: #fff; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+.al-btn-ok:active { transform: scale(0.96); }
+
+/* ========== 自定义分类弹窗 ========== */
+.cc-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  display: none; align-items: center; justify-content: center;
+}
+.cc-overlay.show { display: flex; }
+.cc-box {
+  background: #fff;
+  border-radius: 20px;
+  width: 85%; max-width: 320px;
+  padding: 28px 24px 20px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(124, 92, 252, 0.18);
+  transform: scale(0.9); opacity: 0;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.cc-overlay.show .cc-box { transform: scale(1); opacity: 1; }
+.cc-box .cc-icon { font-size: 40px; margin-bottom: 8px; }
+.cc-box h4 { font-size: 18px; font-weight: 700; color: #1A1A2E; margin-bottom: 6px; }
+.cc-box .cc-hint { font-size: 13px; color: #6B7280; margin-bottom: 18px; }
+.cc-input {
+  width: 100%; padding: 14px 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 14px;
+  font-size: 16px; font-weight: 500;
+  color: #1A1A2E;
+  background: #F8F9FA;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+.cc-input::placeholder { color: #C4C4C4; font-weight: 400; }
+.cc-input:focus {
+  border-color: #7C5CFC;
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.12);
+  background: #fff;
+}
+.cc-colors-label {
+  font-size: 13px; font-weight: 600; color: #6B7280;
+  text-align: left; margin: 16px 0 10px;
+}
+.cc-colors {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  justify-content: center; margin-bottom: 20px;
+}
+.cc-color {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.cc-color:hover { transform: scale(1.15); }
+.cc-color.active {
+  border-color: #1A1A2E;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transform: scale(1.15);
+}
+.cc-btns { display: flex; gap: 12px; }
+.cc-btns button {
+  flex: 1; padding: 13px; border-radius: 14px;
+  font-size: 15px; font-weight: 600; border: none;
+  cursor: pointer; transition: all 0.2s;
+}
+.cc-cancel { background: #F5F5FA; color: #6B7280; }
+.cc-cancel:active { background: #E5E5EA; }
+.cc-ok {
+  background: linear-gradient(135deg, #7C5CFC, #A78BFA);
+  color: #fff; box-shadow: 0 4px 12px rgba(124, 92, 252, 0.3);
+}
+.cc-ok:active { transform: scale(0.96); }
+.cc-ok:disabled {
+  opacity: 0.5; cursor: not-allowed;
+  box-shadow: none;
+}
 </style>
 </head>
 <body>
@@ -878,6 +1090,7 @@ textarea.form-input {
       <!-- 分类 -->
       <div class="form-group">
         <label>分类 <span class="required">*</span></label>
+        <div class="edit-banner" id="editBanner">⚠️ 长按分类可删除，点击 × 即可移除</div>
         <div class="category-grid" id="categoryGrid"></div>
       </div>
 
@@ -923,6 +1136,22 @@ textarea.form-input {
 <!-- ========== Toast提示 ========== -->
 <div class="toast" id="toast"></div>
 
+<!-- ========== 自定义分类弹窗 ========== -->
+<div class="cc-overlay" id="ccOverlay">
+  <div class="cc-box">
+    <div class="cc-icon">🏷️</div>
+    <h4>新建分类</h4>
+    <div class="cc-hint">给你的分类起个名字吧</div>
+    <input class="cc-input" id="ccInput" placeholder="例如：🎬 电影" maxlength="10" autocomplete="off">
+    <div class="cc-colors-label">选择颜色</div>
+    <div class="cc-colors" id="ccColors"></div>
+    <div class="cc-btns">
+      <button class="cc-cancel" id="ccCancel">取消</button>
+      <button class="cc-ok" id="ccOk" disabled>添加</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ========== 数据层 ==========
 const STORAGE_KEY = 'time_memorial_data';
@@ -966,27 +1195,109 @@ function renderCategoryGrid() {
   const grid = document.getElementById('categoryGrid');
   let html = '';
   Object.keys(categoryMap).forEach((key, idx) => {
-    html += `<div class="cat-option${key === selectedCategory ? ' active' : ''}" data-cat="${key}">${categoryMap[key].label}</div>`;
+    html += `<div class="cat-option${key === selectedCategory ? ' active' : ''}" data-cat="${key}">${categoryMap[key].label}<span class="cat-delete" onclick="event.stopPropagation();requestDeleteCat('${key}')">✕</span></div>`;
   });
   html += `<div class="cat-option-add" id="addCatBtn">＋ 新分类</div>`;
   grid.innerHTML = html;
+  // 绑定长按事件
+  grid.querySelectorAll('.cat-option').forEach(el => bindCatLongPress(el));
 }
+
+// ========== 长按删除分类 ==========
+let catLongPressTimer = null;
+let catEditMode = false;
+let catEditTimer = null;
+
+function bindCatLongPress(el) {
+  let moved = false;
+  const start = (e) => {
+    moved = false;
+    catLongPressTimer = setTimeout(() => {
+      if (moved) return;
+      enterCatEditMode();
+      el.classList.add('deletable');
+      if (navigator.vibrate) navigator.vibrate(30);
+    }, 500);
+  };
+  const end = () => { clearTimeout(catLongPressTimer); };
+  const move = () => { moved = true; clearTimeout(catLongPressTimer); };
+  el.addEventListener('touchstart', start, { passive: true });
+  el.addEventListener('touchend', end);
+  el.addEventListener('touchmove', move);
+  el.addEventListener('mousedown', start);
+  el.addEventListener('mouseup', end);
+  el.addEventListener('mouseleave', end);
+}
+
+function enterCatEditMode() {
+  if (catEditMode) return;
+  catEditMode = true;
+  document.querySelectorAll('.cat-option').forEach(el => el.classList.add('deletable'));
+  document.getElementById('editBanner').classList.add('show');
+  clearTimeout(catEditTimer);
+  catEditTimer = setTimeout(() => { exitCatEditMode(); }, 3000);
+}
+
+function exitCatEditMode() {
+  catEditMode = false;
+  clearTimeout(catEditTimer);
+  document.querySelectorAll('.cat-option').forEach(el => el.classList.remove('deletable'));
+  document.getElementById('editBanner').classList.remove('show');
+}
+
+async function requestDeleteCat(key) {
+  const cat = categoryMap[key];
+  if (!cat) return;
+  // 统计关联纪念日数量
+  const count = memorials.filter(m => m.category === key).length;
+  const msg = count > 0
+    ? `删除分类「${cat.label}」后，首页中属于该分类的 ${count} 条纪念日也将一并删除，确认吗？`
+    : `确认删除分类「${cat.label}」吗？`;
+  const confirmed = await showConfirm(msg);
+  if (!confirmed) { exitCatEditMode(); return; }
+  // 删除关联纪念日
+  memorials = memorials.filter(m => m.category !== key);
+  saveData();
+  // 删除自定义分类 / 内置分类置灰标记
+  if (key.startsWith('custom_')) {
+    delete customCats[key];
+    saveCustomCats(customCats);
+    categoryMap = { ...builtinCategoryMap, ...customCats };
+  } else {
+    // 内置分类：从 categoryMap 中移除（本次会话内）
+    delete categoryMap[key];
+  }
+  // 如果当前选中的是被删分类，重置为 love
+  if (selectedCategory === key) selectedCategory = 'love';
+  renderCategoryGrid();
+  renderTabs();
+  renderList();
+  renderFavs();
+  exitCatEditMode();
+  setTimeout(() => showToast(count > 0 ? `已删除「${cat.label}」及 ${count} 条纪念日` : `已删除「${cat.label}」`), 300);
 
 document.addEventListener('click', e => {
   const addBtn = e.target.closest('#addCatBtn');
   if (!addBtn) return;
-  const name = prompt('输入新分类名称（如：🎬 电影）');
-  if (!name || !name.trim()) return;
-  const trimmed = name.trim();
-  const key = 'custom_' + Date.now();
-  const color = CUSTOM_COLORS[Object.keys(customCats).length % CUSTOM_COLORS.length];
-  customCats[key] = { label: trimmed, cls: 'tag-other', color };
-  saveCustomCats(customCats);
-  categoryMap = { ...builtinCategoryMap, ...customCats };
-  selectedCategory = key;
-  renderCategoryGrid();
-  renderTabs();
-  showToast('✅ 分类已添加');
+  showCustomCatPrompt().then(result => {
+    if (!result) return;
+    const key = 'custom_' + Date.now();
+    customCats[key] = { label: result.name, cls: 'tag-other', color: result.color };
+    saveCustomCats(customCats);
+    categoryMap = { ...builtinCategoryMap, ...customCats };
+    selectedCategory = key;
+    renderCategoryGrid();
+    renderTabs();
+    setTimeout(() => showToast('✅ 分类已添加'), 50);
+  });
+});
+
+// 点击空白处退出分类编辑模式
+document.addEventListener('click', e => {
+  if (!catEditMode) return;
+  if (!e.target.closest('.cat-option')) {
+    exitCatEditMode();
+  }
 });
 
 // 默认示例数据（首次加载时使用）
@@ -1019,6 +1330,17 @@ let selectedImage = '';
 let imagePosition = 50; // 0=顶部, 50=居中, 100=底部
 let isFavorite = false;
 
+// 解析图片路径：文件名 → nativeBridge 路径，base64 → 直接返回
+function resolveImageSrc(img) {
+  if (!img) return '';
+  if (img.startsWith('data:')) return img;
+  if (window.nativeBridge) {
+    const path = nativeBridge.getImagePath(img);
+    return path ? 'file://' + path : '';
+  }
+  return img;
+}
+
 // ========== 工具函数 ==========
 function daysBetween(dateStr) {
   const now = new Date();
@@ -1033,12 +1355,112 @@ function formatDate(dateStr) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
+// ========== 自定义分类弹窗 ==========
+(function initCCColors() {
+  const container = document.getElementById('ccColors');
+  CUSTOM_COLORS.forEach((c, i) => {
+    const d = document.createElement('div');
+    d.className = 'cc-color' + (i === 0 ? ' active' : '');
+    d.style.background = c;
+    d.dataset.color = c;
+    d.addEventListener('click', () => {
+      container.querySelectorAll('.cc-color').forEach(x => x.classList.remove('active'));
+      d.classList.add('active');
+    });
+    container.appendChild(d);
+  });
+})();
+
+function showCustomCatPrompt() {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('ccOverlay');
+    const input = document.getElementById('ccInput');
+    const okBtn = document.getElementById('ccOk');
+    const cancelBtn = document.getElementById('ccCancel');
+    overlay.classList.add('show');
+    input.value = '';
+    okBtn.disabled = true;
+    setTimeout(() => input.focus(), 300);
+
+    const validate = () => { okBtn.disabled = !input.value.trim(); };
+    input.addEventListener('input', validate);
+
+    const cleanup = () => {
+      overlay.classList.remove('show');
+      input.removeEventListener('input', validate);
+      input.removeEventListener('keydown', onKey);
+      cancelBtn.removeEventListener('click', onCancel);
+      okBtn.removeEventListener('click', onOk);
+      overlay.removeEventListener('click', onBg);
+    };
+    const onCancel = () => { cleanup(); resolve(null); };
+    const onOk = () => {
+      if (!input.value.trim()) return;
+      const name = input.value.trim();
+      const activeColor = document.querySelector('#ccColors .cc-color.active');
+      const color = activeColor ? activeColor.dataset.color : CUSTOM_COLORS[0];
+      cleanup(); resolve({ name, color });
+    };
+    const onBg = (e) => { if (e.target === overlay) { cleanup(); resolve(null); } };
+    const onKey = (e) => { if (e.key === 'Enter') onOk(); if (e.key === 'Escape') onCancel(); };
+
+    cancelBtn.addEventListener('click', onCancel);
+    okBtn.addEventListener('click', onOk);
+    overlay.addEventListener('click', onBg);
+    input.addEventListener('keydown', onKey);
+  });
+}
+
+function showConfirm(text) {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('dcOverlay');
+    document.getElementById('dcText').textContent = text;
+    overlay.classList.add('show');
+    const cleanup = () => {
+      overlay.classList.remove('show');
+      document.getElementById('dcCancel').removeEventListener('click', onCancel);
+      document.getElementById('dcOk').removeEventListener('click', onOk);
+      overlay.removeEventListener('click', onBg);
+    };
+    const onCancel = () => { cleanup(); resolve(false); };
+    const onOk = () => { cleanup(); resolve(true); };
+    const onBg = (e) => { if (e.target === overlay) { cleanup(); resolve(false); } };
+    document.getElementById('dcCancel').addEventListener('click', onCancel);
+    document.getElementById('dcOk').addEventListener('click', onOk);
+    overlay.addEventListener('click', onBg);
+  });
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if (!t) { console.warn('toast element not found'); return; }
+  console.log('[showToast]', msg);
   t.textContent = msg;
-  t.style.display = 'block';
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.style.display = 'none'; }, 1800);
+  // 移除旧 show 以重置过渡
+  t.classList.remove('show');
+  void t.offsetWidth;
+  t.classList.add('show');
+  t._timer = setTimeout(() => {
+    t.classList.remove('show');
+  }, 1500);
+}
+
+function showAlert(text) {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('alOverlay');
+    document.getElementById('alText').textContent = text;
+    overlay.classList.add('show');
+    const cleanup = () => {
+      overlay.classList.remove('show');
+      document.getElementById('alOk').removeEventListener('click', onOk);
+      overlay.removeEventListener('click', onBg);
+    };
+    const onOk = () => { cleanup(); resolve(); };
+    const onBg = e => { if (e.target === overlay) { cleanup(); resolve(); } };
+    document.getElementById('alOk').addEventListener('click', onOk);
+    overlay.addEventListener('click', onBg);
+  });
 }
 
 function getFilteredData() {
@@ -1091,7 +1513,7 @@ function renderFeatured() {
     const cat = categoryMap[m.category] || categoryMap.other;
     const pos = m.imagePosition != null ? m.imagePosition : 50;
     const imgHtml = m.image
-      ? `<img class="card-img" src="${m.image}" style="object-position:center ${pos}%;" alt="">`
+      ? `<img class="card-img" src="${resolveImageSrc(m.image)}" style="object-position:center ${pos}%;" alt="">`
       : `<div class="card-img" style="background:${coverBg(m.id)};display:flex;align-items:center;justify-content:center;font-size:32px;">${cat.label.charAt(0)}${cat.label.charAt(1)}</div>`;
     return `
       <div class="featured-card" onclick="openDetail(${m.id})">
@@ -1125,7 +1547,7 @@ function renderList() {
     const absDays = Math.abs(days);
     const pos = m.imagePosition != null ? m.imagePosition : 50;
     const imgHtml = m.image
-      ? `<img class="card-cover" src="${m.image}" style="object-position:center ${pos}%;" alt="">`
+      ? `<img class="card-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${pos}%;" alt="">`
       : `<div class="card-cover" style="background:${coverBg(m.id)};display:flex;align-items:center;justify-content:center;font-size:48px;color:rgba(255,255,255,0.6);">${cat.label.slice(0,2)}</div>`;
     const tagsHtml = `
       <span class="tag" style="background:${cat.color}">${cat.label}</span>
@@ -1163,7 +1585,7 @@ function openDetail(id) {
   // 封面
   const detailPos = m.imagePosition != null ? m.imagePosition : 50;
   document.getElementById('detailCover').innerHTML = m.image
-    ? `<img class="detail-cover" src="${m.image}" style="object-position:center ${detailPos}%;" alt="">`
+    ? `<img class="detail-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${detailPos}%;" alt="">`
     : `<div class="detail-cover-placeholder" style="background:${coverBg(m.id)};">${cat.label.slice(0,2)}</div>`;
 
   // 标题
@@ -1200,20 +1622,22 @@ document.getElementById('detailModal').addEventListener('click', e => {
 });
 
 // 删除纪念日
-document.getElementById('detailDeleteBtn').addEventListener('click', () => {
+document.getElementById('detailDeleteBtn').addEventListener('click', async () => {
   if (currentDetailId == null) return;
   const m = memorials.find(x => x.id === currentDetailId);
   if (!m) return;
-  if (!confirm(`确定删除「${m.title}」吗？`)) return;
+  const confirmed = await showConfirm(`确定要删除「${m.title}」吗？`);
+  if (!confirmed) return;
 
-    memorials = memorials.filter(x => x.id !== currentDetailId);
+  if (m.image && !m.image.startsWith('data:') && window.nativeBridge) { try { nativeBridge.deleteImage(m.image); } catch(e) { console.warn('deleteImage failed:', e); } }
+  memorials = memorials.filter(x => x.id !== currentDetailId);
   saveData(memorials);
   document.getElementById('detailModal').classList.remove('show');
   document.body.classList.remove('modal-open');
   currentDetailId = null;
   renderFeatured();
   renderList();
-  showToast('🗑️ 已删除');
+  setTimeout(() => showToast('🗑️ 已删除'), 50);
 });
 
 // ========== 事件：分类标签 ==========
@@ -1394,6 +1818,75 @@ renderTabs();
 renderCategoryGrid();
 renderFeatured();
 renderList();
+
+// ========== 键盘检测 ==========
+(function() {
+  const body = document.body;
+  let initialHeight = window.innerHeight;
+  const THRESHOLD = 120; // 键盘弹出的最小高度变化
+
+  // 方案1: visualViewport API (Android WebView 61+)
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      const heightDiff = initialHeight - window.visualViewport.height;
+      // 当输入框获焦时，强制保持 keyboard-open，防止竞态移除
+      const hasInputFocus = document.activeElement &&
+        (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
+      if (heightDiff > THRESHOLD || hasInputFocus) {
+        body.classList.add('keyboard-open');
+      } else {
+        body.classList.remove('keyboard-open');
+      }
+    });
+  }
+
+  // 方案2: focus/blur 兜底
+  document.addEventListener('focusin', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      body.classList.add('keyboard-open');
+    }
+  });
+  document.addEventListener('focusout', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      setTimeout(() => {
+        if (!document.activeElement || 
+            (document.activeElement.tagName !== 'INPUT' && 
+             document.activeElement.tagName !== 'TEXTAREA')) {
+          body.classList.remove('keyboard-open');
+        }
+      }, 100);
+    }
+  });
+
+  // 页面加载时更新基准高度
+  window.addEventListener('load', () => {
+    initialHeight = window.innerHeight;
+  });
+})();
 </script>
+
+<!-- 删除确认弹窗 -->
+<div class="dc-overlay" id="dcOverlay">
+  <div class="dc-box">
+    <div class="dc-icon">🗑️</div>
+    <h4>确认删除</h4>
+    <p id="dcText"></p>
+    <div class="dc-btns">
+      <button class="dc-cancel" id="dcCancel">取消</button>
+      <button class="dc-ok" id="dcOk">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 操作结果弹窗 -->
+<div class="al-overlay" id="alOverlay">
+  <div class="al-box">
+    <div class="al-icon">✅</div>
+    <h4>操作成功</h4>
+    <p id="alText"></p>
+    <button class="al-btn-ok" id="alOk">好的</button>
+  </div>
+</div>
+
 </body>
 </html>
