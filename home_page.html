@@ -541,6 +541,13 @@ textarea.form-input {
 .detail-overlay.show .detail-sheet {
   transform: translateY(0);
 }
+
+/* 防止弹窗打开时页面跳到顶部 */
+.modal-open {
+  position: fixed;
+  width: 100%;
+  top: 0;
+}
 .detail-cover {
   width: 100%;
   height: 220px;
@@ -1084,19 +1091,23 @@ function openDetail(id) {
   }
   document.getElementById('detailInfo').innerHTML = infoHtml;
 
+  document.body.dataset.scrollY = window.scrollY;
+  document.body.classList.add('modal-open');
+  document.body.style.top = -window.scrollY + 'px';
   document.getElementById('detailModal').classList.add('show');
 }
 
 // 关闭详情
-document.getElementById('detailClose').addEventListener('click', () => {
+function closeDetailModal() {
   document.getElementById('detailModal').classList.remove('show');
+  document.body.classList.remove('modal-open');
+  document.body.style.top = '';
+  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
   currentDetailId = null;
-});
+}
+document.getElementById('detailClose').addEventListener('click', closeDetailModal);
 document.getElementById('detailModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('detailModal')) {
-    document.getElementById('detailModal').classList.remove('show');
-    currentDetailId = null;
-  }
+  if (e.target === document.getElementById('detailModal')) closeDetailModal();
 });
 
 // 删除纪念日
@@ -1108,8 +1119,7 @@ document.getElementById('detailDeleteBtn').addEventListener('click', () => {
 
   memorials = memorials.filter(x => x.id !== currentDetailId);
   saveData(memorials);
-  document.getElementById('detailModal').classList.remove('show');
-  currentDetailId = null;
+  closeDetailModal();
   renderFeatured();
   renderList();
   showToast('🗑️ 已删除');

@@ -869,7 +869,7 @@ body.keyboard-open #bottomNav {
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
 }
-.modal-open { overflow: hidden; position: fixed; width: 100%; }
+.modal-open { overflow: hidden; position: fixed; width: 100%; top: 0; }
 
 /* ========== 删除确认弹窗 ========== */
 .dc-overlay {
@@ -1619,20 +1619,26 @@ function openDetail(id) {
   }
   document.getElementById('detailInfo').innerHTML = infoHtml;
 
-  document.getElementById('detailModal').classList.add('show');
+  document.body.dataset.scrollY = window.scrollY;
+  document.body.style.top = -window.scrollY + 'px';
   document.body.classList.add('modal-open');
+  document.getElementById('detailModal').classList.add('show');
 }
 
 // 关闭详情
 document.getElementById('detailClose').addEventListener('click', () => {
   document.getElementById('detailModal').classList.remove('show');
   document.body.classList.remove('modal-open');
+  document.body.style.top = '';
+  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
   currentDetailId = null;
 });
 document.getElementById('detailModal').addEventListener('click', e => {
   if (e.target === document.getElementById('detailModal')) {
     document.getElementById('detailModal').classList.remove('show');
     document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
     currentDetailId = null;
   }
 });
