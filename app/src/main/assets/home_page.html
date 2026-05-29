@@ -1218,9 +1218,16 @@ let catEditTimer = null;
 
 function bindCatLongPress(el) {
   let moved = false;
+  let startX = 0, startY = 0;
   const start = (e) => {
-    if (e.type === 'touchstart') e.preventDefault();
     moved = false;
+    if (e.type === 'touchstart') {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    } else {
+      startX = e.clientX;
+      startY = e.clientY;
+    }
     catLongPressTimer = setTimeout(() => {
       if (moved) return;
       enterCatEditMode();
@@ -1229,8 +1236,15 @@ function bindCatLongPress(el) {
     }, 500);
   };
   const end = () => { clearTimeout(catLongPressTimer); };
-  const move = () => { moved = true; clearTimeout(catLongPressTimer); };
-  el.addEventListener('touchstart', start, { passive: false });
+  const move = (e) => {
+    const cx = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const cy = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+    if (Math.abs(cx - startX) > 12 || Math.abs(cy - startY) > 12) {
+      moved = true;
+      clearTimeout(catLongPressTimer);
+    }
+  };
+  el.addEventListener('touchstart', start, { passive: true });
   el.addEventListener('touchend', end);
   el.addEventListener('touchmove', move, { passive: true });
   el.addEventListener('mousedown', start);
@@ -1244,7 +1258,7 @@ function enterCatEditMode() {
   document.querySelectorAll('.cat-option').forEach(el => el.classList.add('deletable'));
   document.getElementById('editBanner').classList.add('show');
   clearTimeout(catEditTimer);
-  catEditTimer = setTimeout(() => { exitCatEditMode(); }, 3000);
+  catEditTimer = setTimeout(() => { exitCatEditMode(); }, 8000);
 }
 
 function exitCatEditMode() {
