@@ -417,6 +417,9 @@ textarea.form-input {
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 .cat-option .cat-delete {
   position: absolute;
@@ -1216,6 +1219,7 @@ let catEditTimer = null;
 function bindCatLongPress(el) {
   let moved = false;
   const start = (e) => {
+    if (e.type === 'touchstart') e.preventDefault();
     moved = false;
     catLongPressTimer = setTimeout(() => {
       if (moved) return;
@@ -1226,9 +1230,9 @@ function bindCatLongPress(el) {
   };
   const end = () => { clearTimeout(catLongPressTimer); };
   const move = () => { moved = true; clearTimeout(catLongPressTimer); };
-  el.addEventListener('touchstart', start, { passive: true });
+  el.addEventListener('touchstart', start, { passive: false });
   el.addEventListener('touchend', end);
-  el.addEventListener('touchmove', move);
+  el.addEventListener('touchmove', move, { passive: true });
   el.addEventListener('mousedown', start);
   el.addEventListener('mouseup', end);
   el.addEventListener('mouseleave', end);
