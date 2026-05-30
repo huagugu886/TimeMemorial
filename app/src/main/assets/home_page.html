@@ -667,6 +667,11 @@ textarea.form-input {
   height: 220px;
   object-fit: cover;
   border-radius: 24px 24px 0 0;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.detail-cover:active {
+  filter: brightness(0.92);
 }
 .detail-cover-placeholder {
   width: 100%;
@@ -1014,6 +1019,59 @@ body.keyboard-open #bottomNav {
 .cc-ok:disabled {
   opacity: 0.5; cursor: not-allowed;
   box-shadow: none;
+}
+
+/* ========== 详情页封面图全屏查看器 ========== */
+.fullscreen-img-viewer {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.fullscreen-img-viewer.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.fullscreen-img-viewer .fv-img {
+  max-width: 96%;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.4);
+  transform: scale(0.92);
+  transition: transform 0.3s ease;
+}
+.fullscreen-img-viewer.active .fv-img {
+  transform: scale(1);
+}
+.fullscreen-img-viewer .fv-close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 12px) + 12px);
+  right: 16px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.fullscreen-img-viewer .fv-close:active {
+  background: rgba(255,255,255,0.25);
 }
 </style>
 </head>
@@ -1601,7 +1659,7 @@ function openDetail(id) {
   // 封面
   const detailPos = m.imagePosition != null ? m.imagePosition : 50;
   document.getElementById('detailCover').innerHTML = m.image
-    ? `<img class="detail-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${detailPos}%;" alt="">`
+    ? `<img class="detail-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${detailPos}%;" alt="" onclick="openFullscreenViewer(this.src)">`
     : `<div class="detail-cover-placeholder" style="background:${coverBg(m.id)};">${cat.label.slice(0,2)}</div>`;
 
   // 标题
@@ -1892,6 +1950,29 @@ renderList();
   window.addEventListener('load', () => {
     initialHeight = window.innerHeight;
   });
+
+  // 全屏图片查看器
+  window.openFullscreenViewer = function(src) {
+    if (!src) return;
+    const viewer = document.getElementById('fullscreenImgViewer');
+    const img = document.getElementById('fvImg');
+    img.src = src;
+    viewer.classList.add('active');
+  };
+  window.closeFullscreenViewer = function() {
+    const viewer = document.getElementById('fullscreenImgViewer');
+    viewer.classList.remove('active');
+    document.getElementById('fvImg').src = '';
+  };
+  // 延迟绑定，因为 DOM 元素在 script 之后
+  document.addEventListener('DOMContentLoaded', function() {
+    var fvClose = document.getElementById('fvClose');
+    var fvViewer = document.getElementById('fullscreenImgViewer');
+    if (fvClose) fvClose.addEventListener('click', closeFullscreenViewer);
+    if (fvViewer) fvViewer.addEventListener('click', function(e) {
+      if (e.target === this) closeFullscreenViewer();
+    });
+  });
 })();
 </script>
 
@@ -1916,6 +1997,12 @@ renderList();
     <p id="alText"></p>
     <button class="al-btn-ok" id="alOk">好的</button>
   </div>
+</div>
+
+<!-- 全屏图片查看器 -->
+<div class="fullscreen-img-viewer" id="fullscreenImgViewer">
+  <button class="fv-close" id="fvClose">✕</button>
+  <img class="fv-img" id="fvImg" src="">
 </div>
 
 </body>
