@@ -1705,7 +1705,9 @@ document.getElementById('fabBtn').addEventListener('click', () => {
     document.getElementById('previewContainer').classList.remove('show');
     document.getElementById('uploadArea').style.display = '';
     document.getElementById('favToggle').classList.remove('on');
+    document.body.dataset.scrollY = window.scrollY;
     document.body.classList.add('modal-open');
+    document.body.style.top = -window.scrollY + 'px';
     addModal.classList.add('show');
   }
 });
@@ -1713,11 +1715,17 @@ document.getElementById('fabBtn').addEventListener('click', () => {
 // ========== 事件：关闭弹窗 ==========
 document.getElementById('closeModal').addEventListener('click', () => {
     document.body.classList.remove('modal-open');
+  document.body.style.top = '';
   addModal.classList.remove('show');
+  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
 });
 addModal.addEventListener('click', e => {
     document.body.classList.remove('modal-open');
-  if (e.target === addModal) addModal.classList.remove('show');
+  document.body.style.top = '';
+  if (e.target === addModal) {
+    addModal.classList.remove('show');
+    window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+  }
 });
 
 // ========== 事件：选择分类 ==========
