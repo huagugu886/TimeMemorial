@@ -24,6 +24,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.timememorial.app.R
 
 class HomeFragment : Fragment() {
 
