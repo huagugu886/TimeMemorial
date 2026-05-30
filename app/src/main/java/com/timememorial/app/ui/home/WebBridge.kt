@@ -15,7 +15,7 @@ import java.util.UUID
  * 图片：JS 端通过 window.nativeBridge.saveImage(base64) 保存图片
  * IPC：JS 端通过 window.nativeBridge.writeIpcFile/readIpcFile 与 Termux 通信
  */
-class WebBridge(private val context: Context) {
+class WebBridge(private val context: Context, private val onSetBottomNavVisibility: ((Boolean) -> Unit)? = null) {
 
     /** 图片存放目录：app 内部存储/images/ */
     private val imageDir: File
@@ -171,5 +171,11 @@ class WebBridge(private val context: Context) {
         } catch (e: Exception) {
             false
         }
+    }
+
+    /** 控制底部导航栏显示/隐藏（由 JS 在全屏预览时调用） */
+    @JavascriptInterface
+    fun setBottomNavVisibility(visible: Boolean) {
+        onSetBottomNavVisibility?.invoke(visible)
     }
 }

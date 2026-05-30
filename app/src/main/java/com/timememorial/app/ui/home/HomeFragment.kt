@@ -125,7 +125,12 @@ class HomeFragment : Fragment() {
             }
 
             // 注册 Native 桥接
-            addJavascriptInterface(WebBridge(requireContext()), "nativeBridge")
+            addJavascriptInterface(WebBridge(requireContext()) { visible ->
+                activity?.runOnUiThread {
+                    activity?.findViewById<View>(R.id.bottom_nav)?.visibility =
+                        if (visible) View.VISIBLE else View.GONE
+                }
+            }, "nativeBridge")
 
             // 注入状态栏高度 CSS 变量，让弹窗正确避让状态栏
             webViewClient = object : WebViewClient() {

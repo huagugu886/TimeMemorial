@@ -1958,11 +1958,13 @@ renderList();
     const img = document.getElementById('fvImg');
     img.src = src;
     viewer.classList.add('active');
+    try { window.nativeBridge.setBottomNavVisibility(false); } catch(e) {}
   };
   window.closeFullscreenViewer = function() {
     const viewer = document.getElementById('fullscreenImgViewer');
     viewer.classList.remove('active');
     document.getElementById('fvImg').src = '';
+    try { window.nativeBridge.setBottomNavVisibility(true); } catch(e) {}
   };
   // 延迟绑定，因为 DOM 元素在 script 之后
   document.addEventListener('DOMContentLoaded', function() {
