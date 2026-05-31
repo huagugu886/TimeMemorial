@@ -167,14 +167,16 @@ body {
 /* 事件圆点 */
 .dots {
   display: flex;
+  justify-content: center;
   gap: 3px;
   margin-top: 2px;
-  height: 6px;
+  height: 7px;
 }
 .dot {
-  width: 5px; height: 5px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   animation: dotPop 0.3s ease-out;
+  box-shadow: 0 0 3px rgba(0,0,0,0.15);
 }
 @keyframes dotPop {
   0% { transform: scale(0); }
@@ -626,6 +628,10 @@ const CATEGORY_EMOJI = {
   birthday: '🎂', love: '💕', memorial: '🕊️', work: '💼', travel: '✈️',
   festival: '🎉', anniversary: '💍', other: '📌'
 };
+const CATEGORY_COLOR = {
+  birthday: '#FF6B6B', love: '#FF85A2', memorial: '#A78BFA', work: '#60A5FA',
+  travel: '#34D399', festival: '#FBBF24', anniversary: '#F472B6', other: '#6C63FF'
+};
 let events = [];
 try {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -636,7 +642,8 @@ try {
         date: m.date,
         title: m.title || '纪念日',
         emoji: m.emoji || CATEGORY_EMOJI[m.category] || '📌',
-        category: m.category || 'other'
+        category: m.category || 'other',
+        color: m.color || CATEGORY_COLOR[m.category || 'other'] || '#6C63FF'
       }));
     }
   }
@@ -796,7 +803,7 @@ function renderEvents() {
       }
 
       html += `
-        <div class="event-card" onclick="openDetail(${ev.id})">
+        <div class="event-card" onclick="openDetail(${events.indexOf(ev)})">
           <div class="event-emoji" style="background:${ev.color}18">${ev.emoji}</div>
           <div class="event-info">
             <div class="event-title">${ev.title}</div>
@@ -842,8 +849,8 @@ function updateTitle() {
 }
 
 // ===== 详情弹窗 =====
-function openDetail(eventId) {
-  const ev = events.find(e => e.id === eventId);
+function openDetail(eventIndex) {
+  const ev = events[eventIndex];
   if (!ev) return;
 
   const refDate = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}`;
