@@ -679,9 +679,20 @@ function getDaysBetween(dateStr, targetDate) {
   return Math.round((d2 - d1) / 86400000);
 }
 
+// 解析日期字符串，避免 UTC 时区偏移问题
+function parseLocalDate(dateStr) {
+  const parts = dateStr.split('-');
+  return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+}
+
+// 判断是否为单次事件（旅行等，不需要周年倒计时）
+function isSingleEvent(ev) {
+  return ev.category === 'travel';
+}
+
 function getNextAnniversaryDate(dateStr, refDate) {
-  const evDate = new Date(dateStr);
-  const ref = new Date(refDate);
+  const evDate = parseLocalDate(dateStr);
+  const ref = parseLocalDate(refDate);
   let next = new Date(ref.getFullYear(), evDate.getMonth(), evDate.getDate());
   if (next < ref) next.setFullYear(next.getFullYear() + 1);
   return next;
@@ -784,8 +795,16 @@ function renderEvents() {
   } else {
     evts.forEach(ev => {
       const refDate = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}`;
-      const nextDate = getNextAnniversaryDate(ev.date, refDate);
-      const diff = getDaysBetween(refDate, nextDate.toISOString().slice(0,10));
+      const single = isSingleEvent(ev);
+      let diff;
+      if (single) {
+        // 单次事件：直接计算距离原日期的天数差
+        diff = getDaysBetween(ev.date, refDate);
+      } else {
+        // 周年事件：计算到下一个纪念日的天数
+        const nextDate = getNextAnniversaryDate(ev.date, refDate);
+        diff = getDaysBetween(refDate, nextDate.toISOString().slice(0,10));
+      }
 
       let countdownClass, numText, labelText;
       if (diff === 0) {
@@ -795,11 +814,11 @@ function renderEvents() {
       } else if (diff > 0) {
         countdownClass = 'countdown-future';
         numText = diff;
-        labelText = '天后';
+        labelText = single ? '天前' : '天后';
       } else {
         countdownClass = 'countdown-past';
         numText = Math.abs(diff);
-        labelText = '天前';
+        labelText = single ? '天后' : '天前';
       }
 
       html += `
@@ -854,10 +873,18 @@ function openDetail(eventIndex) {
   if (!ev) return;
 
   const refDate = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}`;
-  const nextDate = getNextAnniversaryDate(ev.date, refDate);
-  const diff = getDaysBetween(refDate, nextDate.toISOString().slice(0,10));
+  const single = isSingleEvent(ev);
+  let diff, nextDate;
+  if (single) {
+    // 单次事件：直接计算距离原日期的天数差
+    diff = getDaysBetween(ev.date, refDate);
+    nextDate = parseLocalDate(ev.date);
+  } else {
+    nextDate = getNextAnniversaryDate(ev.date, refDate);
+    diff = getDaysBetween(refDate, nextDate.toISOString().slice(0,10));
+  }
   const absDiff = Math.abs(diff);
-  const isPast = diff < 0;
+  const isPast = diff > 0; // 单次事件：diff>0 表示已过去
   const isTodayFlag = diff === 0;
   const nextWeekday = WEEKDAYS[nextDate.getDay()];
 
