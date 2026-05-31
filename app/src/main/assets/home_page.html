@@ -1948,6 +1948,9 @@ const previewContainer = document.getElementById('previewContainer');
 const previewImg = document.getElementById('previewImg');
 const uploadArea = document.getElementById('uploadArea');
 
+// 点击上传区域 → 弹出文件选择器
+uploadArea.addEventListener('click', () => imageInput.click());
+
 imageInput.addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
