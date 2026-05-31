@@ -1806,6 +1806,11 @@ function openAddModalForEdit(m) {
   if (selectedImage) {
     document.getElementById('previewContainer').classList.add('show');
     document.getElementById('uploadArea').style.display = 'none';
+    // 设置预览容器中的图片
+    const previewImgEl = document.getElementById('previewImg');
+    if (previewImgEl) {
+      previewImgEl.src = resolveImageSrc(selectedImage);
+    }
     const previewImg = document.getElementById('positionPreviewImg');
     if (previewImg) {
       previewImg.src = resolveImageSrc(selectedImage);
