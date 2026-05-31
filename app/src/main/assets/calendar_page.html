@@ -811,8 +811,14 @@ function renderEvents() {
         diff = getDaysBetween(refDate, formatDateLocal(nextDate));
       }
 
+      // 用真正的今天判断，而不是用户选中的日期（refDate）
+      const _nowCard = new Date();
+      const realTodayCard = `${_nowCard.getFullYear()}-${String(_nowCard.getMonth()+1).padStart(2,'0')}-${String(_nowCard.getDate()).padStart(2,'0')}`;
+      const nextDateCard = single ? ev.date : formatDateLocal(getNextAnniversaryDate(ev.date, refDate));
+      const isTodayCard = nextDateCard === realTodayCard;
+
       let countdownClass, numText, labelText;
-      if (diff === 0) {
+      if (isTodayCard) {
         countdownClass = 'countdown-today';
         numText = '🎉';
         labelText = '就是今天';
@@ -890,7 +896,10 @@ function openDetail(eventIndex) {
   }
   const absDiff = Math.abs(diff);
   const isPast = single && diff > 0;
-  const isTodayFlag = diff === 0;
+  // 用真正的今天判断，而不是用户选中的日期（refDate）
+  const _now = new Date();
+  const realToday = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
+  const isTodayFlag = formatDateLocal(nextDate) === realToday;
   const nextWeekday = WEEKDAYS[nextDate.getDay()];
 
   document.getElementById('detailEmoji').textContent = ev.emoji;
