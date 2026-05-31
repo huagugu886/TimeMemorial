@@ -905,7 +905,7 @@ function openDetail(eventIndex) {
     diff = getDaysBetween(realToday, formatDateLocal(nextDate));
   }
   const absDiff = Math.abs(diff);
-  const isPast = single && diff > 0;
+  const isPast = single && diff < 0;
   const isTodayFlag = formatDateLocal(nextDate) === realToday;
   const nextWeekday = WEEKDAYS[nextDate.getDay()];
 
