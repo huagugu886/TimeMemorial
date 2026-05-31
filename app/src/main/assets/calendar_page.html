@@ -662,18 +662,17 @@ function getDaysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
 function getFirstDayOfMonth(y, m) { return new Date(y, m, 1).getDay(); }
 
 function getEventsForDate(y, m, d) {
-  const mm = String(m + 1).padStart(2, '0');
-  const dd = String(d).padStart(2, '0');
-  const dateStr = `${y}-${mm}-${dd}`;
   return events.filter(ev => {
-    const evDate = new Date(ev.date);
-    return evDate.getMonth() === m && evDate.getDate() === d;
+    const parts = ev.date.split('-');
+    const evMonth = parseInt(parts[parts.length - 2]) - 1;
+    const evDay = parseInt(parts[parts.length - 1]);
+    return evMonth === m && evDay === d;
   });
 }
 
 function getDaysBetween(dateStr, targetDate) {
-  const d1 = new Date(dateStr);
-  const d2 = new Date(targetDate);
+  const d1 = parseLocalDate(dateStr);
+  const d2 = parseLocalDate(targetDate);
   d1.setHours(0,0,0,0);
   d2.setHours(0,0,0,0);
   return Math.round((d2 - d1) / 86400000);
@@ -682,6 +681,9 @@ function getDaysBetween(dateStr, targetDate) {
 // 解析日期字符串，避免 UTC 时区偏移问题
 function parseLocalDate(dateStr) {
   const parts = dateStr.split('-');
+  if (parts.length === 2) {
+    return new Date(today.getFullYear(), parseInt(parts[0]) - 1, parseInt(parts[1]));
+  }
   return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
 }
 
@@ -704,8 +706,11 @@ function getNextAnniversaryDate(dateStr, refDate) {
 }
 
 function formatDateFull(dateStr) {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+  const parts = dateStr.split('-');
+  const month = parseInt(parts[parts.length - 2]);
+  const day = parseInt(parts[parts.length - 1]);
+  const year = parts.length === 3 ? parts[0] : today.getFullYear();
+  return `${year}年${month}月${day}日`;
 }
 
 function isSameDay(y, m, d) {
@@ -800,21 +805,21 @@ function renderEvents() {
   } else {
     evts.forEach(ev => {
       const refDate = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}`;
+      const _nowCard = new Date();
+      const realTodayCard = `${_nowCard.getFullYear()}-${String(_nowCard.getMonth()+1).padStart(2,'0')}-${String(_nowCard.getDate()).padStart(2,'0')}`;
       const single = isSingleEvent(ev);
       let diff;
       if (single) {
         // 单次事件：直接计算距离原日期的天数差
         diff = getDaysBetween(ev.date, refDate);
       } else {
-        // 周年事件：计算到下一个纪念日的天数
-        const nextDate = getNextAnniversaryDate(ev.date, refDate);
-        diff = getDaysBetween(refDate, formatDateLocal(nextDate));
+        // 周年事件：始终从今天计算到下一个纪念日
+        const nextDate = getNextAnniversaryDate(ev.date, realTodayCard);
+        diff = getDaysBetween(realTodayCard, formatDateLocal(nextDate));
       }
 
-      // 用真正的今天判断，而不是用户选中的日期（refDate）
-      const _nowCard = new Date();
-      const realTodayCard = `${_nowCard.getFullYear()}-${String(_nowCard.getMonth()+1).padStart(2,'0')}-${String(_nowCard.getDate()).padStart(2,'0')}`;
-      const nextDateCard = single ? ev.date : formatDateLocal(getNextAnniversaryDate(ev.date, refDate));
+      // 周年事件的下一个纪念日也基于今天计算
+      const nextDateCard = single ? ev.date : formatDateLocal(getNextAnniversaryDate(ev.date, realTodayCard));
       const isTodayCard = nextDateCard === realTodayCard;
 
       let countdownClass, numText, labelText;
@@ -884,6 +889,8 @@ function openDetail(eventIndex) {
   if (!ev) return;
 
   const refDate = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}`;
+  const _now = new Date();
+  const realToday = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
   const single = isSingleEvent(ev);
   let diff, nextDate;
   if (single) {
@@ -891,14 +898,12 @@ function openDetail(eventIndex) {
     diff = getDaysBetween(ev.date, refDate);
     nextDate = parseLocalDate(ev.date);
   } else {
-    nextDate = getNextAnniversaryDate(ev.date, refDate);
-    diff = getDaysBetween(refDate, formatDateLocal(nextDate));
+    // 周年事件：始终从今天计算到下一个纪念日
+    nextDate = getNextAnniversaryDate(ev.date, realToday);
+    diff = getDaysBetween(realToday, formatDateLocal(nextDate));
   }
   const absDiff = Math.abs(diff);
   const isPast = single && diff > 0;
-  // 用真正的今天判断，而不是用户选中的日期（refDate）
-  const _now = new Date();
-  const realToday = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
   const isTodayFlag = formatDateLocal(nextDate) === realToday;
   const nextWeekday = WEEKDAYS[nextDate.getDay()];
 
