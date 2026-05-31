@@ -761,12 +761,10 @@ function renderCalendar() {
       if (evts.length > 0) {
         const dots = document.createElement('span');
         dots.className = 'dots';
-        evts.slice(0, 3).forEach(ev => {
-          const dot = document.createElement('span');
-          dot.className = 'dot';
-          dot.style.background = ev.color;
-          dots.appendChild(dot);
-        });
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.style.background = evts[0].color;
+        dots.appendChild(dot);
         cell.appendChild(dots);
       }
       cell.addEventListener('click', () => {
@@ -810,8 +808,8 @@ function renderEvents() {
       const single = isSingleEvent(ev);
       let diff;
       if (single) {
-        // 单次事件：直接计算距离原日期的天数差
-        diff = getDaysBetween(ev.date, refDate);
+        // 单次事件：始终基于今天计算距离原日期的天数差
+        diff = getDaysBetween(ev.date, realTodayCard);
       } else {
         // 周年事件：始终从今天计算到下一个纪念日
         const nextDate = getNextAnniversaryDate(ev.date, realTodayCard);
@@ -898,8 +896,8 @@ function openDetail(eventIndex) {
   const single = isSingleEvent(ev);
   let diff, nextDate;
   if (single) {
-    // 单次事件：直接计算距离原日期的天数差
-    diff = getDaysBetween(ev.date, refDate);
+    // 单次事件：始终基于今天计算距离原日期的天数差
+    diff = getDaysBetween(ev.date, realToday);
     nextDate = parseLocalDate(ev.date);
   } else {
     // 周年事件：始终从今天计算到下一个纪念日
