@@ -808,8 +808,8 @@ function renderEvents() {
       const single = isSingleEvent(ev);
       let diff;
       if (single) {
-        // 单次事件：始终基于今天计算距离原日期的天数差
-        diff = getDaysBetween(ev.date, realTodayCard);
+        // 单次事件：始终基于今天计算距离原日期的天数差（过去为负）
+        diff = getDaysBetween(realTodayCard, ev.date);
       } else {
         // 周年事件：始终从今天计算到下一个纪念日
         const nextDate = getNextAnniversaryDate(ev.date, realTodayCard);
@@ -896,8 +896,8 @@ function openDetail(eventIndex) {
   const single = isSingleEvent(ev);
   let diff, nextDate;
   if (single) {
-    // 单次事件：始终基于今天计算距离原日期的天数差
-    diff = getDaysBetween(ev.date, realToday);
+    // 单次事件：始终基于今天计算距离原日期的天数差（过去为负）
+    diff = getDaysBetween(realToday, ev.date);
     nextDate = parseLocalDate(ev.date);
   } else {
     // 周年事件：始终从今天计算到下一个纪念日
