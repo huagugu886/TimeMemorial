@@ -620,8 +620,27 @@ body {
 </div>
 
 <script>
-// ===== 示例事件数据 =====
-const events = [];
+// ===== 从首页 localStorage 加载纪念日数据 =====
+const STORAGE_KEY = 'time_memorial_data';
+const CATEGORY_EMOJI = {
+  birthday: '🎂', love: '💕', memorial: '🕊️', work: '💼', travel: '✈️',
+  festival: '🎉', anniversary: '💍', other: '📌'
+};
+let events = [];
+try {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    const memorials = JSON.parse(raw);
+    if (Array.isArray(memorials)) {
+      events = memorials.map(m => ({
+        date: m.date,
+        title: m.title || '纪念日',
+        emoji: m.emoji || CATEGORY_EMOJI[m.category] || '📌',
+        category: m.category || 'other'
+      }));
+    }
+  }
+} catch(e) { console.warn('加载纪念日数据失败:', e); }
 
 const WEEKDAYS = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
 
