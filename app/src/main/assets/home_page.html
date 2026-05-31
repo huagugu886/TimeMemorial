@@ -1388,6 +1388,7 @@ let selectedCategory = 'love';
 let selectedImage = '';
 let imagePosition = 50; // 0=顶部, 50=居中, 100=底部
 let isFavorite = false;
+let editingId = null; // 编辑模式：非null时为编辑已有纪念日
 
 // 解析图片路径：文件名 → nativeBridge 路径，base64 → 直接返回
 function resolveImageSrc(img) {
@@ -1783,6 +1784,56 @@ document.getElementById('detailEditBtn').addEventListener('click', () => {
     openAddModalForEdit(m);
   }
 });
+
+// ========== 编辑模式：复用添加弹窗预填数据 ==========
+function openAddModalForEdit(m) {
+  editingId = m.id;
+  const addModal = document.getElementById('addModal');
+  document.getElementById('titleInput').value = m.title || '';
+  document.getElementById('dateInput').value = m.date || '';
+  document.getElementById('descInput').value = m.desc || '';
+  selectedCategory = m.category || 'love';
+  selectedImage = m.image || '';
+  imagePosition = m.imagePosition || 50;
+  isFavorite = !!m.favorite;
+
+  // 更新分类高亮
+  document.querySelectorAll('.cat-option').forEach(c => {
+    c.classList.toggle('active', c.dataset.cat === selectedCategory);
+  });
+
+  // 图片预览
+  if (selectedImage) {
+    document.getElementById('previewContainer').classList.add('show');
+    document.getElementById('uploadArea').style.display = 'none';
+    const previewImg = document.getElementById('positionPreviewImg');
+    if (previewImg) {
+      previewImg.src = resolveImageSrc(selectedImage);
+      previewImg.style.objectPosition = `center ${100 - imagePosition}%`;
+    }
+    if (document.getElementById('positionSlider')) {
+      document.getElementById('positionSlider').value = imagePosition;
+    }
+  } else {
+    document.getElementById('previewContainer').classList.remove('show');
+    document.getElementById('uploadArea').style.display = '';
+  }
+
+  // 收藏开关
+  document.getElementById('favToggle').classList.toggle('on', isFavorite);
+
+  // 更新弹窗标题和按钮
+  const modalTitle = addModal.querySelector('.modal-title');
+  if (modalTitle) modalTitle.textContent = '✏️ 编辑纪念日';
+  document.getElementById('submitBtn').textContent = '更新纪念日';
+
+  // 打开弹窗
+  document.body.dataset.scrollY = window.scrollY;
+  document.body.classList.add('modal-open');
+  document.body.style.top = `-${window.scrollY}px`;
+  addModal.classList.add('show');
+}
+
 document.getElementById('detailModal').addEventListener('click', e => {
   if (e.target === document.getElementById('detailModal')) {
     document.getElementById('detailModal').classList.remove('show');
@@ -1842,6 +1893,10 @@ document.getElementById('fabBtn').addEventListener('click', () => {
   } else {
     // 降级方案：如果不在 Android 环境，打开内置弹窗
     const addModal = document.getElementById('addModal');
+    editingId = null;
+    const modalTitle = addModal.querySelector('.modal-title');
+    if (modalTitle) modalTitle.textContent = '✨ 添加纪念日';
+    document.getElementById('submitBtn').textContent = '保存纪念日';
     document.getElementById('titleInput').value = '';
     document.getElementById('dateInput').value = new Date().toISOString().slice(0, 10);
     document.getElementById('descInput').value = '';
@@ -1972,25 +2027,48 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     return;
   }
 
-  const newItem = {
-    id: Date.now(),
-    title,
-    date,
-    desc,
-    category: selectedCategory,
-    image: selectedImage,
-    imagePosition: imagePosition,
-    favorite: isFavorite
-  };
-
-  memorials.unshift(newItem);
+  let toastMsg;
+  if (editingId) {
+    // 编辑模式：更新已有纪念日
+    const idx = memorials.findIndex(x => x.id === editingId);
+    if (idx !== -1) {
+      const oldImage = memorials[idx].image;
+      memorials[idx].title = title;
+      memorials[idx].date = date;
+      memorials[idx].desc = desc;
+      memorials[idx].category = selectedCategory;
+      memorials[idx].image = selectedImage;
+      memorials[idx].imagePosition = imagePosition;
+      memorials[idx].favorite = isFavorite;
+      // 清理旧图片（如果是文件名且已更换）
+      if (oldImage && oldImage !== selectedImage && !oldImage.startsWith('data:') && window.nativeBridge) {
+        try { window.nativeBridge.deleteImage(oldImage); } catch(e) {}
+      }
+    }
+    toastMsg = '✏️ 已更新';
+    editingId = null;
+  } else {
+    // 新增模式
+    const newItem = {
+      id: Date.now(),
+      title,
+      date,
+      desc,
+      category: selectedCategory,
+      image: selectedImage,
+      imagePosition: imagePosition,
+      favorite: isFavorite
+    };
+    memorials.unshift(newItem);
+    toastMsg = '✅ 添加成功！';
+  }
   saveData(memorials);
 
   document.body.classList.remove('modal-open');
   addModal.classList.remove('show');
   renderFeatured();
   renderList();
-  showToast('✅ 添加成功！');
+  showToast(toastMsg);
 });
 
 // ========== 初始化 ==========
