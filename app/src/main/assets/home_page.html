@@ -1415,6 +1415,32 @@ function formatDate(dateStr) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
+function isBirthday(m) {
+  return m.category === 'birthday' || (m.tags && m.tags.includes('生日')) || (m.title && m.title.includes('生日'));
+}
+
+function daysUntilNextBirthday(dateStr) {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const birth = new Date(dateStr);
+  const thisYear = new Date(now.getFullYear(), birth.getMonth(), birth.getDate());
+  thisYear.setHours(0,0,0,0);
+  if (thisYear < now) {
+    thisYear.setFullYear(thisYear.getFullYear() + 1);
+  }
+  return Math.floor((thisYear - now) / (1000 * 60 * 60 * 24));
+}
+
+function getAge(dateStr) {
+  const now = new Date();
+  const birth = new Date(dateStr);
+  let age = now.getFullYear() - birth.getFullYear();
+  if (now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
 // ========== 自定义分类弹窗 ==========
 (function initCCColors() {
   const container = document.getElementById('ccColors');
@@ -1581,7 +1607,7 @@ function renderFeatured() {
         <div class="card-info">
           <span class="card-tag" style="background:${cat.color}">${cat.label}</span>
           <div class="card-title">${m.title}</div>
-          <div class="card-date">${formatDate(m.date)} · ${Math.abs(daysBetween(m.date))}天</div>
+          <div class="card-date">${isBirthday(m) ? '🎂 还有' + daysUntilNextBirthday(m.date) + '天过生日' : formatDate(m.date) + ' · ' + Math.abs(daysBetween(m.date)) + '天'}</div>
         </div>
       </div>`;
   }).join('');
@@ -1603,8 +1629,8 @@ function renderList() {
   container.innerHTML = list.map(m => {
     const cat = categoryMap[m.category] || categoryMap.other;
     const days = daysBetween(m.date);
-    const daysLabel = days >= 0 ? '天前' : '天后';
-    const absDays = Math.abs(days);
+    const daysLabel = isBirthday(m) ? '🎂 还有' + daysUntilNextBirthday(m.date) + '天' : (days >= 0 ? '天前' : '天后');
+    const absDays = isBirthday(m) ? daysUntilNextBirthday(m.date) : Math.abs(days);
     const pos = m.imagePosition != null ? m.imagePosition : 50;
     const imgHtml = m.image
       ? `<img class="card-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${pos}%;" alt="">`
@@ -1724,7 +1750,11 @@ function openDetail(id) {
     infoHtml += '</span></div>';
   }
 
-  infoHtml += '<div class="detail-row"><span class="label">📊 天数</span><span class="value">' + absDays + '天（共' + totalDays + '天）</span></div>';
+  if (isBirthday(m)) {
+    infoHtml += '<div class="detail-row"><span class="label">🎂 下一个生日</span><span class="value">' + daysUntilNextBirthday(m.date) + '天后</span></div>';
+  } else {
+    infoHtml += '<div class="detail-row"><span class="label">📊 天数</span><span class="value">' + absDays + '天（共' + totalDays + '天）</span></div>';
+  }
 
   // 下一个整百/整千天纪念日
   const nextMilestone = Math.ceil(totalDays / 100) * 100;
