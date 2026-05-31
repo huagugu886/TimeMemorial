@@ -1953,8 +1953,10 @@ const previewContainer = document.getElementById('previewContainer');
 const previewImg = document.getElementById('previewImg');
 const uploadArea = document.getElementById('uploadArea');
 
-// 点击上传区域 → 弹出文件选择器
-uploadArea.addEventListener('click', () => imageInput.click());
+// 点击上传区域 → 弹出文件选择器（排除 input 自身，防止双重触发）
+uploadArea.addEventListener('click', (e) => {
+  if (e.target !== imageInput) imageInput.click();
+});
 
 imageInput.addEventListener('change', e => {
   const file = e.target.files[0];
