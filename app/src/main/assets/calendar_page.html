@@ -830,11 +830,15 @@ function renderEvents() {
       } else if (diff > 0) {
         countdownClass = 'countdown-future';
         numText = diff;
-        labelText = single ? '天前' : '天后';
+        labelText = single ? '天后' : '天后';
+      } else if (diff === 0) {
+        countdownClass = 'countdown-today';
+        numText = '🎉';
+        labelText = single ? '就是今天' : '就是今天';
       } else {
         countdownClass = 'countdown-past';
         numText = Math.abs(diff);
-        labelText = single ? '天后' : '天前';
+        labelText = single ? '天前' : '天前';
       }
 
       html += `
