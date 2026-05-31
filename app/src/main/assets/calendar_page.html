@@ -685,6 +685,11 @@ function parseLocalDate(dateStr) {
   return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
 }
 
+// 将 Date 对象格式化为本地日期字符串 YYYY-MM-DD（避免 toISOString 的 UTC 偏移）
+function formatDateLocal(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
 // 判断是否为单次事件（旅行等，不需要周年倒计时）
 function isSingleEvent(ev) {
   return ev.category === 'travel';
@@ -803,7 +808,7 @@ function renderEvents() {
       } else {
         // 周年事件：计算到下一个纪念日的天数
         const nextDate = getNextAnniversaryDate(ev.date, refDate);
-        diff = getDaysBetween(refDate, nextDate.toISOString().slice(0,10));
+        diff = getDaysBetween(refDate, formatDateLocal(nextDate));
       }
 
       let countdownClass, numText, labelText;
@@ -881,10 +886,10 @@ function openDetail(eventIndex) {
     nextDate = parseLocalDate(ev.date);
   } else {
     nextDate = getNextAnniversaryDate(ev.date, refDate);
-    diff = getDaysBetween(refDate, nextDate.toISOString().slice(0,10));
+    diff = getDaysBetween(refDate, formatDateLocal(nextDate));
   }
   const absDiff = Math.abs(diff);
-  const isPast = diff > 0; // 单次事件：diff>0 表示已过去
+  const isPast = single && diff > 0;
   const isTodayFlag = diff === 0;
   const nextWeekday = WEEKDAYS[nextDate.getDay()];
 
@@ -915,7 +920,7 @@ function openDetail(eventIndex) {
     labelEl.textContent = '天前';
     labelEl.style.color = 'var(--text-hint)';
     statusEl.textContent = `已过去 ${absDiff} 天`;
-    const nextDiff = getDaysBetween(refDate, nextDate.toISOString().slice(0,10));
+    const nextDiff = getDaysBetween(refDate, formatDateLocal(nextDate));
     statusTextEl.textContent = `距离下一个纪念日还有 ${nextDiff} 天`;
   } else {
     numEl.textContent = diff;
@@ -923,7 +928,7 @@ function openDetail(eventIndex) {
     labelEl.textContent = '天后';
     labelEl.style.color = ev.color;
     statusEl.textContent = `还有 ${diff} 天`;
-    statusTextEl.textContent = `${formatDateFull(nextDate.toISOString().slice(0,10))} · ${nextWeekday}`;
+    statusTextEl.textContent = `${formatDateFull(formatDateLocal(nextDate))} · ${nextWeekday}`;
   }
 
   document.getElementById('detailOverlay').classList.add('show');
