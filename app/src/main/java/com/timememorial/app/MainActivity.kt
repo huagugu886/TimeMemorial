@@ -18,8 +18,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 不再硬编码跟随系统，由应用内主题设置决定
-        // AppCompatDelegate.setDefaultNightMode 由 ThemeManager 统一管理
+        // 深色模式由 TimeMemorialApp.onCreate() 统一读取 SharedPreferences 并设置
+        // 此处不再硬编码 AppCompatDelegate，避免覆盖用户选择
 
         // 沉浸式状态栏：让内容绘制到状态栏下方
         WindowCompat.setDecorFitsSystemWindows(window, false)
