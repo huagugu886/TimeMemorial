@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>TimeMemorial · 日历</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --primary: #6C63FF;
+  --primary-dark: #4A45B5;
+  --primary-light: #EDE9FF;
+  --surface: #F8F6FF;
+  --card: #FFFFFF;
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B7280;
+  --text-hint: #9CA3AF;
+  --divider: #F0F0F5;
+  --today-bg: #6C63FF;
+  --today-text: #FFFFFF;
+  --card-radius: 16px;
+  --shadow: 0 2px 12px rgba(108,99,255,0.08);
+}
+
+body {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", "PingFang SC", sans-serif;
+  background: var(--surface);
+  color: var(--text-primary);
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: 80px;
+}
+
+/* ===== 顶部区域 ===== */
+.header {
+  background: linear-gradient(135deg, #6C63FF 0%, #8B83FF 50%, #A78BFA 100%);
+  padding: 48px 20px 16px;
+  border-radius: 0 0 28px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -30px;
+  width: 180px; height: 180px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: 30px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+
+/* 月份导航 */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 8px;
+}
+.month-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  user-select: none;
+}
+.month-title:active { opacity: 0.7; }
+.nav-btn {
+  width: 34px; height: 34px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+  backdrop-filter: blur(8px);
+}
+.nav-btn:active { background: rgba(255,255,255,0.25); transform: scale(0.9); }
+
+/* 星期表头 */
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0 4px;
+  position: relative;
+  z-index: 1;
+}
+.weekday {
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  padding: 6px 0;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+.weekday:first-child, .weekday:last-child {
+  color: rgba(255,255,255,0.75);
+}
+
+/* ===== 日历网格 ===== */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 6px 4px 12px;
+  position: relative;
+  z-index: 1;
+}
+.day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 12px;
+  min-height: 44px;
+}
+.day-cell:active { transform: scale(0.92); }
+.day-num {
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.other-month .day-num { color: rgba(255,255,255,0.2); }
+.today .day-num {
+  background: #fff;
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(108,99,255,0.3);
+}
+.selected .day-num {
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.6);
+}
+.today.selected .day-num {
+  background: #fff;
+  color: var(--primary);
+  border: 2px solid rgba(255,255,255,0.8);
+}
+.weekend .day-num { color: rgba(255,255,255,0.7); }
+.other-month.weekend .day-num { color: rgba(255,255,255,0.15); }
+
+/* 事件圆点 */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  margin-top: 2px;
+  height: 7px;
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  animation: dotPop 0.3s ease-out;
+  box-shadow: 0 0 3px rgba(0,0,0,0.15);
+}
+@keyframes dotPop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* ===== 白色内容区 ===== */
+.content-area {
+  padding: 20px 16px;
+  margin-top: -4px;
+  min-height: 300px;
+}
+
+/* 选中日期标题 */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.section-date {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.section-weekday {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.section-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* ===== 事件卡片 ===== */
+.event-card {
+  background: var(--card);
+  border-radius: var(--card-radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--divider);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: fadeInUp 0.4s ease-out both;
+}
+.event-card:nth-child(2) { animation-delay: 0.06s; }
+.event-card:nth-child(3) { animation-delay: 0.12s; }
+.event-card:nth-child(4) { animation-delay: 0.18s; }
+.event-card:active { transform: scale(0.97); box-shadow: 0 1px 6px rgba(108,99,255,0.12); }
+
+.event-emoji {
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.event-info { flex: 1; min-width: 0; }
+.event-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.event-category {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.category-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.event-countdown {
+  text-align: right;
+  flex-shrink: 0;
+}
+.countdown-num {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.countdown-label {
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+.countdown-future .countdown-num,
+.countdown-future .countdown-label { color: var(--primary); }
+.countdown-today .countdown-num,
+.countdown-today .countdown-label { color: #F59E0B; }
+.countdown-past .countdown-num,
+.countdown-past .countdown-label { color: var(--text-hint); }
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 0 32px;
+  animation: fadeIn 0.5s ease;
+}
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+.empty-text {
+  font-size: 14px;
+  color: var(--text-hint);
+  line-height: 1.6;
+}
+
+/* ===== 底部导航 ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid var(--divider);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  z-index: 100;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--text-hint);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 4px 12px;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.nav-item.active { color: var(--primary); }
+.nav-icon { font-size: 22px; line-height: 1; }
+
+/* ===== 详情弹窗 ===== */
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.detail-overlay.show { opacity: 1; pointer-events: auto; }
+
+.detail-modal {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  padding: 12px 24px max(24px, env(safe-area-inset-bottom));
+  z-index: 201;
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.detail-overlay.show + .detail-modal,
+.detail-modal.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.detail-handle {
+  width: 36px; height: 4px;
+  background: #E0E0E0;
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.detail-emoji-wrap {
+  width: 80px; height: 80px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 42px;
+}
+.detail-title {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.detail-category {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.detail-category-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+/* 信息行 */
+.detail-info {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 4px 0;
+  margin-bottom: 24px;
+}
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+}
+.detail-row:not(:last-child) {
+  border-bottom: 1px solid var(--divider);
+}
+.detail-row-label {
+  font-size: 13px;
+  color: var(--text-hint);
+}
+.detail-row-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 倒计时大数字 */
+.detail-countdown {
+  text-align: center;
+  margin-bottom: 8px;
+}
+.detail-countdown-num {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+.detail-countdown-label {
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+.detail-status {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.detail-close {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s;
+}
+.detail-close:active { transform: scale(0.97); background: var(--primary-dark); }
+
+/* ===== 动画 ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== 年份选择器 ===== */
+.year-selector {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.year-selector.show { opacity: 1; pointer-events: auto; }
+.year-panel {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 20px;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.year-selector.show .year-panel { transform: scale(1); }
+.year-panel-title {
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.year-cell {
+  padding: 12px 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-primary);
+}
+.year-cell:active { transform: scale(0.93); }
+.year-cell.current {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+}
+.year-cell:hover { background: var(--primary-light); }
+.year-cell.current:hover { background: var(--primary); }
+
+/* 深色模式 */
+body.dark-mode {
+  --surface: #111827;
+  --card: #1F2937;
+  --text-primary: #F9FAFB;
+  --text-secondary: #94A3B8;
+  --text-hint: #6B7280;
+  --divider: #374151;
+  --today-bg: #8B83FF;
+  --today-text: #FFFFFF;
+  --primary-light: #312E81;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+body.dark-mode .header {
+  background: linear-gradient(135deg, #312E81 0%, #4338CA 50%, #6366F1 100%);
+}
+body.dark-mode .event-card:active {
+  background: #2D2D44;
+}
+body.dark-mode .section-count {
+  background: #312E81;
+}
+</style>
+</head>
+<body>
+
+<!-- 顶部 -->
+<div class="header">
+  <div class="month-nav">
+    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+    <span class="month-title" id="monthTitle" onclick="showYearSelector()"></span>
+    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="weekdays">
+    <span class="weekday">日</span>
+    <span class="weekday">一</span>
+    <span class="weekday">二</span>
+    <span class="weekday">三</span>
+    <span class="weekday">四</span>
+    <span class="weekday">五</span>
+    <span class="weekday">六</span>
+  </div>
+  <div class="calendar-grid" id="calendarGrid"></div>
+</div>
+
+<!-- 事件列表 -->
+<div class="content-area" id="contentArea"></div>
+
+<!-- 底部导航 -->
+<div class="bottom-nav">
+  <div class="nav-item" onclick="goToday()">
+    <span class="nav-icon">🏠</span>
+    <span>首页</span>
+  </div>
+  <div class="nav-item active">
+    <span class="nav-icon">📅</span>
+    <span>日历</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">⚙️</span>
+    <span>设置</span>
+  </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)"></div>
+<div class="detail-modal" id="detailModal">
+  <div class="detail-handle"></div>
+  <div class="detail-emoji-wrap" id="detailEmojiWrap">
+    <span id="detailEmoji"></span>
+  </div>
+  <div class="detail-title" id="detailTitle"></div>
+  <div class="detail-category">
+    <span class="detail-category-dot" id="detailCategoryDot"></span>
+    <span id="detailCategoryText"></span>
+  </div>
+  <div class="detail-info">
+    <div class="detail-row">
+      <span class="detail-row-label">📅 日期</span>
+      <span class="detail-row-value" id="detailDate"></span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-row-label">📆 星期</span>
+      <span class="detail-row-value" id="detailWeekday"></span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-row-label">⏱️ 状态</span>
+      <span class="detail-row-value" id="detailStatus"></span>
+    </div>
+  </div>
+  <div class="detail-countdown">
+    <div class="detail-countdown-num" id="detailCountdownNum"></div>
+    <div class="detail-countdown-label" id="detailCountdownLabel"></div>
+  </div>
+  <div class="detail-status" id="detailStatusText"></div>
+  <button class="detail-close" onclick="closeDetailForce()">关闭</button>
+</div>
+
+<!-- 年份选择器 -->
+<div class="year-selector" id="yearSelector" onclick="closeYearSelector(event)">
+  <div class="year-panel">
+    <div class="year-panel-title">选择年份</div>
+    <div class="year-grid" id="yearGrid"></div>
+  </div>
+</div>
+
+<script>
+// ===== 从首页 localStorage 加载纪念日数据 =====
+const STORAGE_KEY = 'time_memorial_data';
+const CATEGORY_EMOJI = {
+  birthday: '🎂', love: '💕', memorial: '🕊️', work: '💼', travel: '✈️',
+  festival: '🎉', anniversary: '💍', other: '📌'
+};
+const CATEGORY_COLOR = {
+  birthday: '#FF6B6B', love: '#FF85A2', memorial: '#A78BFA', work: '#60A5FA',
+  travel: '#34D399', festival: '#FBBF24', anniversary: '#F472B6', other: '#6C63FF'
+};
+let events = [];
+try {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    const memorials = JSON.parse(raw);
+    if (Array.isArray(memorials)) {
+      events = memorials.map(m => ({
+        date: m.date,
+        title: m.title || '纪念日',
+        emoji: m.emoji || CATEGORY_EMOJI[m.category] || '📌',
+        category: m.category || 'other',
+        color: m.color || CATEGORY_COLOR[m.category || 'other'] || '#6C63FF'
+      }));
+    }
+  }
+} catch(e) { console.warn('加载纪念日数据失败:', e); }
+
+const WEEKDAYS = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+
+// ===== 状态 =====
+const today = new Date();
+let currentYear = today.getFullYear();
+let currentMonth = today.getMonth();
+let selectedDay = today.getDate();
+
+// ===== 工具函数 =====
+function getDaysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
+function getFirstDayOfMonth(y, m) { return new Date(y, m, 1).getDay(); }
+
+function getEventsForDate(y, m, d) {
+  return events.filter(ev => {
+    const parts = ev.date.split('-');
+    const evMonth = parseInt(parts[parts.length - 2]) - 1;
+    const evDay = parseInt(parts[parts.length - 1]);
+    return evMonth === m && evDay === d;
+  });
+}
+
+function getDaysBetween(dateStr, targetDate) {
+  const d1 = parseLocalDate(dateStr);
+  const d2 = parseLocalDate(targetDate);
+  d1.setHours(0,0,0,0);
+  d2.setHours(0,0,0,0);
+  return Math.round((d2 - d1) / 86400000);
+}
+
+// 解析日期字符串，避免 UTC 时区偏移问题
+function parseLocalDate(dateStr) {
+  const parts = dateStr.split('-');
+  if (parts.length === 2) {
+    return new Date(today.getFullYear(), parseInt(parts[0]) - 1, parseInt(parts[1]));
+  }
+  return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+}
+
+// 将 Date 对象格式化为本地日期字符串 YYYY-MM-DD（避免 toISOString 的 UTC 偏移）
+function formatDateLocal(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+// 判断是否为单次事件（旅行等，不需要周年倒计时）
+function isSingleEvent(ev) {
+  return ev.category === 'travel';
+}
+
+function getNextAnniversaryDate(dateStr, refDate) {
+  const evDate = parseLocalDate(dateStr);
+  const ref = parseLocalDate(refDate);
+  let next = new Date(ref.getFullYear(), evDate.getMonth(), evDate.getDate());
+  if (next < ref) next.setFullYear(next.getFullYear() + 1);
+  return next;
+}
+
+function formatDateFull(dateStr) {
+  const parts = dateStr.split('-');
+  const month = parseInt(parts[parts.length - 2]);
+  const day = parseInt(parts[parts.length - 1]);
+  const year = parts.length === 3 ? parts[0] : today.getFullYear();
+  return `${year}年${month}月${day}日`;
+}
+
+function isSameDay(y, m, d) {
+  return y === today.getFullYear() && m === today.getMonth() && d === today.getDate();
+}
+
+// ===== 渲染日历 =====
+function renderCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+  const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+  const prevMonthDays = getDaysInMonth(currentYear, currentMonth - 1);
+
+  // 42 格 = 6 行
+  for (let i = 0; i < 42; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+
+    let day, isOtherMonth = false;
+
+    if (i < firstDay) {
+      // 上月
+      day = prevMonthDays - firstDay + i + 1;
+      isOtherMonth = true;
+    } else if (i >= firstDay + daysInMonth) {
+      // 下月
+      day = i - firstDay - daysInMonth + 1;
+      isOtherMonth = true;
+    } else {
+      day = i - firstDay + 1;
+    }
+
+    if (isOtherMonth) cell.classList.add('other-month');
+    if (!isOtherMonth && isSameDay(currentYear, currentMonth, day)) cell.classList.add('today');
+    if (!isOtherMonth && day === selectedDay) cell.classList.add('selected');
+    if (i % 7 === 0 || i % 7 === 6) cell.classList.add('weekend');
+
+    const num = document.createElement('span');
+    num.className = 'day-num';
+    num.textContent = day;
+    cell.appendChild(num);
+
+    // 事件圆点
+    if (!isOtherMonth) {
+      const evts = getEventsForDate(currentYear, currentMonth, day);
+      if (evts.length > 0) {
+        const dots = document.createElement('span');
+        dots.className = 'dots';
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.style.background = evts[0].color;
+        dots.appendChild(dot);
+        cell.appendChild(dots);
+      }
+      cell.addEventListener('click', () => {
+        selectedDay = day;
+        renderCalendar();
+        renderEvents();
+      });
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+// ===== 渲染事件列表 =====
+function renderEvents() {
+  const area = document.getElementById('contentArea');
+  const evts = getEventsForDate(currentYear, currentMonth, selectedDay);
+  const dateObj = new Date(currentYear, currentMonth, selectedDay);
+  const weekday = WEEKDAYS[dateObj.getDay()];
+
+  let html = `
+    <div class="section-header">
+      <span class="section-date">${currentMonth + 1}月${selectedDay}日</span>
+      <span class="section-weekday">${weekday}</span>
+      ${evts.length > 0 ? `<span class="section-count">${evts.length} 个事件</span>` : ''}
+    </div>
+  `;
+
+  if (evts.length === 0) {
+    html += `
+      <div class="empty-state">
+        <div class="empty-icon">🍃</div>
+        <div class="empty-text">这一天还没有纪念日<br>点击 + 添加一个吧</div>
+      </div>
+    `;
+  } else {
+    evts.forEach(ev => {
+      const refDate = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}`;
+      const _nowCard = new Date();
+      const realTodayCard = `${_nowCard.getFullYear()}-${String(_nowCard.getMonth()+1).padStart(2,'0')}-${String(_nowCard.getDate()).padStart(2,'0')}`;
+      const single = isSingleEvent(ev);
+      let diff;
+      if (single) {
+        // 单次事件：始终基于今天计算距离原日期的天数差（过去为负）
+        diff = getDaysBetween(realTodayCard, ev.date);
+      } else {
+        // 周年事件：始终从今天计算到下一个纪念日
+        const nextDate = getNextAnniversaryDate(ev.date, realTodayCard);
+        diff = getDaysBetween(realTodayCard, formatDateLocal(nextDate));
+      }
+
+      // 周年事件的下一个纪念日也基于今天计算
+      const nextDateCard = single ? ev.date : formatDateLocal(getNextAnniversaryDate(ev.date, realTodayCard));
+      const isTodayCard = nextDateCard === realTodayCard;
+
+      let countdownClass, numText, labelText;
+      if (isTodayCard) {
+        countdownClass = 'countdown-today';
+        numText = '🎉';
+        labelText = '就是今天';
+      } else if (diff > 0) {
+        countdownClass = 'countdown-future';
+        numText = diff;
+        labelText = single ? '天后' : '天后';
+      } else if (diff === 0) {
+        countdownClass = 'countdown-today';
+        numText = '🎉';
+        labelText = single ? '就是今天' : '就是今天';
+      } else {
+        countdownClass = 'countdown-past';
+        numText = Math.abs(diff);
+        labelText = single ? '天前' : '天前';
+      }
+
+      html += `
+        <div class="event-card" onclick="openDetail(${events.indexOf(ev)})">
+          <div class="event-emoji" style="background:${ev.color}18">${ev.emoji}</div>
+          <div class="event-info">
+            <div class="event-title">${ev.title}</div>
+            <div class="event-category">
+              <span class="category-dot" style="background:${ev.color}"></span>
+              ${ev.category}
+            </div>
+          </div>
+          <div class="event-countdown ${countdownClass}">
+            <div class="countdown-num">${numText}</div>
+            <div class="countdown-label">${labelText}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  area.innerHTML = html;
+}
+
+// ===== 月份切换 =====
+function changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  selectedDay = 1;
+  updateTitle();
+  renderCalendar();
+  renderEvents();
+}
+
+function goToday() {
+  currentYear = today.getFullYear();
+  currentMonth = today.getMonth();
+  selectedDay = today.getDate();
+  updateTitle();
+  renderCalendar();
+  renderEvents();
+}
+
+function updateTitle() {
+  document.getElementById('monthTitle').textContent = `${currentYear}年${currentMonth + 1}月`;
+}
+
+// ===== 详情弹窗 =====
+function openDetail(eventIndex) {
+  const ev = events[eventIndex];
+  if (!ev) return;
+
+  const refDate = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}`;
+  const _now = new Date();
+  const realToday = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
+  const single = isSingleEvent(ev);
+  let diff, nextDate;
+  if (single) {
+    // 单次事件：始终基于今天计算距离原日期的天数差（过去为负）
+    diff = getDaysBetween(realToday, ev.date);
+    nextDate = parseLocalDate(ev.date);
+  } else {
+    // 周年事件：始终从今天计算到下一个纪念日
+    nextDate = getNextAnniversaryDate(ev.date, realToday);
+    diff = getDaysBetween(realToday, formatDateLocal(nextDate));
+  }
+  const absDiff = Math.abs(diff);
+  const isPast = single && diff < 0;
+  const isTodayFlag = formatDateLocal(nextDate) === realToday;
+  const nextWeekday = WEEKDAYS[nextDate.getDay()];
+
+  document.getElementById('detailEmoji').textContent = ev.emoji;
+  document.getElementById('detailEmojiWrap').style.background = ev.color + '18';
+  document.getElementById('detailTitle').textContent = ev.title;
+  document.getElementById('detailCategoryDot').style.background = ev.color;
+  document.getElementById('detailCategoryText').textContent = ev.category;
+  document.getElementById('detailDate').textContent = formatDateFull(ev.date);
+  document.getElementById('detailWeekday').textContent = nextWeekday;
+
+  const numEl = document.getElementById('detailCountdownNum');
+  const labelEl = document.getElementById('detailCountdownLabel');
+  const statusEl = document.getElementById('detailStatus');
+  const statusTextEl = document.getElementById('detailStatusText');
+
+  if (isTodayFlag) {
+    numEl.textContent = '🎉';
+    numEl.style.color = '#F59E0B';
+    labelEl.textContent = '就是今天！';
+    labelEl.style.color = '#F59E0B';
+    statusEl.textContent = '今天是纪念日 ✨';
+    statusTextEl.textContent = '属于你的特别一天，好好庆祝吧！';
+  } else if (isPast) {
+    const pastDiff = getDaysBetween(formatDateFull(ev.date).replace(/年|月/g,'-').replace('日',''), refDate);
+    numEl.textContent = absDiff;
+    numEl.style.color = 'var(--text-hint)';
+    labelEl.textContent = '天前';
+    labelEl.style.color = 'var(--text-hint)';
+    statusEl.textContent = `已过去 ${absDiff} 天`;
+    const nextDiff = getDaysBetween(refDate, formatDateLocal(nextDate));
+    statusTextEl.textContent = `距离下一个纪念日还有 ${nextDiff} 天`;
+  } else {
+    numEl.textContent = diff;
+    numEl.style.color = ev.color;
+    labelEl.textContent = '天后';
+    labelEl.style.color = ev.color;
+    statusEl.textContent = `还有 ${diff} 天`;
+    statusTextEl.textContent = `${formatDateFull(formatDateLocal(nextDate))} · ${nextWeekday}`;
+  }
+
+  document.getElementById('detailOverlay').classList.add('show');
+  document.getElementById('detailModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail(e) {
+  if (e.target === document.getElementById('detailOverlay')) closeDetailForce();
+}
+function closeDetailForce() {
+  document.getElementById('detailOverlay').classList.remove('show');
+  document.getElementById('detailModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// 滑动关闭
+let touchStartY = 0;
+document.getElementById('detailModal').addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+});
+document.getElementById('detailModal').addEventListener('touchmove', e => {
+  const diff = e.touches[0].clientY - touchStartY;
+  if (diff > 80) closeDetailForce();
+});
+
+// ===== 年份选择器 =====
+function showYearSelector() {
+  const grid = document.getElementById('yearGrid');
+  grid.innerHTML = '';
+  const startYear = currentYear - 6;
+  for (let y = startYear; y <= currentYear + 6; y++) {
+    const cell = document.createElement('div');
+    cell.className = 'year-cell' + (y === currentYear ? ' current' : '');
+    cell.textContent = y;
+    cell.addEventListener('click', () => {
+      currentYear = y;
+      updateTitle();
+      renderCalendar();
+      renderEvents();
+      document.getElementById('yearSelector').classList.remove('show');
+    });
+    grid.appendChild(cell);
+  }
+  document.getElementById('yearSelector').classList.add('show');
+}
+
+function closeYearSelector(e) {
+  if (e.target === document.getElementById('yearSelector')) {
+    document.getElementById('yearSelector').classList.remove('show');
+  }
+}
+
+// ===== 左右滑动切换月份 =====
+let swipeStartX = 0;
+document.querySelector('.header').addEventListener('touchstart', e => {
+  swipeStartX = e.touches[0].clientX;
+});
+document.querySelector('.header').addEventListener('touchend', e => {
+  const diff = e.changedTouches[0].clientX - swipeStartX;
+  if (Math.abs(diff) > 60) {
+    changeMonth(diff > 0 ? -1 : 1);
+  }
+});
+
+// ===== 深色模式（优先读取 settings 手动偏好，否则跟随系统）=====
+(function() {
+  var mql = window.matchMedia('(prefers-color-scheme: dark)');
+  function sync(v) {
+    if (v) document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  }
+  var saved = localStorage.getItem('darkMode');
+  if (saved === 'on') {
+    sync(true);
+  } else if (saved === 'off') {
+    sync(false);
+  } else {
+    sync(mql.matches);
+  }
+  mql.addEventListener('change', function(e) {
+    if (!localStorage.getItem('darkMode')) sync(e.matches);
+  });
+})();
+
+// ===== 初始化 =====
+updateTitle();
+renderCalendar();
+renderEvents();
+</script>
+</body>
+</html>

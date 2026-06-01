@@ -417,6 +417,9 @@ textarea.form-input {
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 .cat-option .cat-delete {
   position: absolute;
@@ -630,147 +633,136 @@ textarea.form-input {
   justify-content: space-between;
   padding: 14px 0;
 }
-/* ========== 详情弹窗 ========== */
+/* ========== 详情弹窗（增强版） ========== */
 .detail-overlay {
-  position: fixed; inset: 0;
+  position: fixed; inset: 0; z-index: 200;
   background: rgba(0,0,0,0.5);
-  z-index: 200;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none;
   transition: opacity 0.3s;
 }
-.detail-overlay.show {
-  opacity: 1;
-  pointer-events: auto;
-}
+.detail-overlay.show { opacity: 1; pointer-events: auto; }
 .detail-sheet {
-  background: var(--card-bg);
+  background: var(--card-bg); width: 100%; max-height: 90vh;
   border-radius: 24px 24px 0 0;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
   transform: translateY(100%);
   transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-  padding-bottom: calc(20px + var(--safe-bottom));
+  padding-bottom: calc(24px + var(--safe-bottom));
 }
-.detail-overlay.show .detail-sheet {
-  transform: translateY(0);
-}
+.detail-overlay.show .detail-sheet { transform: translateY(0); }
+
+/* 封面 */
 .detail-cover {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
+  width: 100%; height: 240px; object-fit: cover; display: block;
   border-radius: 24px 24px 0 0;
+  cursor: pointer; transition: filter 0.2s;
 }
+.detail-cover:active { filter: brightness(0.92); }
 .detail-cover-placeholder {
-  width: 100%;
-  height: 220px;
-  border-radius: 24px 24px 0 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 60px;
-  color: rgba(255,255,255,0.5);
+  width: 100%; height: 240px; display: flex; align-items: center; justify-content: center;
+  border-radius: 24px 24px 0 0; font-size: 72px; color: rgba(255,255,255,0.6);
 }
+
+/* 头部 */
 .detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 20px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 20px 0; gap: 12px;
 }
 .detail-title {
-  font-size: 22px;
-  font-weight: 700;
-  flex: 1;
-  margin-right: 12px;
+  font-size: 22px; font-weight: 700; color: var(--text); flex: 1; line-height: 1.3;
 }
 .detail-close {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: #F3F4F6;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%; background: #F3F4F6;
+  border: none; font-size: 18px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); transition: background 0.2s;
 }
-.detail-info {
-  padding: 16px 20px;
+.detail-close:active { background: #E5E7EB; }
+
+/* 信息区 */
+.detail-info { padding: 16px 20px; }
+
+/* 标签行 */
+.detail-tag-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.detail-tag { padding: 5px 14px; border-radius: 12px; font-size: 12px; color: #fff; font-weight: 600; letter-spacing: 0.3px; }
+
+/* 倒计时区域 */
+.detail-countdown {
+  text-align: center; padding: 20px 0 16px; position: relative;
 }
-.detail-tag-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+.detail-countdown .big-num {
+  font-size: 64px; font-weight: 900; line-height: 1;
+  background: linear-gradient(135deg, var(--primary), #A78BFA);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
-.detail-tag {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  color: #fff;
-  font-weight: 500;
+.detail-countdown .big-unit {
+  font-size: 18px; color: var(--text-secondary); margin-left: 4px; font-weight: 600;
 }
+.detail-countdown .countdown-sub {
+  font-size: 13px; color: var(--text-secondary); margin-top: 6px;
+}
+.detail-countdown.is-today .big-num {
+  font-size: 52px;
+  background: linear-gradient(135deg, #FF6B9D, #FF9F43);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.detail-countdown.is-today .celebration {
+  font-size: 28px; margin-top: 4px; display: block;
+  animation: celebBounce 1.5s ease-in-out infinite;
+}
+@keyframes celebBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.detail-countdown.is-past .big-num {
+  background: linear-gradient(135deg, #9CA3AF, #D1D5DB);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 信息卡片网格 */
+.detail-cards {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px;
+}
+.detail-card {
+  background: #F8F9FA; border-radius: 14px; padding: 12px 10px; text-align: center;
+}
+.detail-card .card-icon { font-size: 20px; margin-bottom: 4px; }
+.detail-card .card-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; }
+.detail-card .card-value { font-size: 13px; color: var(--text); font-weight: 600; }
+
+/* 信息行 */
 .detail-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid #F3F4F6;
-  font-size: 14px;
-  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 10px; padding: 12px 0;
+  border-bottom: 1px solid #F3F4F6; font-size: 14px;
 }
 .detail-row:last-child { border-bottom: none; }
-.detail-row .label { width: 56px; flex-shrink: 0; }
-.detail-row .value { color: var(--text); font-weight: 500; }
+.detail-row .label { width: 70px; flex-shrink: 0; color: var(--text-secondary); }
+.detail-row .value { color: var(--text); font-weight: 500; flex: 1; }
+
+/* 描述框 */
 .detail-desc-box {
-  background: #F8F9FA;
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin: 12px 0;
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
+  background: #F8F9FA; border-radius: 14px; padding: 16px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+  margin-top: 16px; border-left: 3px solid var(--primary);
 }
-.detail-days {
-  text-align: center;
-  padding: 12px 0;
-}
-.detail-days .num {
-  font-size: 48px;
-  font-weight: 800;
-  color: var(--primary);
-}
-.detail-days .unit {
-  font-size: 16px;
-  color: var(--text-secondary);
-  margin-left: 4px;
-}
-.detail-actions {
-  padding: 8px 20px 0;
-  display: flex;
-  gap: 12px;
-}
+
+/* 分割线 */
+.detail-divider { height: 1px; background: #F3F4F6; margin: 4px 0; }
+
+/* 操作按钮 */
+.detail-actions { display: flex; gap: 12px; padding: 12px 20px 0; }
 .btn-edit, .btn-delete {
-  flex: 1;
-  padding: 14px;
-  border: none;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  flex: 1; padding: 14px; border-radius: 14px; border: none;
+  font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.btn-edit {
-  background: rgba(124, 92, 252, 0.1);
-  color: var(--primary);
-}
-.btn-delete {
-  background: #FFF0F0;
-  color: #EF4444;
-}
+.btn-edit { background: rgba(124, 92, 252, 0.1); color: var(--primary); }
+.btn-edit:active { background: rgba(124, 92, 252, 0.2); }
+.btn-delete { background: #FFF0F0; color: #EF4444; }
 .btn-delete:active { background: #FEE2E2; }
 
 .favorite-toggle label {
@@ -844,24 +836,29 @@ body.keyboard-open #bottomNav {
 /* ========== 提示Toast ========== */
 .toast {
   position: fixed;
-  top: 50%;
+  bottom: 100px;
   left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0,0,0,0.75);
+  transform: translateX(-50%) translateY(20px);
+  background: linear-gradient(135deg, #7C5CFC, #A78BFA);
   color: #fff;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-size: 14px;
+  padding: 14px 28px;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   z-index: 999;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 8px 24px rgba(124, 92, 252, 0.35);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
 }
 .toast.show {
   opacity: 1;
   pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
 }
-.modal-open { overflow: hidden; position: fixed; width: 100%; }
+.modal-open { overflow: hidden; position: fixed; width: 100%; top: 0; }
 
 /* ========== 删除确认弹窗 ========== */
 .dc-overlay {
@@ -1007,6 +1004,254 @@ body.keyboard-open #bottomNav {
   opacity: 0.5; cursor: not-allowed;
   box-shadow: none;
 }
+
+/* ========== 详情页封面图全屏查看器 ========== */
+.fullscreen-img-viewer {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.fullscreen-img-viewer.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.fullscreen-img-viewer .fv-img {
+  max-width: 96%;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.4);
+  transform: scale(0.92);
+  transition: transform 0.3s ease;
+}
+.fullscreen-img-viewer.active .fv-img {
+  transform: scale(1);
+}
+.fullscreen-img-viewer .fv-close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 12px) + 12px);
+  right: 16px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.fullscreen-img-viewer .fv-close:active {
+  background: rgba(255,255,255,0.25);
+}
+
+/* ========== 深色模式 ========== */
+body.dark-mode {
+  --bg: #111827;
+  --card-bg: #1F2937;
+  --text: #F9FAFB;
+  --text-secondary: #94A3B8;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+body.dark-mode .header {
+  background: linear-gradient(135deg, #312E81 0%, #4338CA 50%, #6366F1 100%);
+}
+body.dark-mode .search-bar {
+  background: #1F2937;
+  color: #F9FAFB;
+}
+body.dark-mode .search-bar input {
+  background: transparent;
+  color: #F9FAFB;
+}
+body.dark-mode .search-bar input::placeholder {
+  color: #6B7280;
+}
+body.dark-mode .tabs {
+  background: transparent;
+}
+body.dark-mode .tab {
+  background: #1F2937;
+  color: #94A3B8;
+}
+body.dark-mode .tab.active {
+  background: var(--primary);
+  color: #fff;
+}
+body.dark-mode .section-title {
+  color: #F9FAFB;
+}
+body.dark-mode .featured-card {
+  background: #1F2937;
+  color: #F9FAFB;
+}
+body.dark-mode .memorial-card {
+  background: #1F2937;
+  color: #F9FAFB;
+}
+body.dark-mode .memorial-card .memorial-title,
+body.dark-mode .memorial-card .memorial-desc {
+  color: #F9FAFB;
+}
+body.dark-mode .memorial-card .memorial-date,
+body.dark-mode .memorial-card .countdown-label {
+  color: #94A3B8;
+}
+body.dark-mode .empty-state {
+  color: #6B7280;
+}
+body.dark-mode .modal-box {
+  background: #1F2937;
+  color: #F9FAFB;
+}
+body.dark-mode .modal-box h3 {
+  color: #F9FAFB;
+}
+body.dark-mode .form-group label {
+  color: #94A3B8;
+}
+body.dark-mode .form-input,
+body.dark-mode .form-textarea {
+  background: #374151;
+  color: #F9FAFB;
+  border-color: #4B5563;
+}
+body.dark-mode .form-input:focus,
+body.dark-mode .form-textarea:focus {
+  border-color: var(--primary);
+}
+body.dark-mode .cat-option {
+  background: #374151;
+  color: #F9FAFB;
+}
+body.dark-mode .cat-option.active {
+  background: var(--primary);
+  color: #fff;
+}
+body.dark-mode .modal-actions .btn-cancel {
+  background: #374151;
+  color: #94A3B8;
+}
+body.dark-mode .detail-overlay .detail-box {
+  background: #1F2937;
+  color: #F9FAFB;
+}
+body.dark-mode .detail-overlay .detail-title {
+  color: #F9FAFB;
+}
+body.dark-mode .detail-overlay .detail-desc {
+  color: #94A3B8;
+}
+body.dark-mode .detail-overlay .detail-info-label {
+  color: #6B7280;
+}
+body.dark-mode .detail-overlay .detail-info-value {
+  color: #F9FAFB;
+}
+body.dark-mode .detail-overlay .detail-card {
+  background: #374151;
+}
+body.dark-mode .detail-overlay .card-icon {
+  opacity: 0.7;
+}
+body.dark-mode .detail-overlay .card-label {
+  color: #94A3B8;
+}
+body.dark-mode .detail-overlay .card-value {
+  color: #F9FAFB;
+}
+body.dark-mode .detail-overlay .detail-loc {
+  color: #CBD5E1;
+}
+body.dark-mode .detail-overlay .detail-tags .tag {
+  background: #374151;
+  color: #CBD5E1;
+}
+body.dark-mode .dc-overlay .dc-box,
+body.dark-mode .al-overlay .al-box {
+  background: #1F2937;
+  color: #F9FAFB;
+}
+body.dark-mode .dc-overlay .dc-box h4,
+body.dark-mode .al-overlay .al-box h4 {
+  color: #F9FAFB;
+}
+body.dark-mode .dc-overlay .dc-box p,
+body.dark-mode .al-overlay .al-box p {
+  color: #94A3B8;
+}
+body.dark-mode .dc-cancel {
+  background: #374151;
+  color: #94A3B8;
+}
+body.dark-mode .cc-box {
+  background: #1F2937;
+  color: #F9FAFB;
+}
+body.dark-mode .cc-box h4 {
+  color: #F9FAFB;
+}
+body.dark-mode .cc-label {
+  color: #94A3B8;
+}
+body.dark-mode .cc-color.active {
+  border-color: #F9FAFB;
+}
+body.dark-mode .cc-cancel {
+  background: #374151;
+  color: #94A3B8;
+}
+body.dark-mode .modal-close {
+  background: #374151;
+  color: #94A3B8;
+}
+body.dark-mode .image-upload-area {
+  background: #374151;
+  border-color: #4B5563;
+  color: #94A3B8;
+}
+body.dark-mode .image-upload-area .upload-icon {
+  color: #6B7280;
+}
+body.dark-mode .position-picker {
+  background: #1F2937;
+}
+body.dark-mode .position-preview {
+  background: #374151;
+}
+body.dark-mode .edit-banner {
+  background: #422006;
+  color: #FCD34D;
+}
+body.dark-mode .tab {
+  border-color: #374151;
+}
+body.dark-mode .search-bar .search-icon {
+  color: #6B7280;
+}
+body.dark-mode .modal-header {
+  border-bottom-color: #374151;
+}
+body.dark-mode .fullscreen-img-viewer {
+  background: rgba(0,0,0,0.95);
+}
+body.dark-mode .sort-btn {
+  background: #374151;
+  color: #94A3B8;
+}
 </style>
 </head>
 <body>
@@ -1056,7 +1301,8 @@ body.keyboard-open #bottomNav {
     </div>
     <div class="detail-info" id="detailInfo"></div>
     <div class="detail-actions">
-      <button class="btn-delete" id="detailDeleteBtn">🗑️ 删除纪念日</button>
+      <button class="btn-edit" id="detailEditBtn">✏️ 编辑</button>
+      <button class="btn-delete" id="detailDeleteBtn">🗑️ 删除</button>
     </div>
   </div>
 </div>
@@ -1065,7 +1311,7 @@ body.keyboard-open #bottomNav {
 <div class="modal-overlay" id="addModal">
   <div class="modal-sheet">
     <div class="modal-header">
-      <h3>✨ 添加纪念日</h3>
+      <h3 class="modal-title">✨ 添加纪念日</h3>
       <button class="modal-close" id="closeModal">✕</button>
     </div>
     <div class="modal-body">
@@ -1210,8 +1456,16 @@ let catEditTimer = null;
 
 function bindCatLongPress(el) {
   let moved = false;
+  let startX = 0, startY = 0;
   const start = (e) => {
     moved = false;
+    if (e.type === 'touchstart') {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    } else {
+      startX = e.clientX;
+      startY = e.clientY;
+    }
     catLongPressTimer = setTimeout(() => {
       if (moved) return;
       enterCatEditMode();
@@ -1220,10 +1474,17 @@ function bindCatLongPress(el) {
     }, 500);
   };
   const end = () => { clearTimeout(catLongPressTimer); };
-  const move = () => { moved = true; clearTimeout(catLongPressTimer); };
+  const move = (e) => {
+    const cx = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const cy = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+    if (Math.abs(cx - startX) > 12 || Math.abs(cy - startY) > 12) {
+      moved = true;
+      clearTimeout(catLongPressTimer);
+    }
+  };
   el.addEventListener('touchstart', start, { passive: true });
   el.addEventListener('touchend', end);
-  el.addEventListener('touchmove', move);
+  el.addEventListener('touchmove', move, { passive: true });
   el.addEventListener('mousedown', start);
   el.addEventListener('mouseup', end);
   el.addEventListener('mouseleave', end);
@@ -1235,7 +1496,7 @@ function enterCatEditMode() {
   document.querySelectorAll('.cat-option').forEach(el => el.classList.add('deletable'));
   document.getElementById('editBanner').classList.add('show');
   clearTimeout(catEditTimer);
-  catEditTimer = setTimeout(() => { exitCatEditMode(); }, 3000);
+  catEditTimer = setTimeout(() => { exitCatEditMode(); }, 8000);
 }
 
 function exitCatEditMode() {
@@ -1272,10 +1533,10 @@ async function requestDeleteCat(key) {
   renderCategoryGrid();
   renderTabs();
   renderList();
-  renderFavs();
+  renderFeatured();
   exitCatEditMode();
   setTimeout(() => showToast(count > 0 ? `已删除「${cat.label}」及 ${count} 条纪念日` : `已删除「${cat.label}」`), 300);
-
+}
 document.addEventListener('click', e => {
   const addBtn = e.target.closest('#addCatBtn');
   if (!addBtn) return;
@@ -1300,13 +1561,7 @@ document.addEventListener('click', e => {
   }
 });
 
-// 默认示例数据（首次加载时使用）
-const defaultData = [
-  { id: 1, title: '我们的第一次旅行', desc: '一起去了海边，看了人生中最美的日落', date: '2024-02-14', category: 'travel', image: '', favorite: true },
-  { id: 2, title: '在一起100天', desc: '从相识到相知，每一天都值得纪念', date: '2024-06-21', category: 'love', image: '', favorite: true },
-  { id: 3, title: '妈妈的生日', desc: '祝妈妈永远健康快乐', date: '2023-08-15', category: 'birthday', image: '', favorite: false },
-  { id: 4, title: '入职第一天', desc: '新起点，新征程', date: '2025-03-01', category: 'work', image: '', favorite: false }
-];
+// 默认示例数据已移除，新用户首次打开为空白状态
 
 function loadData() {
   try {
@@ -1319,8 +1574,7 @@ function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-let memorials = loadData() || defaultData;
-if (!loadData()) saveData(memorials);
+let memorials = loadData() || [];
 
 let currentFilter = 'all';
 let sortOrder = 'asc'; // asc=最早的在前, desc=最新的在前
@@ -1329,6 +1583,7 @@ let selectedCategory = 'love';
 let selectedImage = '';
 let imagePosition = 50; // 0=顶部, 50=居中, 100=底部
 let isFavorite = false;
+let editingId = null; // 编辑模式：非null时为编辑已有纪念日
 
 // 解析图片路径：文件名 → nativeBridge 路径，base64 → 直接返回
 function resolveImageSrc(img) {
@@ -1353,6 +1608,32 @@ function daysBetween(dateStr) {
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function isBirthday(m) {
+  return m.category === 'birthday' || (m.tags && m.tags.includes('生日')) || (m.title && m.title.includes('生日'));
+}
+
+function daysUntilNextBirthday(dateStr) {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const birth = new Date(dateStr);
+  const thisYear = new Date(now.getFullYear(), birth.getMonth(), birth.getDate());
+  thisYear.setHours(0,0,0,0);
+  if (thisYear < now) {
+    thisYear.setFullYear(thisYear.getFullYear() + 1);
+  }
+  return Math.floor((thisYear - now) / (1000 * 60 * 60 * 24));
+}
+
+function getAge(dateStr) {
+  const now = new Date();
+  const birth = new Date(dateStr);
+  let age = now.getFullYear() - birth.getFullYear();
+  if (now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
 }
 
 // ========== 自定义分类弹窗 ==========
@@ -1521,7 +1802,7 @@ function renderFeatured() {
         <div class="card-info">
           <span class="card-tag" style="background:${cat.color}">${cat.label}</span>
           <div class="card-title">${m.title}</div>
-          <div class="card-date">${formatDate(m.date)} · ${Math.abs(daysBetween(m.date))}天</div>
+          <div class="card-date">${isBirthday(m) ? '🎂 还有' + daysUntilNextBirthday(m.date) + '天过生日' : formatDate(m.date) + ' · ' + Math.abs(daysBetween(m.date)) + '天'}</div>
         </div>
       </div>`;
   }).join('');
@@ -1543,8 +1824,8 @@ function renderList() {
   container.innerHTML = list.map(m => {
     const cat = categoryMap[m.category] || categoryMap.other;
     const days = daysBetween(m.date);
-    const daysLabel = days >= 0 ? '天前' : '天后';
-    const absDays = Math.abs(days);
+    const daysLabel = isBirthday(m) ? '🎂 还有' + daysUntilNextBirthday(m.date) + '天' : (days >= 0 ? '天前' : '天后');
+    const absDays = isBirthday(m) ? daysUntilNextBirthday(m.date) : Math.abs(days);
     const pos = m.imagePosition != null ? m.imagePosition : 50;
     const imgHtml = m.image
       ? `<img class="card-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${pos}%;" alt="">`
@@ -1579,44 +1860,216 @@ function openDetail(id) {
 
   const cat = categoryMap[m.category] || categoryMap.other;
   const days = daysBetween(m.date);
-  const daysLabel = days >= 0 ? '天前' : '天后';
   const absDays = Math.abs(days);
+
+  // 计算年月
+  const targetDate = new Date(m.date);
+  const now = new Date();
+  const diffMs = Math.abs(now - targetDate);
+  const totalDays = Math.floor(diffMs / (1000*60*60*24));
+  const years = Math.floor(totalDays / 365);
+  const months = Math.floor((totalDays % 365) / 30);
+  const remainDays = totalDays % 30;
+
+  // 星期几
+  const weekDays = ['日','一','二','三','四','五','六'];
+  const weekDay = '周' + weekDays[targetDate.getDay()];
+
+  // 状态判断
+  const isToday = days === 0;
+  const isPast = days > 0;
+  const isFuture = days < 0;
+  let statusText, statusEmoji;
+  if (isToday) { statusText = '就是今天'; statusEmoji = '🎉'; }
+  else if (isPast) { statusText = '已过去'; statusEmoji = '⏰'; }
+  else { statusText = '即将到来'; statusEmoji = '⏳'; }
+
+  // 相对时间描述
+  let relativeText = '';
+  if (isToday) relativeText = '今天就是这个日子！';
+  else if (absDays === 1) relativeText = isPast ? '昨天刚过' : '明天就到';
+  else if (absDays < 7) relativeText = isPast ? absDays + '天前' : '还有' + absDays + '天';
+  else if (absDays < 30) relativeText = isPast ? Math.floor(absDays/7) + '周前' : '还有' + Math.floor(absDays/7) + '周';
+  else if (absDays < 365) relativeText = isPast ? Math.floor(absDays/30) + '个月前' : '还有' + Math.floor(absDays/30) + '个月';
+  else {
+    const y = Math.floor(absDays/365);
+    const rm = Math.floor((absDays%365)/30);
+    relativeText = isPast ? y + '年' + (rm > 0 ? rm + '个月' : '') + '前' : '还有' + y + '年' + (rm > 0 ? rm + '个月' : '');
+  }
 
   // 封面
   const detailPos = m.imagePosition != null ? m.imagePosition : 50;
   document.getElementById('detailCover').innerHTML = m.image
-    ? `<img class="detail-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${detailPos}%;" alt="">`
-    : `<div class="detail-cover-placeholder" style="background:${coverBg(m.id)};">${cat.label.slice(0,2)}</div>`;
+    ? '<img class="detail-cover" src="' + resolveImageSrc(m.image) + '" style="object-position:center ' + detailPos + '%;" alt="" onclick="openFullscreenViewer(this.src)">'
+    : '<div class="detail-cover-placeholder" style="background:' + coverBg(m.id) + ';">' + cat.label.slice(0,2) + '</div>';
 
   // 标题
   document.getElementById('detailTitle').textContent = m.title;
 
-  // 信息
-  let infoHtml = `<div class="detail-days"><span class="num">${absDays}</span><span class="unit">${daysLabel}</span></div>`;
-  infoHtml += `<div class="detail-tag-row">`;
-  infoHtml += `<span class="detail-tag" style="background:${cat.color}">${cat.label}</span>`;
-  if (m.favorite) infoHtml += `<span class="detail-tag" style="background:#EE5A24">❤️ 精选</span>`;
-  infoHtml += `</div>`;
-  infoHtml += `<div class="detail-row"><span class="label">📅 日期</span><span class="value">${formatDate(m.date)}</span></div>`;
-  if (m.desc) {
-    infoHtml += `<div class="detail-desc-box">${m.desc}</div>`;
+  // 构建信息区域
+  let infoHtml = '';
+
+  // 倒计时区域
+  const countdownClass = isToday ? 'is-today' : (isPast ? 'is-past' : '');
+  infoHtml += '<div class="detail-countdown ' + countdownClass + '">';
+  if (isToday) {
+    infoHtml += '<span class="big-num">🎉</span>';
+    infoHtml += '<div class="countdown-sub">今天就是这个纪念日！</div>';
+    infoHtml += '<span class="celebration">🎊🎈🎂</span>';
+  } else {
+    infoHtml += '<span class="big-num">' + absDays + '</span>';
+    infoHtml += '<span class="big-unit">' + (isPast ? '天前' : '天后') + '</span>';
+    infoHtml += '<div class="countdown-sub">' + relativeText + '</div>';
   }
+  infoHtml += '</div>';
+
+  // 标签行
+  infoHtml += '<div class="detail-tag-row">';
+  infoHtml += '<span class="detail-tag" style="background:' + cat.color + '">' + cat.label + '</span>';
+  if (m.favorite) infoHtml += '<span class="detail-tag" style="background:#EE5A24">❤️ 精选</span>';
+  infoHtml += '</div>';
+
+  // 信息卡片网格
+  infoHtml += '<div class="detail-cards">';
+  infoHtml += '<div class="detail-card"><div class="card-icon">📅</div><div class="card-label">日期</div><div class="card-value">' + formatDate(m.date) + '</div></div>';
+  infoHtml += '<div class="detail-card"><div class="card-icon">📆</div><div class="card-label">星期</div><div class="card-value">' + weekDay + '</div></div>';
+  infoHtml += '<div class="detail-card"><div class="card-icon">' + statusEmoji + '</div><div class="card-label">状态</div><div class="card-value">' + statusText + '</div></div>';
+  infoHtml += '</div>';
+
+  // 详细信息行
+  if (years > 0 || months > 0) {
+    infoHtml += '<div class="detail-row"><span class="label">⏳ 已过</span><span class="value">';
+    if (years > 0) infoHtml += years + '年';
+    if (months > 0) infoHtml += months + '个月';
+    if (remainDays > 0) infoHtml += remainDays + '天';
+    infoHtml += '</span></div>';
+  }
+
+  if (isBirthday(m)) {
+    infoHtml += '<div class="detail-row"><span class="label">🎂 下一个生日</span><span class="value">' + daysUntilNextBirthday(m.date) + '天后</span></div>';
+  } else {
+    infoHtml += '<div class="detail-row"><span class="label">📊 天数</span><span class="value">' + absDays + '天（共' + totalDays + '天）</span></div>';
+  }
+
+  // 下一个整百/整千天纪念日
+  const nextMilestone = Math.ceil(totalDays / 100) * 100;
+  if (nextMilestone > totalDays && nextMilestone - totalDays <= 100) {
+    const daysToMilestone = nextMilestone - totalDays;
+    const milestoneDate = new Date(now.getTime() + daysToMilestone * 86400000);
+    infoHtml += '<div class="detail-row"><span class="label">🎯 下个</span><span class="value">第' + nextMilestone + '天 (' + formatDate(milestoneDate.toISOString().slice(0,10)) + ')</span></div>';
+  }
+
+  // 描述
+  if (m.desc) {
+    infoHtml += '<div class="detail-desc-box">📝 ' + m.desc + '</div>';
+  }
+
   document.getElementById('detailInfo').innerHTML = infoHtml;
 
-  document.getElementById('detailModal').classList.add('show');
+  document.body.dataset.scrollY = window.scrollY;
+  document.body.style.top = -window.scrollY + 'px';
   document.body.classList.add('modal-open');
+  document.getElementById('detailModal').classList.add('show');
 }
 
 // 关闭详情
 document.getElementById('detailClose').addEventListener('click', () => {
   document.getElementById('detailModal').classList.remove('show');
   document.body.classList.remove('modal-open');
+  document.body.style.top = '';
+  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
   currentDetailId = null;
 });
 document.getElementById('detailModal').addEventListener('click', e => {
   if (e.target === document.getElementById('detailModal')) {
     document.getElementById('detailModal').classList.remove('show');
     document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+    currentDetailId = null;
+  }
+});
+
+// 编辑按钮
+document.getElementById('detailEditBtn').addEventListener('click', () => {
+  if (!currentDetailId) return;
+  const m = memorials.find(x => x.id === currentDetailId);
+  if (!m) return;
+  // 关闭详情弹窗
+  document.getElementById('detailModal').classList.remove('show');
+  document.body.classList.remove('modal-open');
+  document.body.style.top = '';
+  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+  currentDetailId = null;
+  // 导航到编辑页面（如果Android端支持）
+  if (window.Android && window.Android.navigateToEdit) {
+    window.Android.navigateToEdit(m.id);
+  } else {
+    // 降级：打开内置编辑弹窗
+    openAddModalForEdit(m);
+  }
+});
+
+// ========== 编辑模式：复用添加弹窗预填数据 ==========
+function openAddModalForEdit(m) {
+  editingId = m.id;
+  const addModal = document.getElementById('addModal');
+  document.getElementById('titleInput').value = m.title || '';
+  document.getElementById('dateInput').value = m.date || '';
+  document.getElementById('descInput').value = m.desc || '';
+  selectedCategory = m.category || 'love';
+  selectedImage = m.image || '';
+  imagePosition = m.imagePosition || 50;
+  isFavorite = !!m.favorite;
+
+  // 更新分类高亮
+  document.querySelectorAll('.cat-option').forEach(c => {
+    c.classList.toggle('active', c.dataset.cat === selectedCategory);
+  });
+
+  // 图片预览
+  if (selectedImage) {
+    document.getElementById('previewContainer').classList.add('show');
+    document.getElementById('uploadArea').style.display = 'none';
+    // 设置预览容器中的图片
+    const previewImgEl = document.getElementById('previewImg');
+    if (previewImgEl) {
+      previewImgEl.src = resolveImageSrc(selectedImage);
+    }
+    const previewImg = document.getElementById('positionPreviewImg');
+    if (previewImg) {
+      previewImg.src = resolveImageSrc(selectedImage);
+      previewImg.style.objectPosition = `center ${100 - imagePosition}%`;
+    }
+    if (document.getElementById('positionSlider')) {
+      document.getElementById('positionSlider').value = imagePosition;
+    }
+  } else {
+    document.getElementById('previewContainer').classList.remove('show');
+    document.getElementById('uploadArea').style.display = '';
+  }
+
+  // 收藏开关
+  document.getElementById('favToggle').classList.toggle('on', isFavorite);
+
+  // 更新弹窗标题和按钮
+  const modalTitle = addModal.querySelector('.modal-title');
+  if (modalTitle) modalTitle.textContent = '✏️ 编辑纪念日';
+  document.getElementById('submitBtn').textContent = '更新纪念日';
+
+  // 打开弹窗
+  document.body.dataset.scrollY = window.scrollY;
+  document.body.classList.add('modal-open');
+  document.body.style.top = `-${window.scrollY}px`;
+  addModal.classList.add('show');
+}
+
+document.getElementById('detailModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('detailModal')) {
+    document.getElementById('detailModal').classList.remove('show');
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
     currentDetailId = null;
   }
 });
@@ -1670,6 +2123,10 @@ document.getElementById('fabBtn').addEventListener('click', () => {
   } else {
     // 降级方案：如果不在 Android 环境，打开内置弹窗
     const addModal = document.getElementById('addModal');
+    editingId = null;
+    const modalTitle = addModal.querySelector('.modal-title');
+    if (modalTitle) modalTitle.textContent = '✨ 添加纪念日';
+    document.getElementById('submitBtn').textContent = '保存纪念日';
     document.getElementById('titleInput').value = '';
     document.getElementById('dateInput').value = new Date().toISOString().slice(0, 10);
     document.getElementById('descInput').value = '';
@@ -1683,7 +2140,9 @@ document.getElementById('fabBtn').addEventListener('click', () => {
     document.getElementById('previewContainer').classList.remove('show');
     document.getElementById('uploadArea').style.display = '';
     document.getElementById('favToggle').classList.remove('on');
+    document.body.dataset.scrollY = window.scrollY;
     document.body.classList.add('modal-open');
+    document.body.style.top = -window.scrollY + 'px';
     addModal.classList.add('show');
   }
 });
@@ -1691,11 +2150,17 @@ document.getElementById('fabBtn').addEventListener('click', () => {
 // ========== 事件：关闭弹窗 ==========
 document.getElementById('closeModal').addEventListener('click', () => {
     document.body.classList.remove('modal-open');
+  document.body.style.top = '';
   addModal.classList.remove('show');
+  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
 });
 addModal.addEventListener('click', e => {
     document.body.classList.remove('modal-open');
-  if (e.target === addModal) addModal.classList.remove('show');
+  document.body.style.top = '';
+  if (e.target === addModal) {
+    addModal.classList.remove('show');
+    window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+  }
 });
 
 // ========== 事件：选择分类 ==========
@@ -1712,6 +2177,11 @@ const imageInput = document.getElementById('imageInput');
 const previewContainer = document.getElementById('previewContainer');
 const previewImg = document.getElementById('previewImg');
 const uploadArea = document.getElementById('uploadArea');
+
+// 点击上传区域 → 弹出文件选择器（排除 input 自身，防止双重触发）
+uploadArea.addEventListener('click', (e) => {
+  if (e.target !== imageInput) imageInput.click();
+});
 
 imageInput.addEventListener('change', e => {
   const file = e.target.files[0];
@@ -1792,26 +2262,61 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     return;
   }
 
-  const newItem = {
-    id: Date.now(),
-    title,
-    date,
-    desc,
-    category: selectedCategory,
-    image: selectedImage,
-    imagePosition: imagePosition,
-    favorite: isFavorite
-  };
-
-  memorials.unshift(newItem);
+  let toastMsg;
+  if (editingId) {
+    // 编辑模式：更新已有纪念日
+    const idx = memorials.findIndex(x => x.id === editingId);
+    if (idx !== -1) {
+      const oldImage = memorials[idx].image;
+      memorials[idx].title = title;
+      memorials[idx].date = date;
+      memorials[idx].desc = desc;
+      memorials[idx].category = selectedCategory;
+      memorials[idx].image = selectedImage;
+      memorials[idx].imagePosition = imagePosition;
+      memorials[idx].favorite = isFavorite;
+      // 清理旧图片（如果是文件名且已更换）
+      if (oldImage && oldImage !== selectedImage && !oldImage.startsWith('data:') && window.nativeBridge) {
+        try { window.nativeBridge.deleteImage(oldImage); } catch(e) {}
+      }
+    }
+    toastMsg = '✏️ 已更新';
+    editingId = null;
+  } else {
+    // 新增模式
+    const newItem = {
+      id: Date.now(),
+      title,
+      date,
+      desc,
+      category: selectedCategory,
+      image: selectedImage,
+      imagePosition: imagePosition,
+      favorite: isFavorite
+    };
+    memorials.unshift(newItem);
+    toastMsg = '✅ 添加成功！';
+  }
   saveData(memorials);
 
   document.body.classList.remove('modal-open');
   addModal.classList.remove('show');
   renderFeatured();
   renderList();
-  showToast('✅ 添加成功！');
+  showToast(toastMsg);
 });
+
+// ========== 深色模式 ==========
+(function(){
+  var dm = localStorage.getItem('darkMode');
+  var isDark = dm === 'on' || (!dm && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if(isDark) document.body.classList.add('dark-mode');
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e){
+    if(!localStorage.getItem('darkMode')){
+      document.body.classList.toggle('dark-mode', e.matches);
+    }
+  });
+})();
 
 // ========== 初始化 ==========
 renderTabs();
@@ -1862,6 +2367,58 @@ renderList();
   window.addEventListener('load', () => {
     initialHeight = window.innerHeight;
   });
+
+  // 全屏图片查看器
+  window.openFullscreenViewer = function(src) {
+    if (!src) return;
+    const viewer = document.getElementById('fullscreenImgViewer');
+    const img = document.getElementById('fvImg');
+    img.src = src;
+    viewer.classList.add('active');
+    try { window.nativeBridge.setBottomNavVisibility(false); } catch(e) {}
+  };
+  window.closeFullscreenViewer = function() {
+    const viewer = document.getElementById('fullscreenImgViewer');
+    viewer.classList.remove('active');
+    document.getElementById('fvImg').src = '';
+    try { window.nativeBridge.setBottomNavVisibility(true); } catch(e) {}
+  };
+  // 延迟绑定，因为 DOM 元素在 script 之后
+  document.addEventListener('DOMContentLoaded', function() {
+    var fvClose = document.getElementById('fvClose');
+    var fvViewer = document.getElementById('fullscreenImgViewer');
+    if (fvClose) fvClose.addEventListener('click', closeFullscreenViewer);
+    if (fvViewer) fvViewer.addEventListener('click', function(e) {
+      if (e.target === this) closeFullscreenViewer();
+    });
+  });
+})();
+// ===== 深色模式：读取用户设置，未设置则跟随系统 =====
+(function() {
+  var mql = window.matchMedia('(prefers-color-scheme: dark)');
+  function apply(v) {
+    if (v) document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  }
+  // 优先读用户在设置页保存的偏好
+  var saved = localStorage.getItem('darkMode');
+  if (saved === 'on') {
+    apply(true);
+  } else if (saved === 'off') {
+    apply(false);
+  } else {
+    // 用户未手动设置，跟随系统
+    apply(mql.matches);
+    mql.addEventListener('change', function(e) { apply(e.matches); });
+  }
+  // 监听其他页面（设置页）修改 localStorage 后的同步
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'darkMode') {
+      if (e.newValue === 'on') apply(true);
+      else if (e.newValue === 'off') apply(false);
+      else apply(mql.matches);
+    }
+  });
 })();
 </script>
 
@@ -1886,6 +2443,12 @@ renderList();
     <p id="alText"></p>
     <button class="al-btn-ok" id="alOk">好的</button>
   </div>
+</div>
+
+<!-- 全屏图片查看器 -->
+<div class="fullscreen-img-viewer" id="fullscreenImgViewer">
+  <button class="fv-close" id="fvClose">✕</button>
+  <img class="fv-img" id="fvImg" src="">
 </div>
 
 </body>
