@@ -2374,15 +2374,32 @@ renderList();
     });
   });
 })();
-// ===== 深色模式自动检测 =====
+// ===== 深色模式：读取用户设置，未设置则跟随系统 =====
 (function() {
   var mql = window.matchMedia('(prefers-color-scheme: dark)');
-  function sync(v) {
+  function apply(v) {
     if (v) document.body.classList.add('dark-mode');
     else document.body.classList.remove('dark-mode');
   }
-  sync(mql.matches);
-  mql.addEventListener('change', function(e) { sync(e.matches); });
+  // 优先读用户在设置页保存的偏好
+  var saved = localStorage.getItem('darkMode');
+  if (saved === 'on') {
+    apply(true);
+  } else if (saved === 'off') {
+    apply(false);
+  } else {
+    // 用户未手动设置，跟随系统
+    apply(mql.matches);
+    mql.addEventListener('change', function(e) { apply(e.matches); });
+  }
+  // 监听其他页面（设置页）修改 localStorage 后的同步
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'darkMode') {
+      if (e.newValue === 'on') apply(true);
+      else if (e.newValue === 'off') apply(false);
+      else apply(mql.matches);
+    }
+  });
 })();
 </script>
 
