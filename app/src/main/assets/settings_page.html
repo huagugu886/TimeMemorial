@@ -110,18 +110,11 @@
     width: 32px; height: 32px; border-radius: 50%;
     cursor: pointer; transition: transform .15s, box-shadow .2s, border-color .2s;
     border: 2.5px solid transparent;
-    position: relative;
   }
   .dot:active { transform: scale(.92); }
   .dot.on {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(139,92,246,.25), 0 2px 8px rgba(139,92,246,.3);
-  }
-  .dot.on::after {
-    content: '✓'; position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; color: #fff; font-weight: 700;
-    text-shadow: 0 1px 2px rgba(0,0,0,.3);
   }
   .c1 { background: #8B5CF6; }
   .c2 { background: #3B82F6; }
