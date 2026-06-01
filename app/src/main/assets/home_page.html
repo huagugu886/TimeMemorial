@@ -1326,7 +1326,12 @@ body.dark-mode .sort-btn {
       <!-- 日期 -->
       <div class="form-group">
         <label>日期 <span class="required">*</span></label>
-        <input type="date" class="form-input" id="dateInput">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="date" class="form-input" id="dateInput" style="flex:1;">
+          <span id="dateTypeBtn" onclick="toggleDateType()" style="flex-shrink:0;cursor:pointer;padding:6px 12px;border-radius:8px;background:rgba(255,255,255,0.15);font-size:13px;white-space:nowrap;">
+            <span id="dateTypeLabel">📅 公历</span>
+          </span>
+        </div>
       </div>
 
       <!-- 描述 -->
@@ -2040,6 +2045,10 @@ function openAddModalForEdit(m) {
   imagePosition = m.imagePosition || 50;
   isFavorite = !!m.favorite;
 
+  // 同步农历/公历状态
+  currentDateType = m.dateType || 'solar';
+  document.getElementById('dateTypeLabel').textContent = currentDateType === 'lunar' ? '🌙 农历' : '📅 公历';
+
   // 更新分类高亮
   document.querySelectorAll('.cat-option').forEach(c => {
     c.classList.toggle('active', c.dataset.cat === selectedCategory);
@@ -2154,6 +2163,8 @@ document.getElementById('fabBtn').addEventListener('click', () => {
     selectedImage = '';
     imagePosition = 50;
     isFavorite = false;
+    currentDateType = 'solar';
+    document.getElementById('dateTypeLabel').textContent = '📅 公历';
     document.querySelectorAll('.cat-option').forEach(c => {
       c.classList.toggle('active', c.dataset.cat === 'love');
     });
