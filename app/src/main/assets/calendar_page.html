@@ -862,6 +862,8 @@ function renderEvents() {
         labelText = single ? '天前' : '天前';
       }
 
+    const isReminding = !single && diff > 0 && diff <= (ev.remindDays || 3);
+    if (isReminding) labelText += ' 🔔';
       html += `
         <div class="event-card" onclick="openDetail(${events.indexOf(ev)})">
           <div class="event-emoji" style="background:${ev.color}18">${ev.emoji}</div>

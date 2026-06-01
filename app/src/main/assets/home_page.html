@@ -2303,6 +2303,11 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     editingId = null;
   } else {
     // 新增模式
+    // 从设置页读取默认值
+    const defaultRepeat = localStorage.getItem('reminder_default_repeat') || 'yearly';
+    const defaultRemindDays = parseInt(localStorage.getItem('reminder_days_before') || '3');
+    const isLunar = selectedCategory === 'birthday'; // 生日默认农历，其他公历
+
     const newItem = {
       id: Date.now(),
       title,
@@ -2311,7 +2316,10 @@ document.getElementById('submitBtn').addEventListener('click', () => {
       category: selectedCategory,
       image: selectedImage,
       imagePosition: imagePosition,
-      favorite: isFavorite
+      favorite: isFavorite,
+      repeatType: defaultRepeat,        // 每年/每月/每周/无
+      remindDays: defaultRemindDays,    // 提前提醒天数
+      dateType: currentDateType  // 农历/公历
     };
     memorials.unshift(newItem);
     toastMsg = '✅ 添加成功！';
@@ -2472,6 +2480,14 @@ syncToNative();
     if (e.key === 'darkMode') applyTheme(localStorage.getItem('themeColor') || 'purple');
   });
 })();
+
+// ========== 农历/公历切换 ==========
+let currentDateType = 'solar';
+function toggleDateType() {
+  currentDateType = currentDateType === 'solar' ? 'lunar' : 'solar';
+  document.getElementById('dateTypeLabel').textContent = 
+    currentDateType === 'lunar' ? '🌙 农历' : '📅 公历';
+}
 </script>
 
 <!-- 删除确认弹窗 -->
