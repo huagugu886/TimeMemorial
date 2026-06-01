@@ -2147,7 +2147,8 @@ document.getElementById('fabBtn').addEventListener('click', () => {
     if (modalTitle) modalTitle.textContent = '✨ 添加纪念日';
     document.getElementById('submitBtn').textContent = '保存纪念日';
     document.getElementById('titleInput').value = '';
-    document.getElementById('dateInput').value = new Date().toISOString().slice(0, 10);
+    const _now = new Date();
+    document.getElementById('dateInput').value = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
     document.getElementById('descInput').value = '';
     selectedCategory = 'love';
     selectedImage = '';
@@ -2306,8 +2307,6 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     // 从设置页读取默认值
     const defaultRepeat = localStorage.getItem('reminder_default_repeat') || 'yearly';
     const defaultRemindDays = parseInt(localStorage.getItem('reminder_days_before') || '3');
-    const isLunar = selectedCategory === 'birthday'; // 生日默认农历，其他公历
-
     const newItem = {
       id: Date.now(),
       title,
