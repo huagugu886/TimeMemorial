@@ -1033,6 +1033,17 @@ document.querySelector('.header').addEventListener('touchend', e => {
   }
 });
 
+// ===== 深色模式自动检测 =====
+(function() {
+  var mql = window.matchMedia('(prefers-color-scheme: dark)');
+  function sync(v) {
+    if (v) document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  }
+  sync(mql.matches);
+  mql.addEventListener('change', function(e) { sync(e.matches); });
+})();
+
 // ===== 初始化 =====
 updateTitle();
 renderCalendar();
