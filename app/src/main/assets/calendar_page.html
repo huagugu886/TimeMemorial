@@ -1033,15 +1033,24 @@ document.querySelector('.header').addEventListener('touchend', e => {
   }
 });
 
-// ===== 深色模式自动检测 =====
+// ===== 深色模式（优先读取 settings 手动偏好，否则跟随系统）=====
 (function() {
   var mql = window.matchMedia('(prefers-color-scheme: dark)');
   function sync(v) {
     if (v) document.body.classList.add('dark-mode');
     else document.body.classList.remove('dark-mode');
   }
-  sync(mql.matches);
-  mql.addEventListener('change', function(e) { sync(e.matches); });
+  var saved = localStorage.getItem('darkMode');
+  if (saved === 'on') {
+    sync(true);
+  } else if (saved === 'off') {
+    sync(false);
+  } else {
+    sync(mql.matches);
+  }
+  mql.addEventListener('change', function(e) {
+    if (!localStorage.getItem('darkMode')) sync(e.matches);
+  });
 })();
 
 // ===== 初始化 =====
