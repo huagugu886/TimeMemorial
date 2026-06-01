@@ -54,7 +54,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .row:active { background: #F9FAFB; }
+  .row:active { background: var(--divider); }
   .row + .row::before {
     content: '';
     position: absolute;
@@ -69,13 +69,13 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; flex-shrink: 0;
   }
-  .ico-p { background: #EDE9FE; }
-  .ico-b { background: #DBEAFE; }
-  .ico-k { background: #FCE7F3; }
-  .ico-o { background: #FEF3C7; }
-  .ico-g { background: #D1FAE5; }
-  .ico-r { background: #FEE2E2; }
-  .ico-w { background: #F3F4F6; }
+  .ico-p { background: rgba(139,92,246,.15); }
+  .ico-b { background: rgba(59,130,246,.15); }
+  .ico-k { background: rgba(236,72,153,.15); }
+  .ico-o { background: rgba(251,191,36,.15); }
+  .ico-g { background: rgba(16,185,129,.15); }
+  .ico-r { background: rgba(239,68,68,.15); }
+  .ico-w { background: rgba(107,114,128,.15); }
 
   /* 文字区 */
   .txt { flex: 1; min-width: 0; }
@@ -245,24 +245,60 @@
 </div>
 
 <script>
-document.querySelectorAll('.dot').forEach(d=>{
-  d.onclick=()=>{
-    document.querySelectorAll('.dot').forEach(x=>x.classList.remove('on'));
+// === 深色模式逻辑 ===
+const dmSwitch = document.getElementById('dm');
+const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+function applyDark(dark) {
+  const s = document.documentElement.style;
+  if (dark) {
+    s.setProperty('--bg','#111827'); s.setProperty('--card-bg','#1F2937');
+    s.setProperty('--text','#F9FAFB'); s.setProperty('--text-sec','#6B7280');
+    s.setProperty('--divider','#374151'); s.setProperty('--switch-off','#4B5563');
+  } else {
+    s.setProperty('--bg','#F2F0F7'); s.setProperty('--card-bg','#FFFFFF');
+    s.setProperty('--text','#1F2937'); s.setProperty('--text-sec','#9CA3AF');
+    s.setProperty('--divider','#F3F4F6'); s.setProperty('--switch-off','#E5E7EB');
+  }
+}
+
+// 初始化：从 localStorage 读取偏好，没有则跟随系统
+const saved = localStorage.getItem('darkMode');
+if (saved === 'on') {
+  dmSwitch.checked = true;
+  applyDark(true);
+} else if (saved === 'off') {
+  dmSwitch.checked = false;
+  applyDark(false);
+} else {
+  // 默认跟随系统
+  dmSwitch.checked = sysDark.matches;
+  applyDark(sysDark.matches);
+}
+
+// 用户手动切换 → 保存偏好
+dmSwitch.onchange = function() {
+  applyDark(this.checked);
+  localStorage.setItem('darkMode', this.checked ? 'on' : 'off');
+};
+
+// 监听系统深色模式变化 → 自动跟随（仅当用户未手动固定时）
+sysDark.addEventListener('change', (e) => {
+  const pref = localStorage.getItem('darkMode');
+  if (!pref) {
+    // 用户没手动选过，跟随系统
+    dmSwitch.checked = e.matches;
+    applyDark(e.matches);
+  }
+});
+
+// === 主题色选择 ===
+document.querySelectorAll('.dot').forEach(d => {
+  d.onclick = () => {
+    document.querySelectorAll('.dot').forEach(x => x.classList.remove('on'));
     d.classList.add('on');
   };
 });
-document.getElementById('dm').onchange=function(){
-  const s=document.documentElement.style;
-  if(this.checked){
-    s.setProperty('--bg','#111827');s.setProperty('--card-bg','#1F2937');
-    s.setProperty('--text','#F9FAFB');s.setProperty('--text-sec','#6B7280');
-    s.setProperty('--divider','#374151');s.setProperty('--switch-off','#4B5563');
-  }else{
-    s.setProperty('--bg','#F2F0F7');s.setProperty('--card-bg','#FFFFFF');
-    s.setProperty('--text','#1F2937');s.setProperty('--text-sec','#9CA3AF');
-    s.setProperty('--divider','#F3F4F6');s.setProperty('--switch-off','#E5E7EB');
-  }
-};
 </script>
 </body>
 </html>
