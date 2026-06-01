@@ -62,13 +62,12 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.webView.apply {
-            clearCache(true)
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = true
             settings.allowContentAccess = true
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            settings.cacheMode = WebSettings.LOAD_NO_CACHE
+            settings.cacheMode = WebSettings.LOAD_DEFAULT
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
             settings.setSupportZoom(false)
