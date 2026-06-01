@@ -156,6 +156,77 @@
   }
   .foot-name { font-size: 16px; font-weight: 600; }
   .foot-ver { font-size: 12px; color: var(--text-sec); margin-top: 2px; }
+
+  /* === 选择器弹窗 === */
+  .picker-mask {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,.35); z-index: 999;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .picker-mask.show { opacity: 1; pointer-events: auto; }
+  .picker-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000;
+    background: var(--card-bg);
+    border-radius: 16px 16px 0 0;
+    padding: 0 0 env(safe-area-inset-bottom, 16px);
+    transform: translateY(100%);
+    transition: transform .28s cubic-bezier(.32,.72,0,1);
+  }
+  .picker-sheet.show { transform: translateY(0); }
+  .picker-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px 12px; border-bottom: 1px solid var(--divider);
+  }
+  .picker-head .picker-title { font-size: 16px; font-weight: 700; }
+  .picker-head .picker-done {
+    font-size: 15px; font-weight: 600; color: var(--primary);
+    background: none; border: none; cursor: pointer; padding: 4px 8px;
+  }
+  .picker-list {
+    max-height: 320px; overflow-y: auto; padding: 8px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .picker-opt {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px; font-size: 16px; cursor: pointer;
+    transition: background .1s;
+  }
+  .picker-opt:active { background: var(--divider); }
+  .picker-opt .check { color: var(--primary); font-size: 18px; font-weight: 700; opacity: 0; }
+  .picker-opt.active .check { opacity: 1; }
+
+  /* 自定义时间滚轮选择器 */
+  .time-wheel-wrap {
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px 0 8px; position: relative; height: 220px; gap: 0;
+  }
+  .wheel-col {
+    width: 80px; height: 220px; overflow-y: scroll;
+    scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .wheel-col::-webkit-scrollbar { display: none; }
+  .wheel-pad { height: 90px; flex-shrink: 0; }
+  .wheel-item {
+    height: 40px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 500; color: var(--text-sec);
+    scroll-snap-align: center; transition: color .15s, transform .15s, font-weight .15s;
+    flex-shrink: 0;
+  }
+  .wheel-item.active {
+    color: var(--text); font-weight: 700; font-size: 26px;
+  }
+  .wheel-sep {
+    font-size: 28px; font-weight: 700; color: var(--text);
+    width: 30px; text-align: center; flex-shrink: 0;
+    line-height: 40px;
+  }
+  .wheel-highlight {
+    position: absolute; left: 20px; right: 20px; top: 90px; height: 40px;
+    background: var(--primary); opacity: 0.07; border-radius: 10px;
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
@@ -199,17 +270,17 @@
     </div>
     <label class="sw"><input type="checkbox" checked><span class="sl"></span></label>
   </div>
-  <div class="row">
+  <div class="row" id="rowDays">
     <div class="ico ico-o">⏰</div>
     <div class="txt"><div class="txt-main">提前提醒</div></div>
     <div class="right"><span class="val">3 天</span><span class="chev">›</span></div>
   </div>
-  <div class="row">
+  <div class="row" id="rowTime">
     <div class="ico ico-b">🕘</div>
     <div class="txt"><div class="txt-main">提醒时间</div></div>
     <div class="right"><span class="val">09:00</span><span class="chev">›</span></div>
   </div>
-  <div class="row">
+  <div class="row" id="rowRepeat">
     <div class="ico ico-p">🔁</div>
     <div class="txt"><div class="txt-main">默认重复</div></div>
     <div class="right"><span class="val">每年</span><span class="chev">›</span></div>
@@ -266,6 +337,49 @@
   <div class="foot-ico">🕐</div>
   <div class="foot-name">TimeMemorial</div>
   <div class="foot-ver">Version 2.0.1</div>
+</div>
+
+<!-- === 选择器组件 === -->
+<div class="picker-mask" id="pickerMask"></div>
+
+<!-- 提前提醒天数选择器 -->
+<div class="picker-sheet" id="daysSheet">
+  <div class="picker-head">
+    <span class="picker-title">提前提醒</span>
+    <button class="picker-done" id="daysDone">完成</button>
+  </div>
+  <div class="picker-list" id="daysList"></div>
+</div>
+
+<!-- 提醒时间选择器 -->
+<div class="picker-sheet" id="timeSheet">
+  <div class="picker-head">
+    <span class="picker-title">提醒时间</span>
+    <button class="picker-done" id="timeDone">完成</button>
+  </div>
+  <div class="time-wheel-wrap">
+    <div class="wheel-col" id="hourWheel">
+      <div class="wheel-pad"></div>
+      <div class="wheel-pad"></div>
+      <div class="wheel-pad"></div>
+    </div>
+    <div class="wheel-sep">:</div>
+    <div class="wheel-col" id="minWheel">
+      <div class="wheel-pad"></div>
+      <div class="wheel-pad"></div>
+      <div class="wheel-pad"></div>
+    </div>
+    <div class="wheel-highlight"></div>
+  </div>
+</div>
+
+<!-- 默认重复选择器 -->
+<div class="picker-sheet" id="repeatSheet">
+  <div class="picker-head">
+    <span class="picker-title">默认重复</span>
+    <button class="picker-done" id="repeatDone">完成</button>
+  </div>
+  <div class="picker-list" id="repeatList"></div>
 </div>
 
 <script>
@@ -369,7 +483,193 @@ document.querySelectorAll('.dot').forEach(function(d) {
   };
 });
 
-// 监听其他页面修改主题色
+// === 提前提醒 / 提醒时间 / 默认重复 交互 ===
+const DAYS_OPTS = [1, 2, 3, 5, 7, 10, 15, 30];
+const REPEAT_OPTS = [
+  { v: 'none',   label: '不重复' },
+  { v: 'weekly', label: '每周' },
+  { v: 'monthly',label: '每月' },
+  { v: 'yearly', label: '每年' }
+];
+
+// 从 localStorage 读取
+let reminderDays  = parseInt(localStorage.getItem('reminderDays'))  || 3;
+let reminderTime  = localStorage.getItem('reminderTime') || '09:00';
+let repeatType    = localStorage.getItem('repeatType')   || 'yearly';
+
+// 初始化显示值
+function updateLabels() {
+  document.querySelector('#rowDays .val').textContent  = reminderDays + ' 天';
+  document.querySelector('#rowTime .val').textContent  = reminderTime;
+  var rep = REPEAT_OPTS.find(r => r.v === repeatType);
+  document.querySelector('#rowRepeat .val').textContent = rep ? rep.label : '每年';
+}
+updateLabels();
+
+// 通知 nativeBridge 同步设置
+function syncSettings() {
+  var s = { reminderDays: reminderDays, reminderTime: reminderTime, repeatType: repeatType };
+  try { nativeBridge.updateReminderSettings(JSON.stringify(s)); } catch(e) {}
+}
+
+// 弹窗控制
+var mask = document.getElementById('pickerMask');
+function openSheet(id) {
+  mask.classList.add('show');
+  document.getElementById(id).classList.add('show');
+}
+function closeAll() {
+  mask.classList.remove('show');
+  document.querySelectorAll('.picker-sheet').forEach(s => s.classList.remove('show'));
+}
+mask.onclick = closeAll;
+
+// --- 提前提醒 ---
+(function() {
+  var list = document.getElementById('daysList');
+  DAYS_OPTS.forEach(function(d) {
+    var div = document.createElement('div');
+    div.className = 'picker-opt' + (d === reminderDays ? ' active' : '');
+    div.setAttribute('data-v', d);
+    div.innerHTML = '<span>' + d + ' 天</span><span class="check">✓</span>';
+    div.onclick = function() {
+      list.querySelectorAll('.picker-opt').forEach(o => o.classList.remove('active'));
+      div.classList.add('active');
+      reminderDays = d;
+    };
+    list.appendChild(div);
+  });
+  document.getElementById('rowDays').onclick = function() {
+    // 刷新选中态
+    list.querySelectorAll('.picker-opt').forEach(function(o) {
+      o.classList.toggle('active', parseInt(o.getAttribute('data-v')) === reminderDays);
+    });
+    openSheet('daysSheet');
+  };
+  document.getElementById('daysDone').onclick = function() {
+    localStorage.setItem('reminderDays', reminderDays);
+    updateLabels(); syncSettings(); closeAll();
+  };
+})();
+
+// --- 提醒时间（自定义滚轮）---
+(function() {
+  var hourWheel = document.getElementById('hourWheel');
+  var minWheel  = document.getElementById('minWheel');
+  var MINS = [0,5,10,15,20,25,30,35,40,45,50,55];
+  var ITEM_H = 40;
+
+  // 生成滚轮选项
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  for (var h = 0; h < 24; h++) {
+    var d = document.createElement('div');
+    d.className = 'wheel-item'; d.textContent = pad2(h); d.setAttribute('data-v', h);
+    hourWheel.appendChild(d);
+  }
+  MINS.forEach(function(m) {
+    var d = document.createElement('div');
+    d.className = 'wheel-item'; d.textContent = pad2(m); d.setAttribute('data-v', m);
+    minWheel.appendChild(d);
+  });
+  // 底部 padding
+  hourWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  hourWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  hourWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  minWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  minWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  minWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+
+  // 解析当前时间
+  function parseTime(str) {
+    var p = str.split(':');
+    return { h: parseInt(p[0]) || 0, m: parseInt(p[1]) || 0 };
+  }
+
+  // 滚到指定值（index = 值本身，因为 0-23 和 0-55/5 对应 index）
+  function scrollToVal(wheel, valIdx) {
+    wheel.scrollTop = valIdx * ITEM_H;
+  }
+
+  // 更新高亮
+  function updateHighlight(wheel) {
+    var items = wheel.querySelectorAll('.wheel-item');
+    var center = wheel.scrollTop + 110; // 中心线位置
+    var best = null, bestDist = 9999;
+    items.forEach(function(it) {
+      var top = it.offsetTop;
+      var mid = top + ITEM_H / 2;
+      var dist = Math.abs(mid - center);
+      if (dist < bestDist) { bestDist = dist; best = it; }
+    });
+    items.forEach(function(it) { it.classList.toggle('active', it === best); });
+  }
+
+  // 获取当前选中值
+  function getSelected(wheel) {
+    var active = wheel.querySelector('.wheel-item.active');
+    return active ? parseInt(active.getAttribute('data-v')) : 0;
+  }
+
+  // 滚动事件（防抖更新高亮）
+  var scrollTimer;
+  function onScroll(wheel) {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function() { updateHighlight(wheel); }, 60);
+  }
+  hourWheel.onscroll = function() { onScroll(hourWheel); };
+  minWheel.onscroll  = function() { onScroll(minWheel); };
+
+  // 打开时滚到当前值
+  document.getElementById('rowTime').onclick = function() {
+    var t = parseTime(reminderTime);
+    scrollToVal(hourWheel, t.h);
+    scrollToVal(minWheel, MINS.indexOf(t.m) >= 0 ? MINS.indexOf(t.m) : 0);
+    // 延迟一帧再更新高亮，等 scrollTop 生效
+    setTimeout(function() {
+      updateHighlight(hourWheel);
+      updateHighlight(minWheel);
+    }, 50);
+    openSheet('timeSheet');
+  };
+
+  // 完成
+  document.getElementById('timeDone').onclick = function() {
+    var h = getSelected(hourWheel);
+    var m = getSelected(minWheel);
+    reminderTime = pad2(h) + ':' + pad2(m);
+    localStorage.setItem('reminderTime', reminderTime);
+    updateLabels(); syncSettings(); closeAll();
+  };
+})();
+
+// --- 默认重复 ---
+(function() {
+  var list = document.getElementById('repeatList');
+  REPEAT_OPTS.forEach(function(r) {
+    var div = document.createElement('div');
+    div.className = 'picker-opt' + (r.v === repeatType ? ' active' : '');
+    div.setAttribute('data-v', r.v);
+    div.innerHTML = '<span>' + r.label + '</span><span class="check">✓</span>';
+    div.onclick = function() {
+      list.querySelectorAll('.picker-opt').forEach(o => o.classList.remove('active'));
+      div.classList.add('active');
+      repeatType = r.v;
+    };
+    list.appendChild(div);
+  });
+  document.getElementById('rowRepeat').onclick = function() {
+    list.querySelectorAll('.picker-opt').forEach(function(o) {
+      o.classList.toggle('active', o.getAttribute('data-v') === repeatType);
+    });
+    openSheet('repeatSheet');
+  };
+  document.getElementById('repeatDone').onclick = function() {
+    localStorage.setItem('repeatType', repeatType);
+    updateLabels(); syncSettings(); closeAll();
+  };
+})();
+
+// 监听其他页面修改设置
 window.addEventListener('storage', function(e) {
   if (e.key === 'themeColor') {
     applyTheme(e.newValue || 'purple', dmSwitch.checked);
