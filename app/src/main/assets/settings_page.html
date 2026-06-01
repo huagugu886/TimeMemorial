@@ -108,11 +108,21 @@
   }
   .dot {
     width: 32px; height: 32px; border-radius: 50%;
-    cursor: pointer; transition: transform .15s;
-    border: 3px solid transparent;
+    cursor: pointer; transition: transform .15s, box-shadow .2s, border-color .2s;
+    border: 2.5px solid transparent;
+    position: relative;
   }
-  .dot:active { transform: scale(.88); }
-  .dot.on { border-color: var(--primary); box-shadow: inset 0 0 0 2px #fff; }
+  .dot:active { transform: scale(.92); }
+  .dot.on {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(139,92,246,.25), 0 2px 8px rgba(139,92,246,.3);
+  }
+  .dot.on::after {
+    content: '✓'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #fff; font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,.3);
+  }
   .c1 { background: #8B5CF6; }
   .c2 { background: #3B82F6; }
   .c3 { background: #EC4899; }
@@ -126,11 +136,11 @@
   [data-theme="rose"] .ico-p { background: rgba(244,63,94,.15); }
   [data-theme="teal"] .ico-p { background: rgba(20,184,166,.15); }
 
-  [data-theme="purple"] .dot.on { border-color: #8B5CF6; }
-  [data-theme="blue"] .dot.on { border-color: #3B82F6; }
-  [data-theme="pink"] .dot.on { border-color: #EC4899; }
-  [data-theme="rose"] .dot.on { border-color: #F43F5E; }
-  [data-theme="teal"] .dot.on { border-color: #14B8A6; }
+  [data-theme="purple"] .dot.on { border-color: #8B5CF6; box-shadow: 0 0 0 3px rgba(139,92,246,.25), 0 2px 8px rgba(139,92,246,.3); }
+  [data-theme="blue"] .dot.on { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,.25), 0 2px 8px rgba(59,130,246,.3); }
+  [data-theme="pink"] .dot.on { border-color: #EC4899; box-shadow: 0 0 0 3px rgba(236,72,153,.25), 0 2px 8px rgba(236,72,153,.3); }
+  [data-theme="rose"] .dot.on { border-color: #F43F5E; box-shadow: 0 0 0 3px rgba(244,63,94,.25), 0 2px 8px rgba(244,63,94,.3); }
+  [data-theme="teal"] .dot.on { border-color: #14B8A6; box-shadow: 0 0 0 3px rgba(20,184,166,.25), 0 2px 8px rgba(20,184,166,.3); }
 
   [data-theme="purple"] .foot-ico { background: linear-gradient(135deg, #8B5CF6, #A78BFA); box-shadow: 0 4px 16px rgba(139,92,246,.2); }
   [data-theme="blue"] .foot-ico { background: linear-gradient(135deg, #3B82F6, #60A5FA); box-shadow: 0 4px 16px rgba(59,130,246,.2); }
