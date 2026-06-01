@@ -1701,23 +1701,22 @@ function lunarToSolar(dateStr) {
 }
 
 // ========== 工具函数 ==========
+function parseLocalDate(dateStr) {
+  if (!dateStr) return new Date();
+  const parts = dateStr.split('-');
+  return new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+}
 function daysBetween(dateStr, dataType) {
   const now = new Date();
   now.setHours(0,0,0,0);
   const actualDateStr = (dataType === 'lunar') ? lunarToSolar(dateStr) : dateStr;
-  const target = new Date(actualDateStr);
-  target.setHours(0,0,0,0);
-  return Math.floor((now - target) / (1000 * 60 * 60 * 24));
-}
-  const now = new Date();
-  now.setHours(0,0,0,0);
-  const target = new Date(dateStr);
+  const target = parseLocalDate(actualDateStr);
   target.setHours(0,0,0,0);
   return Math.floor((now - target) / (1000 * 60 * 60 * 24));
 }
 
 function formatDate(dateStr) {
-  const d = new Date(dateStr);
+  const d = parseLocalDate(dateStr);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
@@ -1729,7 +1728,7 @@ function daysUntilNextBirthday(dateStr, dataType) {
   const now = new Date();
   now.setHours(0,0,0,0);
   const actualDateStr = (dataType === 'lunar') ? lunarToSolar(dateStr) : dateStr;
-  const birth = new Date(actualDateStr);
+  const birth = parseLocalDate(actualDateStr);
   const thisYear = new Date(now.getFullYear(), birth.getMonth(), birth.getDate());
   thisYear.setHours(0,0,0,0);
   if (thisYear < now) {
@@ -1740,7 +1739,7 @@ function daysUntilNextBirthday(dateStr, dataType) {
 
 function getAge(dateStr) {
   const now = new Date();
-  const birth = new Date(dateStr);
+  const birth = parseLocalDate(dateStr);
   let age = now.getFullYear() - birth.getFullYear();
   if (now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) {
     age--;
@@ -1976,7 +1975,7 @@ function openDetail(id) {
 
   // 计算年月
   const actualDate = (m.dateType === 'lunar') ? lunarToSolar(m.date) : m.date;
-  const targetDate = new Date(actualDate);
+  const targetDate = parseLocalDate(actualDate);
   const now = new Date();
   const diffMs = Math.abs(now - targetDate);
   const totalDays = Math.floor(diffMs / (1000*60*60*24));
@@ -2044,7 +2043,7 @@ function openDetail(id) {
 
   // 信息卡片网格
   infoHtml += '<div class="detail-cards">';
-  infoHtml += '<div class="detail-card"><div class="card-icon">📅</div><div class="card-label">日期</div><div class="card-value">' + formatDate(m.date) + '</div></div>';
+  infoHtml += '<div class="detail-card"><div class="card-icon">📅</div><div class="card-label">日期</div><div class="card-value">' + ((m.dateType==='lunar') ? formatDate(lunarToSolar(m.date))+' 🌙农历' : formatDate(m.date)) + '</div></div>';
   infoHtml += '<div class="detail-card"><div class="card-icon">📆</div><div class="card-label">星期</div><div class="card-value">' + weekDay + '</div></div>';
   infoHtml += '<div class="detail-card"><div class="card-icon">' + statusEmoji + '</div><div class="card-label">状态</div><div class="card-value">' + statusText + '</div></div>';
   infoHtml += '</div>';
@@ -2396,6 +2395,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
       memorials[idx].image = selectedImage;
       memorials[idx].imagePosition = imagePosition;
       memorials[idx].favorite = isFavorite;
+      memorials[idx].dateType = currentDateType;
       // 清理旧图片（如果是文件名且已更换）
       if (oldImage && oldImage !== selectedImage && !oldImage.startsWith('data:') && window.nativeBridge) {
         try { window.nativeBridge.deleteImage(oldImage); } catch(e) {}
