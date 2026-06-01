@@ -119,6 +119,25 @@
   .c4 { background: #F43F5E; }
   .c5 { background: #14B8A6; }
 
+  /* 主题色切换 — 动态图标背景 & 底部图标 */
+  [data-theme="purple"] .ico-p { background: rgba(139,92,246,.15); }
+  [data-theme="blue"] .ico-p { background: rgba(59,130,246,.15); }
+  [data-theme="pink"] .ico-p { background: rgba(236,72,153,.15); }
+  [data-theme="rose"] .ico-p { background: rgba(244,63,94,.15); }
+  [data-theme="teal"] .ico-p { background: rgba(20,184,166,.15); }
+
+  [data-theme="purple"] .dot.on { border-color: #8B5CF6; }
+  [data-theme="blue"] .dot.on { border-color: #3B82F6; }
+  [data-theme="pink"] .dot.on { border-color: #EC4899; }
+  [data-theme="rose"] .dot.on { border-color: #F43F5E; }
+  [data-theme="teal"] .dot.on { border-color: #14B8A6; }
+
+  [data-theme="purple"] .foot-ico { background: linear-gradient(135deg, #8B5CF6, #A78BFA); box-shadow: 0 4px 16px rgba(139,92,246,.2); }
+  [data-theme="blue"] .foot-ico { background: linear-gradient(135deg, #3B82F6, #60A5FA); box-shadow: 0 4px 16px rgba(59,130,246,.2); }
+  [data-theme="pink"] .foot-ico { background: linear-gradient(135deg, #EC4899, #F472B6); box-shadow: 0 4px 16px rgba(236,72,153,.2); }
+  [data-theme="rose"] .foot-ico { background: linear-gradient(135deg, #F43F5E, #FB7185); box-shadow: 0 4px 16px rgba(244,63,94,.2); }
+  [data-theme="teal"] .foot-ico { background: linear-gradient(135deg, #14B8A6, #2DD4BF); box-shadow: 0 4px 16px rgba(20,184,166,.2); }
+
   /* 底部版本 */
   .foot {
     text-align: center; padding: 32px 0 0;
@@ -245,6 +264,48 @@
 </div>
 
 <script>
+// === 主题色定义 ===
+const THEMES = {
+  purple: {
+    light: { primary: '#8B5CF6', light: '#C4B5FD', dark: '#6D28D9', shadow: 'rgba(139,92,246,0.15)' },
+    dark:  { primary: '#A78BFA', light: '#7C3AED', dark: '#5B21B6', shadow: 'rgba(167,139,250,0.2)' }
+  },
+  blue: {
+    light: { primary: '#3B82F6', light: '#93C5FD', dark: '#1D4ED8', shadow: 'rgba(59,130,246,0.15)' },
+    dark:  { primary: '#60A5FA', light: '#2563EB', dark: '#1E40AF', shadow: 'rgba(96,165,250,0.2)' }
+  },
+  pink: {
+    light: { primary: '#EC4899', light: '#F9A8D4', dark: '#BE185D', shadow: 'rgba(236,72,153,0.15)' },
+    dark:  { primary: '#F472B6', light: '#DB2777', dark: '#9D174D', shadow: 'rgba(244,114,182,0.2)' }
+  },
+  rose: {
+    light: { primary: '#F43F5E', light: '#FDA4AF', dark: '#BE123C', shadow: 'rgba(244,63,94,0.15)' },
+    dark:  { primary: '#FB7185', light: '#E11D48', dark: '#9F1239', shadow: 'rgba(251,113,133,0.2)' }
+  },
+  teal: {
+    light: { primary: '#14B8A6', light: '#5EEAD4', dark: '#0F766E', shadow: 'rgba(20,184,166,0.15)' },
+    dark:  { primary: '#2DD4BF', light: '#0D9488', dark: '#115E59', shadow: 'rgba(45,212,191,0.2)' }
+  }
+};
+
+// === 应用主题色 ===
+function applyTheme(themeName, isDark) {
+  const theme = THEMES[themeName] || THEMES.purple;
+  const mode = isDark ? 'dark' : 'light';
+  const c = theme[mode];
+  const s = document.documentElement.style;
+  s.setProperty('--primary', c.primary);
+  s.setProperty('--primary-light', c.light);
+  s.setProperty('--primary-dark', c.dark);
+  s.setProperty('--shadow', '0 4px 20px ' + c.shadow);
+  // 标记当前主题色，供 CSS 规则使用
+  document.documentElement.setAttribute('data-theme', themeName);
+  // 更新圆点选中状态
+  document.querySelectorAll('.dot').forEach(function(d) {
+    d.classList.toggle('on', d.getAttribute('data-c') === themeName);
+  });
+}
+
 // === 深色模式逻辑 ===
 const dmSwitch = document.getElementById('dm');
 const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -260,9 +321,11 @@ function applyDark(dark) {
     s.setProperty('--text','#1F2937'); s.setProperty('--text-sec','#9CA3AF');
     s.setProperty('--divider','#F3F4F6'); s.setProperty('--switch-off','#E5E7EB');
   }
+  // 深色模式切换后重新应用主题色（确保主题色覆盖默认值）
+  applyTheme(localStorage.getItem('themeColor') || 'purple', dark);
 }
 
-// 初始化：从 localStorage 读取偏好，没有则跟随系统
+// 初始化深色模式
 const saved = localStorage.getItem('darkMode');
 if (saved === 'on') {
   dmSwitch.checked = true;
@@ -271,34 +334,46 @@ if (saved === 'on') {
   dmSwitch.checked = false;
   applyDark(false);
 } else {
-  // 默认跟随系统
   dmSwitch.checked = sysDark.matches;
   applyDark(sysDark.matches);
 }
 
-// 用户手动切换 → 保存偏好
+// 用户手动切换深色模式 → 保存偏好
 dmSwitch.onchange = function() {
   applyDark(this.checked);
   localStorage.setItem('darkMode', this.checked ? 'on' : 'off');
   try { nativeBridge.setDarkMode(this.checked); } catch(e) {}
 };
 
-// 监听系统深色模式变化 → 自动跟随（仅当用户未手动固定时）
+// 监听系统深色模式变化
 sysDark.addEventListener('change', (e) => {
   const pref = localStorage.getItem('darkMode');
   if (!pref) {
-    // 用户没手动选过，跟随系统
     dmSwitch.checked = e.matches;
     applyDark(e.matches);
   }
 });
 
 // === 主题色选择 ===
-document.querySelectorAll('.dot').forEach(d => {
-  d.onclick = () => {
-    document.querySelectorAll('.dot').forEach(x => x.classList.remove('on'));
-    d.classList.add('on');
+document.querySelectorAll('.dot').forEach(function(d) {
+  d.onclick = function() {
+    var themeName = d.getAttribute('data-c');
+    localStorage.setItem('themeColor', themeName);
+    var isDark = dmSwitch.checked;
+    applyTheme(themeName, isDark);
   };
+});
+
+// 监听其他页面修改主题色
+window.addEventListener('storage', function(e) {
+  if (e.key === 'themeColor') {
+    applyTheme(e.newValue || 'purple', dmSwitch.checked);
+  }
+  if (e.key === 'darkMode') {
+    if (e.newValue === 'on') { dmSwitch.checked = true; applyDark(true); }
+    else if (e.newValue === 'off') { dmSwitch.checked = false; applyDark(false); }
+    else { dmSwitch.checked = sysDark.matches; applyDark(sysDark.matches); }
+  }
 });
 </script>
 </body>
