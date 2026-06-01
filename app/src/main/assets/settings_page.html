@@ -517,12 +517,19 @@ var mask = document.getElementById('pickerMask');
 function openSheet(id) {
   mask.classList.add('show');
   document.getElementById(id).classList.add('show');
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
 }
 function closeAll() {
   mask.classList.remove('show');
   document.querySelectorAll('.picker-sheet').forEach(s => s.classList.remove('show'));
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
 }
 mask.onclick = closeAll;
+mask.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
 
 // --- 提前提醒 ---
 (function() {
