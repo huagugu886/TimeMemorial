@@ -1255,6 +1255,148 @@ body.dark-mode .sort-btn {
   background: #374151;
   color: #94A3B8;
 }
+
+/* ========== 自定义日历选择器 ========== */
+.calendar-popup {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 9999;
+  justify-content: center;
+  align-items: flex-end;
+}
+.calendar-popup.show {
+  display: flex;
+}
+.calendar-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+}
+.calendar-panel {
+  position: relative;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 420px;
+  padding: 20px 16px calc(20px + var(--sb-height, 0px));
+  animation: slideUp 0.25s ease;
+  z-index: 1;
+}
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.cal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1F2937;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.cal-title:hover { background: #F3F4F6; }
+.cal-nav-btn {
+  width: 36px; height: 36px;
+  border: none;
+  background: #F3F4F6;
+  border-radius: 10px;
+  font-size: 20px;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.cal-nav-btn:active { background: #E5E7EB; }
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.calendar-weekdays span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9CA3AF;
+  padding: 4px 0;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  background: transparent;
+}
+.cal-day:active { transform: scale(0.92); }
+.cal-day.other { color: #D1D5DB; }
+.cal-day.today {
+  background: #F3F4F6;
+  font-weight: 700;
+  color: var(--primary, #7C5CFC);
+}
+.cal-day.selected {
+  background: var(--primary, #7C5CFC);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(124,92,252,0.3);
+}
+.calendar-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  gap: 10px;
+}
+.cal-today-btn, .cal-confirm-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cal-today-btn {
+  background: #F3F4F6;
+  color: #374151;
+}
+.cal-today-btn:active { background: #E5E7EB; }
+.cal-confirm-btn {
+  background: var(--primary, #7C5CFC);
+  color: #fff;
+}
+.cal-confirm-btn:active { opacity: 0.85; }
+
+/* 暗黑模式 */
+body.dark-mode .calendar-panel { background: #1F2937; }
+body.dark-mode .cal-title { color: #F9FAFB; }
+body.dark-mode .cal-title:hover { background: #374151; }
+body.dark-mode .cal-nav-btn { background: #374151; color: #D1D5DB; }
+body.dark-mode .cal-nav-btn:active { background: #4B5563; }
+body.dark-mode .calendar-weekdays span { color: #6B7280; }
+body.dark-mode .cal-day { color: #E5E7EB; }
+body.dark-mode .cal-day.other { color: #4B5563; }
+body.dark-mode .cal-day.today { background: #374151; color: var(--primary-light, #A78BFA); }
+body.dark-mode .cal-day.selected { background: var(--primary, #7C5CFC); color: #fff; }
+body.dark-mode .cal-today-btn { background: #374151; color: #D1D5DB; }
+body.dark-mode .cal-today-btn:active { background: #4B5563; }
 </style>
 </head>
 <body>
@@ -1328,10 +1470,34 @@ body.dark-mode .sort-btn {
       <div class="form-group">
         <label>日期 <span class="required">*</span></label>
         <div style="display:flex;align-items:center;gap:10px;">
-          <input type="date" class="form-input" id="dateInput" style="flex:1;">
+          <input type="hidden" id="dateInput">
+          <div id="datePickerBtn" class="form-input" style="flex:1;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;" onclick="openCalendarPopup()">
+            <span id="datePickerDisplay">选择日期</span>
+            <span style="opacity:0.5;font-size:16px;">📅</span>
+          </div>
           <span id="dateTypeBtn" onclick="toggleDateType()" style="flex-shrink:0;cursor:pointer;padding:6px 12px;border-radius:8px;background:rgba(255,255,255,0.15);font-size:13px;white-space:nowrap;">
             <span id="dateTypeLabel">📅 公历</span>
           </span>
+        </div>
+      </div>
+
+      <!-- 日历弹窗 -->
+      <div id="calendarPopup" class="calendar-popup">
+        <div class="calendar-overlay" onclick="closeCalendarPopup()"></div>
+        <div class="calendar-panel">
+          <div class="calendar-header">
+            <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
+            <span id="calTitle" class="cal-title"></span>
+            <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+          <div class="calendar-footer">
+            <button class="cal-today-btn" onclick="calGoToday()">今天</button>
+            <button class="cal-confirm-btn" onclick="calConfirm()">确定</button>
+          </div>
         </div>
       </div>
 
@@ -2065,6 +2231,7 @@ function openAddModalForEdit(m) {
   const addModal = document.getElementById('addModal');
   document.getElementById('titleInput').value = m.title || '';
   document.getElementById('dateInput').value = m.date || '';
+  updateDateDisplay();
   document.getElementById('descInput').value = m.desc || '';
   selectedCategory = m.category || 'love';
   selectedImage = m.image || '';
@@ -2184,6 +2351,7 @@ document.getElementById('fabBtn').addEventListener('click', () => {
     document.getElementById('titleInput').value = '';
     const _now = new Date();
     document.getElementById('dateInput').value = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
+    updateDateDisplay();
     document.getElementById('descInput').value = '';
     selectedCategory = 'love';
     selectedImage = '';
@@ -2524,7 +2692,178 @@ function toggleDateType() {
   currentDateType = currentDateType === 'solar' ? 'lunar' : 'solar';
   document.getElementById('dateTypeLabel').textContent = 
     currentDateType === 'lunar' ? '🌙 农历' : '📅 公历';
+  // 更新日期显示（如果已有日期）
+  updateDateDisplay();
 }
+
+// ========== 自定义日历选择器 ==========
+let calYear, calMonth, calSelectedDate; // calSelectedDate: 'YYYY-MM-DD'
+
+function openCalendarPopup() {
+  const val = document.getElementById('dateInput').value;
+  if (val) {
+    const p = val.split('-');
+    calYear = parseInt(p[0]);
+    calMonth = parseInt(p[1]) - 1;
+    calSelectedDate = val;
+  } else {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    calSelectedDate = null;
+  }
+  renderCalendar();
+  document.getElementById('calendarPopup').classList.add('show');
+}
+
+function closeCalendarPopup() {
+  document.getElementById('calendarPopup').classList.remove('show');
+}
+
+function calPrevMonth() {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function calNextMonth() {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+
+function calGoToday() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar();
+}
+
+function calSelectDate(y, m, d) {
+  calSelectedDate = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  renderCalendar();
+}
+
+function calConfirm() {
+  if (!calSelectedDate) {
+    // 如果没选，默认选今天
+    const now = new Date();
+    calSelectedDate = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  }
+  document.getElementById('dateInput').value = calSelectedDate;
+  updateDateDisplay();
+  closeCalendarPopup();
+}
+
+function updateDateDisplay() {
+  const val = document.getElementById('dateInput').value;
+  const display = document.getElementById('datePickerDisplay');
+  if (!val) {
+    display.textContent = '选择日期';
+    display.style.color = '';
+    return;
+  }
+  const p = val.split('-');
+  const y = parseInt(p[0]), mo = parseInt(p[1]), d = parseInt(p[2]);
+  const weekNames = ['周日','周一','周二','周三','周四','周五','周六'];
+  const dateObj = new Date(y, mo - 1, d);
+  const week = weekNames[dateObj.getDay()];
+
+  if (currentDateType === 'lunar') {
+    try {
+      const solar = Solar.fromDate(dateObj);
+      const lunar = solar.getLunar();
+      display.textContent = `${lunar.getYearInChinese()}年${lunar.getMonthInChinese()}月${lunar.getDayInChinese()} ${week}`;
+    } catch(e) {
+      display.textContent = `${y}年${mo}月${d}日 ${week}`;
+    }
+  } else {
+    display.textContent = `${y}年${mo}月${d}日 ${week}`;
+  }
+  display.style.color = 'var(--text)';
+}
+
+function renderCalendar() {
+  const title = document.getElementById('calTitle');
+  title.textContent = `${calYear}年 ${calMonth + 1}月`;
+
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+
+  // 上月尾部
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = daysInPrevMonth - i;
+    const btn = document.createElement('button');
+    btn.className = 'cal-day other';
+    btn.textContent = d;
+    const prevM = calMonth - 1;
+    const prevY = prevM < 0 ? calYear - 1 : calYear;
+    const pm = prevM < 0 ? 11 : prevM;
+    btn.onclick = () => calSelectDate(prevY, pm, d);
+    grid.appendChild(btn);
+  }
+
+  // 本月
+  for (let d = 1; d <= daysInMonth; d++) {
+    const btn = document.createElement('button');
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    btn.className = 'cal-day';
+    if (dateStr === todayStr) btn.classList.add('today');
+    if (dateStr === calSelectedDate) btn.classList.add('selected');
+    btn.textContent = d;
+    btn.onclick = () => calSelectDate(calYear, calMonth, d);
+    grid.appendChild(btn);
+  }
+
+  // 下月头部
+  const totalCells = grid.children.length;
+  const remaining = (Math.ceil(totalCells / 7) * 7) - totalCells;
+  for (let d = 1; d <= remaining; d++) {
+    const btn = document.createElement('button');
+    btn.className = 'cal-day other';
+    btn.textContent = d;
+    const nextM = calMonth + 1;
+    const nextY = nextM > 11 ? calYear + 1 : calYear;
+    const nm = nextM > 11 ? 0 : nextM;
+    btn.onclick = () => calSelectDate(nextY, nm, d);
+    grid.appendChild(btn);
+  }
+}
+
+// 修复：原生日期/时间选择器打开时，阻止底层弹窗滚动穿透
+(function() {
+  var _modalSheet = null;
+  function lockSheet() {
+    _modalSheet = document.querySelector('.modal-sheet');
+    if (_modalSheet) {
+      _modalSheet.style.overflow = 'hidden';
+      _modalSheet.addEventListener('touchmove', _prevent, { passive: false });
+    }
+  }
+  function unlockSheet() {
+    if (_modalSheet) {
+      _modalSheet.style.overflow = '';
+      _modalSheet.removeEventListener('touchmove', _prevent);
+      _modalSheet = null;
+    }
+  }
+  function _prevent(e) { e.preventDefault(); }
+  document.addEventListener('focus', function(e) {
+    if (e.target.type === 'date' || e.target.type === 'time' || e.target.type === 'datetime-local') lockSheet();
+  }, true);
+  document.addEventListener('blur', function(e) {
+    if (e.target.type === 'date' || e.target.type === 'time' || e.target.type === 'datetime-local') {
+      setTimeout(unlockSheet, 300);
+    }
+  }, true);
+})();
 </script>
 
 <!-- 删除确认弹窗 -->

@@ -11,8 +11,8 @@ android {
         applicationId = "com.timememorial.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 94
-        versionName = "2.0.51"
+        versionCode = 95
+        versionName = "2.0.52"
     }
 
     buildTypes {
