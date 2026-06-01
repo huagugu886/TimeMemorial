@@ -1521,6 +1521,7 @@ async function requestDeleteCat(key) {
   // 删除关联纪念日
   memorials = memorials.filter(m => m.category !== key);
   saveData();
+  syncToNative();
   // 删除自定义分类 / 内置分类置灰标记
   if (key.startsWith('custom_')) {
     delete customCats[key];
@@ -1574,6 +1575,21 @@ function loadData() {
 }
 function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ── 纪念日数据同步到原生端 ──
+function syncToNative() {
+    if (window.nativeBridge && window.nativeBridge.syncAnniversaries) {
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        window.nativeBridge.syncAnniversaries(JSON.stringify(
+            data.map(m => ({
+                id: m.id,
+                title: m.title,
+                date: m.date,
+                category: m.category || 'other'
+            }))
+        ));
+    }
 }
 
 let memorials = loadData() || [];
@@ -2087,6 +2103,7 @@ document.getElementById('detailDeleteBtn').addEventListener('click', async () =>
   if (m.image && !m.image.startsWith('data:') && window.nativeBridge) { try { nativeBridge.deleteImage(m.image); } catch(e) { console.warn('deleteImage failed:', e); } }
   memorials = memorials.filter(x => x.id !== currentDetailId);
   saveData(memorials);
+  syncToNative();
   document.getElementById('detailModal').classList.remove('show');
   document.body.classList.remove('modal-open');
   currentDetailId = null;
@@ -2300,6 +2317,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     toastMsg = '✅ 添加成功！';
   }
   saveData(memorials);
+  syncToNative();
 
   document.body.classList.remove('modal-open');
   addModal.classList.remove('show');
@@ -2325,6 +2343,7 @@ renderTabs();
 renderCategoryGrid();
 renderFeatured();
 renderList();
+syncToNative();
 
 // ========== 键盘检测 ==========
 (function() {

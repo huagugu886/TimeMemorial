@@ -178,4 +178,78 @@ class WebBridge(private val context: Context, private val onSetBottomNavVisibili
     fun setBottomNavVisibility(visible: Boolean) {
         onSetBottomNavVisibility?.invoke(visible)
     }
+
+    // ── 纪念日数据同步到原生端（供提醒功能使用） ──
+    @JavascriptInterface
+    fun syncAnniversaries(jsonString: String) {
+        try {
+            val jsonArray = org.json.JSONArray(jsonString)
+            com.timememorial.app.reminder.ReminderSettings.saveAnniversaries(context, jsonArray)
+            // 同步后立即调度提醒
+            com.timememorial.app.reminder.ReminderManager.scheduleDaily(context)
+        } catch (e: Exception) {
+            android.util.Log.e("WebBridge", "syncAnniversaries failed", e)
+        }
+    }
+
+    // ── 查询当前待提醒列表（供 WebView 展示） ──
+    @JavascriptInterface
+    fun getUpcomingReminders(): String {
+        return try {
+            val reminders = com.timememorial.app.reminder.ReminderSettings.getUpcomingReminders(context)
+            val jsonArray = org.json.JSONArray()
+            for (r in reminders) {
+                val obj = org.json.JSONObject().apply {
+                    put("id", r.id)
+                    put("title", r.title)
+                    put("date", r.date)
+                    put("daysUntil", r.daysUntil)
+                    put("isToday", r.isToday)
+                    put("category", r.category)
+                }
+                jsonArray.put(obj)
+            }
+            jsonArray.toString()
+        } catch (e: Exception) {
+            "[]"
+        }
+    }
+
+    // ── 获取提醒设置 ──
+    @JavascriptInterface
+    fun getReminderSettings(): String {
+        return try {
+            val obj = org.json.JSONObject().apply {
+                put("enabled", com.timememorial.app.reminder.ReminderSettings.isEnabled(context))
+                put("daysBefore", com.timememorial.app.reminder.ReminderSettings.getDaysBefore(context))
+                put("hour", com.timememorial.app.reminder.ReminderSettings.getHour(context))
+                put("minute", com.timememorial.app.reminder.ReminderSettings.getMinute(context))
+            }
+            obj.toString()
+        } catch (e: Exception) {
+            "{}"
+        }
+    }
+
+    // ── 保存提醒设置 ──
+    @JavascriptInterface
+    fun saveReminderSettings(jsonString: String) {
+        try {
+            val obj = org.json.JSONObject(jsonString)
+            val settings = com.timememorial.app.reminder.ReminderSettings
+            if (obj.has("enabled")) settings.setEnabled(context, obj.getBoolean("enabled"))
+            if (obj.has("daysBefore")) settings.setDaysBefore(context, obj.getInt("daysBefore"))
+            if (obj.has("hour") && obj.has("minute")) {
+                settings.setTime(context, obj.getInt("hour"), obj.getInt("minute"))
+            }
+            // 重新调度
+            if (settings.isEnabled(context)) {
+                com.timememorial.app.reminder.ReminderManager.scheduleDaily(context)
+            } else {
+                com.timememorial.app.reminder.ReminderManager.cancel(context)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("WebBridge", "saveReminderSettings failed", e)
+        }
+    }
 }
