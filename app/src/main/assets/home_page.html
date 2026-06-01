@@ -1619,8 +1619,96 @@ function resolveImageSrc(img) {
   return img;
 }
 
+// ========== 农历转公历（1998-2030） ==========
+function lunarToSolar(dateStr) {
+  const parts = dateStr.split('-');
+  const y = parseInt(parts[0]), m = parseInt(parts[1]), d = parseInt(parts[2]);
+  if (!y || !m || !d || m > 13 || d > 31) return dateStr;
+  // 农历数据：低12位=1-12月大小月(1=30天,0=29天)，高4位=闰月月份(0=无闰月)
+  // 闰月天数固定：数据对应年份闰月29天，数据+1=对应年份闰月30天（通过比较当前和下一年数据推断）
+  const lunarData = [
+    0x04bd,0x04ae,0x0a57,0x054d,0x0d26,0x0d95,0x1655,0x056a,0x09ad,0x055d, // 1900-1909
+    0x04ae,0x0a5b,0x0a4d,0x0d25,0x1d25,0x0b54,0x0b6a,0x096d,0x04af,0x0497, // 1910-1919
+    0x0a4b,0x0b4b,0x06a5,0x06d4,0x1ab5,0x02b6,0x0957,0x052f,0x0497,0x0656, // 1920-1929
+    0x0d4a,0x0ea5,0x16a9,0x05ad,0x02b6,0x096e,0x04af,0x0c97,0x0a4b,0x0d25, // 1930-1939
+    0x1d25,0x0b54,0x0b6a,0x095d,0x055a,0x04ad,0x0a4d,0x0d4b,0x1ad2,0x0d25, // 1940-1949
+    0x0d52,0x0aaa,0x095b,0x04b6,0x0a57,0x054e,0x0d15,0x1d25,0x0d54,0x0b6a, // 1950-1959
+    0x096d,0x05ad,0x055a,0x04ad,0x0a4d,0x0d25,0x0d25,0x1b4a,0x0b56,0x095d, // 1960-1969
+    0x055a,0x055d,0x04ae,0x0a4d,0x0d1b,0x0d25,0x0d52,0x0aaa,0x095b,0x04b6, // 1970-1979
+    0x0a57,0x054e,0x0d16,0x0d25,0x0d54,0x0b6a,0x096d,0x05ad,0x055a,0x04ad, // 1980-1989
+    0x0a4d,0x0d25,0x1d25,0x0b4a,0x0b56,0x055d,0x052d,0x0a5b,0x0a4d,0x0d25, // 1990-1999
+    0x1d52,0x0aaa,0x095b,0x04b6,0x0a57,0x054e,0x0d16,0x1695,0x0d54,0x0b6a, // 2000-2009
+    0x096d,0x05ad,0x055a,0x04ad,0x0a4d,0x0d25,0x1d25,0x0b4a,0x1b56,0x055d, // 2010-2019
+    0x052d,0x0a5b,0x0a4d,0x0d25,0x1d52,0x0aaa,0x095b,0x04b6,0x0a57,0x054e, // 2020-2029
+    0x0d15 // 2030
+  ];
+  const idx = y - 1900;
+  if (idx < 0 || idx >= lunarData.length) return dateStr;
+  const data = lunarData[idx];
+  const leapMonth = (data >> 20) & 0xf;
+  let bigMonths = data & 0xfff; // 低12位
+
+  // 计算该年正月初一的公历日期
+  // 基准：1900年正月初一 = 1900-01-31
+  const baseSolar = new Date(1900, 0, 31); // 1900-01-31
+  let totalDays = 0;
+  for (let yy = 1900; yy < y; yy++) {
+    const d2 = lunarData[yy - 1900];
+    totalDays += 348; // 12 * 29 = 348（平年基准）
+    // 大月额外天数
+    let bm = d2 & 0xfff;
+    for (let bit = 0; bit < 12; bit++) { if (bm & (1 << bit)) totalDays++; }
+    // 闰月额外天数
+    const lm = (d2 >> 20) & 0xf;
+    if (lm > 0) {
+      const leapBig = (d2 >> 16) & 0xf;
+      totalDays += (leapBig ? 30 : 29);
+    }
+  }
+
+  // 加上目标年中到目标月之前的天数
+  // 月份天数表
+  const monthDays = [];
+  for (let i = 0; i < 12; i++) {
+    monthDays.push((bigMonths & (1 << i)) ? 30 : 29);
+  }
+
+  let dayOffset = 0;
+  for (let mm = 1; mm < m; mm++) {
+    if (mm === leapMonth + 1) {
+      // 闰月在当前月之前，先加闰月天数
+      const leapBig = (data >> 16) & 0xf;
+      dayOffset += leapBig ? 30 : 29;
+    }
+    dayOffset += monthDays[mm - 1];
+  }
+
+  // 如果目标月就是闰月（即 m 是闰月后的重复月份）
+  // 约定：dateType='lunar' 且有闰月时，m>leapMonth 表示闰月后的月份
+  // 闰月本身的天数
+  if (leapMonth > 0 && m === leapMonth) {
+    // 如果是闰月本身（用 m=13 表示闰月）
+  } else if (leapMonth > 0 && m === 13) {
+    // m=13 表示闰月
+    for (let mm = 1; mm <= leapMonth; mm++) dayOffset += monthDays[mm - 1];
+  }
+
+  dayOffset += d - 1;
+  const result = new Date(baseSolar);
+  result.setDate(result.getDate() + totalDays + dayOffset);
+  const ry = result.getFullYear(), rm = result.getMonth() + 1, rd = result.getDate();
+  return ry + '-' + String(rm).padStart(2, '0') + '-' + String(rd).padStart(2, '0');
+}
+
 // ========== 工具函数 ==========
-function daysBetween(dateStr) {
+function daysBetween(dateStr, dataType) {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const actualDateStr = (dataType === 'lunar') ? lunarToSolar(dateStr) : dateStr;
+  const target = new Date(actualDateStr);
+  target.setHours(0,0,0,0);
+  return Math.floor((now - target) / (1000 * 60 * 60 * 24));
+}
   const now = new Date();
   now.setHours(0,0,0,0);
   const target = new Date(dateStr);
@@ -1637,10 +1725,11 @@ function isBirthday(m) {
   return m.category === 'birthday' || (m.tags && m.tags.includes('生日')) || (m.title && m.title.includes('生日'));
 }
 
-function daysUntilNextBirthday(dateStr) {
+function daysUntilNextBirthday(dateStr, dataType) {
   const now = new Date();
   now.setHours(0,0,0,0);
-  const birth = new Date(dateStr);
+  const actualDateStr = (dataType === 'lunar') ? lunarToSolar(dateStr) : dateStr;
+  const birth = new Date(actualDateStr);
   const thisYear = new Date(now.getFullYear(), birth.getMonth(), birth.getDate());
   thisYear.setHours(0,0,0,0);
   if (thisYear < now) {
@@ -1825,7 +1914,7 @@ function renderFeatured() {
         <div class="card-info">
           <span class="card-tag" style="background:${cat.color}">${cat.label}</span>
           <div class="card-title">${m.title}</div>
-          <div class="card-date">${isBirthday(m) ? '🎂 还有' + daysUntilNextBirthday(m.date) + '天过生日' : formatDate(m.date) + ' · ' + Math.abs(daysBetween(m.date)) + '天'}</div>
+          <div class="card-date">${isBirthday(m) ? '🎂 还有' + daysUntilNextBirthday(m.date, m.dateType) + '天过生日' : formatDate(m.date) + ' · ' + Math.abs(daysBetween(m.date, m.dateType)) + '天'}</div>
         </div>
       </div>`;
   }).join('');
@@ -1846,9 +1935,9 @@ function renderList() {
 
   container.innerHTML = list.map(m => {
     const cat = categoryMap[m.category] || categoryMap.other;
-    const days = daysBetween(m.date);
-    const daysLabel = isBirthday(m) ? '🎂 还有' + daysUntilNextBirthday(m.date) + '天' : (days >= 0 ? '天前' : '天后');
-    const absDays = isBirthday(m) ? daysUntilNextBirthday(m.date) : Math.abs(days);
+    const days = daysBetween(m.date, m.dateType);
+    const daysLabel = isBirthday(m) ? '🎂 还有' + daysUntilNextBirthday(m.date, m.dateType) + '天' : (days >= 0 ? '天前' : '天后');
+    const absDays = isBirthday(m) ? daysUntilNextBirthday(m.date, m.dateType) : Math.abs(days);
     const pos = m.imagePosition != null ? m.imagePosition : 50;
     const imgHtml = m.image
       ? `<img class="card-cover" src="${resolveImageSrc(m.image)}" style="object-position:center ${pos}%;" alt="">`
@@ -1882,11 +1971,12 @@ function openDetail(id) {
   currentDetailId = id;
 
   const cat = categoryMap[m.category] || categoryMap.other;
-  const days = daysBetween(m.date);
+  const days = daysBetween(m.date, m.dateType);
   const absDays = Math.abs(days);
 
   // 计算年月
-  const targetDate = new Date(m.date);
+  const actualDate = (m.dateType === 'lunar') ? lunarToSolar(m.date) : m.date;
+  const targetDate = new Date(actualDate);
   const now = new Date();
   const diffMs = Math.abs(now - targetDate);
   const totalDays = Math.floor(diffMs / (1000*60*60*24));
@@ -1969,7 +2059,7 @@ function openDetail(id) {
   }
 
   if (isBirthday(m)) {
-    infoHtml += '<div class="detail-row"><span class="label">🎂 下一个生日</span><span class="value">' + daysUntilNextBirthday(m.date) + '天后</span></div>';
+    infoHtml += '<div class="detail-row"><span class="label">🎂 下一个生日</span><span class="value">' + daysUntilNextBirthday(m.date, m.dateType) + '天后</span></div>';
   } else {
     infoHtml += '<div class="detail-row"><span class="label">📊 天数</span><span class="value">' + absDays + '天（共' + totalDays + '天）</span></div>';
   }
