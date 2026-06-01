@@ -280,6 +280,7 @@ if (saved === 'on') {
 dmSwitch.onchange = function() {
   applyDark(this.checked);
   localStorage.setItem('darkMode', this.checked ? 'on' : 'off');
+  try { nativeBridge.setDarkMode(this.checked); } catch(e) {}
 };
 
 // 监听系统深色模式变化 → 自动跟随（仅当用户未手动固定时）

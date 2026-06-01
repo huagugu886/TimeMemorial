@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -17,6 +19,19 @@ import com.timememorial.app.R
 class SettingsFragment : Fragment() {
 
     private var webView: WebView? = null
+
+    /** JS 桥接：让设置页切换暗色模式时同步到 SharedPreferences + AppCompatDelegate */
+    inner class DarkModeBridge {
+        @JavascriptInterface
+        fun setDarkMode(enabled: Boolean) {
+            requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+                .edit().putBoolean("dark_mode", enabled).apply()
+            AppCompatDelegate.setDefaultNightMode(
+                if (enabled) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(
@@ -39,6 +54,8 @@ class SettingsFragment : Fragment() {
             settings.builtInZoomControls = false
             settings.displayZoomControls = false
 
+            addJavascriptInterface(DarkModeBridge(), "nativeBridge")
+
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
@@ -57,7 +74,7 @@ class SettingsFragment : Fragment() {
                 }
             }
             webChromeClient = WebChromeClient()
-            loadUrl("file:///android_asset/settings_page.html?v=1")
+            loadUrl("file:///android_asset/settings_page.html?v=2")
         }
 
         return view
