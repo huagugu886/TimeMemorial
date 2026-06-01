@@ -133,17 +133,23 @@ class HomeFragment : Fragment() {
                 }
             }, "nativeBridge")
 
-            // 注入状态栏高度 CSS 变量，让弹窗正确避让状态栏
+            // 注入状态栏高度 CSS 变量 + 暗色模式主题
+            val isDarkMode = resources.configuration.uiMode and
+                    android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+                    android.content.res.Configuration.UI_MODE_NIGHT_YES
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     val sbHeight = resources.getIdentifier(
                         "status_bar_height", "dimen", "android"
                     ).let { if (it > 0) resources.getDimensionPixelSize(it) else 48 }
-                    view?.evaluateJavascript(
-                        "document.documentElement.style.setProperty('--sb-height', '${sbHeight}px')",
-                        null
-                    )
+                    val js = buildString {
+                        append("document.documentElement.style.setProperty('--sb-height', '${sbHeight}px');")
+                        if (isDarkMode) {
+                            append("document.body.setAttribute('data-theme','dark');")
+                        }
+                    }
+                    view?.evaluateJavascript(js, null)
                 }
             }
 

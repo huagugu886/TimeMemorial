@@ -50,10 +50,14 @@ class CalendarFragment : Fragment() {
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
 
-            // 页面加载完成后注入状态栏高度
+            // 页面加载完成后注入状态栏高度 + 暗色模式主题
+            val isDarkMode = resources.configuration.uiMode and
+                    android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+                    android.content.res.Configuration.UI_MODE_NIGHT_YES
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
+                    val darkJs = if (isDarkMode) "document.body.setAttribute('data-theme','dark');" else ""
                     view?.evaluateJavascript(
                         """
                         (function() {
@@ -62,6 +66,7 @@ class CalendarFragment : Fragment() {
                             // 隐藏底部导航栏（原生已有底栏）
                             var bottomNav = document.querySelector('.bottom-nav');
                             if (bottomNav) bottomNav.style.display = 'none';
+                            $darkJs
                         })();
                         """.trimIndent(), null
                     )
