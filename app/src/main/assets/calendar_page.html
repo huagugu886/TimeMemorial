@@ -537,6 +537,29 @@ body {
 }
 .year-cell:hover { background: var(--primary-light); }
 .year-cell.current:hover { background: var(--primary); }
+
+/* 深色模式 */
+body.dark-mode {
+  --surface: #111827;
+  --card: #1F2937;
+  --text-primary: #F9FAFB;
+  --text-secondary: #94A3B8;
+  --text-hint: #6B7280;
+  --divider: #374151;
+  --today-bg: #8B83FF;
+  --today-text: #FFFFFF;
+  --primary-light: #312E81;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+body.dark-mode .header {
+  background: linear-gradient(135deg, #312E81 0%, #4338CA 50%, #6366F1 100%);
+}
+body.dark-mode .event-card:active {
+  background: #2D2D44;
+}
+body.dark-mode .section-count {
+  background: #312E81;
+}
 </style>
 </head>
 <body>
