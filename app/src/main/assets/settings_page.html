@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>设置</title>
+<style>
+  :root {
+    --bg: #F2F0F7;
+    --card-bg: #FFFFFF;
+    --primary: #8B5CF6;
+    --text: #1F2937;
+    --text-sec: #9CA3AF;
+    --divider: #F3F4F6;
+    --switch-off: #E5E7EB;
+    --radius: 20px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 20px 120px;
+  }
+
+  /* 顶部 */
+  .header { padding: 24px 4px 20px; }
+  .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
+
+  /* 分组 */
+  .group {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .group-head {
+    padding: 16px 20px 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-sec);
+    letter-spacing: 0.3px;
+  }
+
+  /* 行 */
+  .row {
+    display: flex;
+    align-items: center;
+    padding: 13px 20px;
+    gap: 14px;
+    position: relative;
+    transition: background .12s;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .row:active { background: #F9FAFB; }
+  .row + .row::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 54px; right: 0;
+    height: 1px;
+    background: var(--divider);
+  }
+
+  /* 图标 */
+  .ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .ico-p { background: #EDE9FE; }
+  .ico-b { background: #DBEAFE; }
+  .ico-k { background: #FCE7F3; }
+  .ico-o { background: #FEF3C7; }
+  .ico-g { background: #D1FAE5; }
+  .ico-r { background: #FEE2E2; }
+  .ico-w { background: #F3F4F6; }
+
+  /* 文字区 */
+  .txt { flex: 1; min-width: 0; }
+  .txt-main { font-size: 16px; font-weight: 450; line-height: 1.3; }
+  .txt-sub { font-size: 12px; color: var(--text-sec); margin-top: 1px; }
+
+  /* 右侧 */
+  .right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .val { font-size: 15px; color: var(--text-sec); }
+  .chev { color: #D1D5DB; font-size: 13px; font-weight: 600; }
+
+  /* 开关 */
+  .sw { position: relative; width: 51px; height: 31px; flex-shrink: 0; }
+  .sw input { opacity: 0; width: 0; height: 0; }
+  .sw .sl {
+    position: absolute; inset: 0; background: var(--switch-off);
+    border-radius: 16px; transition: background .25s; cursor: pointer;
+  }
+  .sw .sl::before {
+    content: ''; position: absolute; width: 27px; height: 27px;
+    left: 2px; top: 2px; background: #fff; border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12); transition: transform .25s;
+  }
+  .sw input:checked + .sl { background: var(--primary); }
+  .sw input:checked + .sl::before { transform: translateX(20px); }
+
+  /* 主题色 — 内嵌在卡片行内 */
+  .colors {
+    display: flex; gap: 12px; padding: 4px 20px 16px;
+  }
+  .dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; transition: transform .15s;
+    border: 3px solid transparent;
+  }
+  .dot:active { transform: scale(.88); }
+  .dot.on { border-color: var(--primary); box-shadow: inset 0 0 0 2px #fff; }
+  .c1 { background: #8B5CF6; }
+  .c2 { background: #3B82F6; }
+  .c3 { background: #EC4899; }
+  .c4 { background: #F43F5E; }
+  .c5 { background: #14B8A6; }
+
+  /* 底部版本 */
+  .foot {
+    text-align: center; padding: 32px 0 0;
+  }
+  .foot-ico {
+    width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 10px;
+    background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 4px 16px rgba(139,92,246,.2);
+  }
+  .foot-name { font-size: 16px; font-weight: 600; }
+  .foot-ver { font-size: 12px; color: var(--text-sec); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header"><h1>设置</h1></div>
+
+<!-- 外观 -->
+<div class="group">
+  <div class="group-head">外观</div>
+  <div class="row">
+    <div class="ico ico-p">🌙</div>
+    <div class="txt"><div class="txt-main">深色模式</div></div>
+    <label class="sw"><input type="checkbox" id="dm"><span class="sl"></span></label>
+  </div>
+  <div class="row">
+    <div class="ico ico-b">🎨</div>
+    <div class="txt"><div class="txt-main">主题色</div></div>
+  </div>
+  <div class="colors">
+    <div class="dot c1 on" data-c="purple"></div>
+    <div class="dot c2" data-c="blue"></div>
+    <div class="dot c3" data-c="pink"></div>
+    <div class="dot c4" data-c="rose"></div>
+    <div class="dot c5" data-c="teal"></div>
+  </div>
+  <div class="row">
+    <div class="ico ico-o">🔤</div>
+    <div class="txt"><div class="txt-main">字体大小</div></div>
+    <div class="right"><span class="val">标准</span><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 纪念日提醒 -->
+<div class="group">
+  <div class="group-head">纪念日提醒</div>
+  <div class="row">
+    <div class="ico ico-k">🔔</div>
+    <div class="txt">
+      <div class="txt-main">纪念日提醒</div>
+      <div class="txt-sub">在纪念日前提醒你</div>
+    </div>
+    <label class="sw"><input type="checkbox" checked><span class="sl"></span></label>
+  </div>
+  <div class="row">
+    <div class="ico ico-o">⏰</div>
+    <div class="txt"><div class="txt-main">提前提醒</div></div>
+    <div class="right"><span class="val">3 天</span><span class="chev">›</span></div>
+  </div>
+  <div class="row">
+    <div class="ico ico-b">🕘</div>
+    <div class="txt"><div class="txt-main">提醒时间</div></div>
+    <div class="right"><span class="val">09:00</span><span class="chev">›</span></div>
+  </div>
+  <div class="row">
+    <div class="ico ico-p">🔁</div>
+    <div class="txt"><div class="txt-main">默认重复</div></div>
+    <div class="right"><span class="val">每年</span><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 通知 -->
+<div class="group">
+  <div class="group-head">通知</div>
+  <div class="row">
+    <div class="ico ico-b">📢</div>
+    <div class="txt"><div class="txt-main">通知渠道</div></div>
+    <div class="right"><span class="val">灵动岛</span><span class="chev">›</span></div>
+  </div>
+  <div class="row">
+    <div class="ico ico-g">🔊</div>
+    <div class="txt"><div class="txt-main">声音与振动</div></div>
+    <div class="right"><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 数据 -->
+<div class="group">
+  <div class="group-head">数据</div>
+  <div class="row">
+    <div class="ico ico-g">📤</div>
+    <div class="txt"><div class="txt-main">备份与恢复</div></div>
+    <div class="right"><span class="chev">›</span></div>
+  </div>
+  <div class="row">
+    <div class="ico ico-w">🗑️</div>
+    <div class="txt"><div class="txt-main">清除缓存</div></div>
+    <div class="right"><span class="val">12.3 MB</span><span class="chev">›</span></div>
+  </div>
+  <div class="row">
+    <div class="ico ico-b">📦</div>
+    <div class="txt"><div class="txt-main">导出数据</div></div>
+    <div class="right"><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 关于 -->
+<div class="group">
+  <div class="group-head">关于</div>
+  <div class="row">
+    <div class="ico ico-p">ℹ️</div>
+    <div class="txt"><div class="txt-main">版本信息</div></div>
+    <div class="right"><span class="val">v2.0.1</span><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 底部 -->
+<div class="foot">
+  <div class="foot-ico">🕐</div>
+  <div class="foot-name">TimeMemorial</div>
+  <div class="foot-ver">Version 2.0.1</div>
+</div>
+
+<script>
+document.querySelectorAll('.dot').forEach(d=>{
+  d.onclick=()=>{
+    document.querySelectorAll('.dot').forEach(x=>x.classList.remove('on'));
+    d.classList.add('on');
+  };
+});
+document.getElementById('dm').onchange=function(){
+  const s=document.documentElement.style;
+  if(this.checked){
+    s.setProperty('--bg','#111827');s.setProperty('--card-bg','#1F2937');
+    s.setProperty('--text','#F9FAFB');s.setProperty('--text-sec','#6B7280');
+    s.setProperty('--divider','#374151');s.setProperty('--switch-off','#4B5563');
+  }else{
+    s.setProperty('--bg','#F2F0F7');s.setProperty('--card-bg','#FFFFFF');
+    s.setProperty('--text','#1F2937');s.setProperty('--text-sec','#9CA3AF');
+    s.setProperty('--divider','#F3F4F6');s.setProperty('--switch-off','#E5E7EB');
+  }
+};
+</script>
+</body>
+</html>

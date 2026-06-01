@@ -1,44 +1,79 @@
 package com.timememorial.app.ui.settings
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatDelegate
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import com.timememorial.app.databinding.FragmentSettingsBinding
+import com.timememorial.app.R
 
 class SettingsFragment : Fragment() {
 
-    private var _binding: FragmentSettingsBinding? = null
-    private val binding get() = _binding!!
+    private var webView: WebView? = null
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        return binding.root
+        val view = inflater.inflate(R.layout.fragment_settings, container, false)
+        webView = view.findViewById(R.id.webView)
+
+        webView?.apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.allowFileAccess = true
+            settings.allowContentAccess = true
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            settings.cacheMode = WebSettings.LOAD_NO_CACHE
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            settings.setSupportZoom(false)
+            settings.builtInZoomControls = false
+            settings.displayZoomControls = false
+
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    val sbHeight = getStatusBarHeight()
+                    view?.evaluateJavascript(
+                        "document.documentElement.style.setProperty('--sb-height', '${sbHeight}px');",
+                        null
+                    )
+                    view?.evaluateJavascript(
+                        """
+                        var bn = document.querySelector('.bottom-nav');
+                        if (bn) bn.style.display = 'none';
+                        """.trimIndent(),
+                        null
+                    )
+                }
+            }
+            webChromeClient = WebChromeClient()
+            loadUrl("file:///android_asset/settings_page.html?v=1")
+        }
+
+        return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val prefs = requireContext().getSharedPreferences("settings", 0)
-        val isDark = prefs.getBoolean("dark_mode", false)
-        binding.switchDarkMode.isChecked = isDark
-
-        binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("dark_mode", isChecked).apply()
-            AppCompatDelegate.setDefaultNightMode(
-                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
-            )
-        }
+    private fun getStatusBarHeight(): Int {
+        val insets = ViewCompat.getRootWindowInsets(requireView()) ?: return 0
+        return insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
     }
 
     override fun onDestroyView() {
+        webView?.apply {
+            stopLoading()
+            destroy()
+        }
+        webView = null
         super.onDestroyView()
-        _binding = null
     }
 }
