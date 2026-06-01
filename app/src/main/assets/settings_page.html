@@ -336,7 +336,7 @@
 <div class="foot">
   <div class="foot-ico">🕐</div>
   <div class="foot-name">TimeMemorial</div>
-  <div class="foot-ver">Version 2.0.1</div>
+  <div class="foot-ver" id="appVer">Version</div>
 </div>
 
 <!-- === 选择器组件 === -->
@@ -674,6 +674,15 @@ mask.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passiv
     localStorage.setItem('repeatType', repeatType);
     updateLabels(); syncSettings(); closeAll();
   };
+})();
+
+// === 底部版本号：从版本信息行动态同步 ===
+(function() {
+  var verSpan = document.querySelector('.row .val'); // 版本信息行的 span
+  var footVer = document.getElementById('appVer');
+  if (verSpan && footVer) {
+    footVer.textContent = verSpan.textContent;
+  }
 })();
 
 // 监听其他页面修改设置

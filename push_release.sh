@@ -65,6 +65,13 @@ sed -i "s/versionName = \"${CURRENT_NAME}\"/versionName = \"${NEW_NAME}\"/" "$BU
 echo "✅ 版本号已更新"
 grep -E "versionCode|versionName" "$BUILD_FILE" | head -2
 
+# 同步更新 settings_page.html 中的版本号
+SETTINGS_HTML="app/src/main/assets/settings_page.html"
+if [ -f "$SETTINGS_HTML" ]; then
+    sed -i "s|<span class=\"val\">v${CURRENT_NAME}</span>|<span class=\"val\">v${NEW_NAME}</span>|" "$SETTINGS_HTML"
+    echo "✅ settings_page.html 版本号已同步: v${NEW_NAME}"
+fi
+
 TAG="v${NEW_NAME}"
 
 echo ""
