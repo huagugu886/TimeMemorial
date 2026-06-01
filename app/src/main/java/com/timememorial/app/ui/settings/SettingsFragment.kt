@@ -26,10 +26,13 @@ class SettingsFragment : Fragment() {
         fun setDarkMode(enabled: Boolean) {
             requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
                 .edit().putBoolean("dark_mode", enabled).apply()
-            AppCompatDelegate.setDefaultNightMode(
-                if (enabled) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
-            )
+            // 必须在主线程调用，否则 Activity 重建可能不触发
+            activity?.runOnUiThread {
+                AppCompatDelegate.setDefaultNightMode(
+                    if (enabled) AppCompatDelegate.MODE_NIGHT_YES
+                    else AppCompatDelegate.MODE_NIGHT_NO
+                )
+            }
         }
     }
 

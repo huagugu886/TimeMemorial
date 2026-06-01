@@ -11,6 +11,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import androidx.core.content.ContextCompat
+import com.google.android.material.color.MaterialColors
 import com.timememorial.app.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +34,9 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
         binding.bottomNav.setupWithNavController(navController)
+
+        // 深色模式切换后强制刷新底栏颜色（BottomNavigationView 缓存 ColorStateList）
+        refreshBottomNavColors()
 
         // 底栏：只吃导航栏底部 insets，阻止键盘(IME)把它顶上去
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
@@ -62,5 +67,24 @@ class MainActivity : AppCompatActivity() {
             }
             insets
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 从设置页切深色模式回来时，确保底栏颜色同步
+        refreshBottomNavColors()
+    }
+
+    /** 强制刷新底栏颜色，解决深色模式切换后不生效的问题 */
+    private fun refreshBottomNavColors() {
+        val bottomNav = binding.bottomNav
+        // 重新加载 color state list，清除缓存
+        val colorStateList = ContextCompat.getColorStateList(this, R.color.bottom_nav_color)
+        bottomNav.itemIconTintList = colorStateList
+        bottomNav.itemTextColor = colorStateList
+        // 背景色跟随主题
+        bottomNav.setBackgroundColor(
+            MaterialColors.getColor(bottomNav, com.google.android.material.R.attr.colorSurface, 0)
+        )
     }
 }
