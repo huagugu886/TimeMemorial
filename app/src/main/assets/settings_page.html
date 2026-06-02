@@ -315,7 +315,7 @@
     <div class="txt"><div class="txt-main">清除缓存</div></div>
     <div class="right"><span class="val">12.3 MB</span><span class="chev">›</span></div>
   </div>
-  <div class="row">
+  <div class="row" id="rowExport">
     <div class="ico ico-b">📦</div>
     <div class="txt"><div class="txt-main">导出数据</div></div>
     <div class="right"><span class="chev">›</span></div>
@@ -696,6 +696,21 @@ window.addEventListener('storage', function(e) {
     else { dmSwitch.checked = sysDark.matches; applyDark(sysDark.matches); }
   }
 });
+
+/* ===== 导出数据 ===== */
+document.getElementById('rowExport').onclick = function() {
+  try {
+    var result = nativeBridge.exportData();
+    var res = JSON.parse(result);
+    if (res.ok) {
+      alert('导出成功 ✅\n\n' + res.path);
+    } else {
+      alert('导出失败：' + (res.error || '未知错误'));
+    }
+  } catch(e) {
+    alert('导出异常：' + e.message);
+  }
+};
 </script>
 </body>
 </html>

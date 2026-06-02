@@ -9,8 +9,16 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
+import android.os.Environment
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import com.timememorial.app.reminder.ReminderSettings
+import org.json.JSONObject
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -32,6 +40,28 @@ class SettingsFragment : Fragment() {
                     if (enabled) AppCompatDelegate.MODE_NIGHT_YES
                     else AppCompatDelegate.MODE_NIGHT_NO
                 )
+            }
+        }
+
+        @JavascriptInterface
+        fun exportData(): String {
+            val ctx = webView?.context ?: return "{\"ok\":false}"
+            try {
+                val jsonArray = ReminderSettings.getAnniversaries(ctx)
+                val wrapper = JSONObject()
+                wrapper.put("version", 1)
+                wrapper.put("exportedAt", SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date()))
+                wrapper.put("count", jsonArray.length())
+                wrapper.put("data", jsonArray)
+                val json = wrapper.toString(2)
+                val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                val fileName = "anniversaries_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
+                val file = File(dir, fileName)
+                file.writeText(json)
+                return "{\"ok\":true,\"path\":\"${file.absolutePath}\"}"
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsFragment", "Export failed", e)
+                return "{\"ok\":false,\"error\":\"${e.message}\"}"
             }
         }
 
