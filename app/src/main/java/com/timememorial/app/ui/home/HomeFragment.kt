@@ -215,7 +215,7 @@ class HomeFragment : Fragment() {
     fun reloadFromRestore() {
         val webView = _binding?.webView ?: return
         val context = requireContext()
-        val allData = com.timememorial.app.data.AnniversaryRepository.getAll(context)
+        val allData = com.timememorial.app.data.local.AnniversaryRepository.getAll(context)
         val jsonArray = org.json.JSONArray()
         for (item in allData) {
             val obj = org.json.JSONObject()

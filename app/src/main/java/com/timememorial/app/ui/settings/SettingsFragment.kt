@@ -136,7 +136,7 @@ class SettingsFragment : Fragment() {
                 activity?.runOnUiThread {
                     try {
                         androidx.navigation.Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-                            .navigate(R.id.navigation_home)
+                            .navigate(R.id.nav_home)
                     } catch (e: Exception) {
                         android.util.Log.e("SettingsFragment", "navigate to home failed", e)
                     }
