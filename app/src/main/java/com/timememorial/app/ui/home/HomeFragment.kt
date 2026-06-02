@@ -229,34 +229,22 @@ class HomeFragment : Fragment() {
         prefs.edit().putBoolean("pending_restore_sync", false).apply()
         android.widget.Toast.makeText(requireContext(), "数据恢复成功，正在刷新首页…", android.widget.Toast.LENGTH_SHORT).show()
 
-        val context = requireContext()
-        val anniversaries = com.timememorial.app.data.local.AnniversaryRepository.getAll(context)
-
-        val jsonArray = org.json.JSONArray()
-        for (item in anniversaries) {
-            val json = org.json.JSONObject().apply {
-                put("id", item["id"] ?: 0L)
-                put("title", item["title"] ?: "")
-                put("date", item["date"] ?: "")
-                put("desc", item["note"] ?: "")
-                put("category", item["category"] ?: "")
-                put("image", item["photoUri"] ?: "")
-                put("imagePosition", 50)
-                put("favorite", false)
-                val repeatYearly = item["repeatYearly"] as? Boolean ?: true
-                put("repeatType", if (repeatYearly) "yearly" else "none")
-                put("remindDays", item["reminderDays"] ?: 3)
-                put("dateType", "solar")
-            }
-            jsonArray.put(json)
+        // 直接用 SettingsFragment.restoreData() 提前存好的首页格式 JSON
+        // 不能从 AnniversaryRepository 读——页面初始化时 syncToNative() 已经
+        // 把 localStorage（空的）同步回 native 覆盖了 anniversaries.json
+        val pendingData = prefs.getString("pending_restore_data", null)
+        if (pendingData.isNullOrEmpty()) {
+            android.util.Log.w("HomeFragment", "pending_restore_data is empty, skip restore")
+            return
         }
 
-        val jsonStr = jsonArray.toString()
+        val jsonStr = pendingData
             .replace("\\", "\\\\")
             .replace("'", "\\'")
             .replace("\n", "\\n")
             .replace("\r", "\\r")
-        val js = "localStorage.setItem('memorials', '$jsonStr'); window.location.reload();"
+        // 先调 JS 端函数注入（更新内存+localStorage），再 reload 确保渲染
+        val js = "window.__injectRestoreData && __injectRestoreData('$jsonStr'); setTimeout(function(){ window.location.reload(); }, 200);"
         webView.evaluateJavascript(js, null)
     }
 
