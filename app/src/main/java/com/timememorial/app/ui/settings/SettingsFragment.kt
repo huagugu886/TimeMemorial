@@ -39,11 +39,17 @@ class SettingsFragment : Fragment() {
         fun saveReminderSettings(jsonString: String) {
             try {
                 val json = org.json.JSONObject(jsonString)
-                val prefs = requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+                val prefs = requireContext().getSharedPreferences("reminder_settings", android.content.Context.MODE_PRIVATE)
+                val timeParts = json.optString("reminderTime", "09:00").split(":")
+                val hour = timeParts.getOrNull(0)?.toIntOrNull() ?: 9
+                val minute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
+
                 prefs.edit()
-                    .putInt("reminder_days", json.optInt("reminderDays", 3))
-                    .putString("reminder_time", json.optString("reminderTime", "09:00"))
-                    .putString("repeat_type", json.optString("repeatType", "yearly"))
+                    .putBoolean("enabled", true)
+                    .putInt("days_before", json.optInt("reminderDays", 3))
+                    .putInt("hour", hour)
+                    .putInt("minute", minute)
+                    .putString("default_repeat", json.optString("repeatType", "yearly"))
                     .apply()
             } catch (e: Exception) {
                 android.util.Log.e("SettingsFragment", "saveReminderSettings failed", e)
