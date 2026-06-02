@@ -183,12 +183,21 @@ class WebBridge(private val context: Context, private val onSetBottomNavVisibili
     @JavascriptInterface
     fun syncAnniversaries(jsonString: String) {
         try {
+            android.util.Log.w("WebBridge", "syncAnniversaries CALLED, json length=${jsonString.length}")
+            android.util.Log.w("WebBridge", "syncAnniversaries json=$jsonString")
+            android.util.Log.w("WebBridge", "syncAnniversaries context.filesDir=${context.filesDir}")
+            android.util.Log.w("WebBridge", "syncAnniversaries context.packageName=${context.packageName}")
             val jsonArray = org.json.JSONArray(jsonString)
             com.timememorial.app.reminder.ReminderSettings.saveAnniversaries(context, jsonArray)
+            android.util.Log.w("WebBridge", "syncAnniversaries saveAnniversaries DONE")
+            // 验证写入结果
+            val verify = com.timememorial.app.reminder.ReminderSettings.getAnniversaries(context)
+            android.util.Log.w("WebBridge", "syncAnniversaries verify read back count=${verify.length()}")
             // 同步后立即调度提醒
             com.timememorial.app.reminder.ReminderManager.scheduleDaily(context)
+            android.util.Log.w("WebBridge", "syncAnniversaries scheduleDaily DONE")
         } catch (e: Exception) {
-            android.util.Log.e("WebBridge", "syncAnniversaries failed", e)
+            android.util.Log.e("WebBridge", "syncAnniversaries FAILED", e)
         }
     }
 

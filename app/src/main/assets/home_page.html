@@ -1758,16 +1758,21 @@ function saveData(data) {
 
 // ── 纪念日数据同步到原生端 ──
 function syncToNative() {
+    console.log('[SyncToNative] called, nativeBridge=', !!window.nativeBridge, 'syncAnniversaries=', !!(window.nativeBridge && window.nativeBridge.syncAnniversaries));
     if (window.nativeBridge && window.nativeBridge.syncAnniversaries) {
         const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        window.nativeBridge.syncAnniversaries(JSON.stringify(
-            data.map(m => ({
-                id: m.id,
-                title: m.title,
-                date: m.date,
-                category: m.category || 'other'
-            }))
-        ));
+        console.log('[SyncToNative] syncing', data.length, 'anniversaries');
+        const payload = JSON.stringify(data.map(m => ({
+            id: m.id,
+            title: m.title,
+            date: m.date,
+            category: m.category || 'other'
+        })));
+        console.log('[SyncToNative] payload=', payload);
+        window.nativeBridge.syncAnniversaries(payload);
+        console.log('[SyncToNative] syncAnniversaries called OK');
+    } else {
+        console.log('[SyncToNative] SKIPPED - bridge not ready');
     }
 }
 
