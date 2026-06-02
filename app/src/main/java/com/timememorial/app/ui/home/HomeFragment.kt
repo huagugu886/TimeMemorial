@@ -210,7 +210,37 @@ class HomeFragment : Fragment() {
             prefs.edit().putBoolean("pending_restore_sync", false).apply()
             android.widget.Toast.makeText(requireContext(), "数据恢复成功，正在刷新首页…", android.widget.Toast.LENGTH_SHORT).show()
             val webView = _binding?.webView ?: return
-            webView.evaluateJavascript("localStorage.removeItem('anniversaries');", null)
+
+            // 从原生存储读取恢复的数据，推入 localStorage
+            val context = requireContext()
+            val anniversaries = com.timememorial.app.data.local.AnniversaryRepository.getAll(context)
+
+            // 转换为 home_page.html 期望的 JSON 格式
+            val jsonArray = org.json.JSONArray()
+            for (item in anniversaries) {
+                val json = org.json.JSONObject().apply {
+                    put("id", item.id)
+                    put("title", item.title)
+                    put("date", item.date)
+                    put("desc", item.note ?: "")
+                    put("category", item.category)
+                    put("image", item.photoUri ?: "")
+                    put("imagePosition", 50)
+                    put("favorite", false)
+                    put("repeatType", if (item.repeatYearly) "yearly" else "none")
+                    put("remindDays", item.reminderDays)
+                    put("dateType", "solar")
+                }
+                jsonArray.put(json)
+            }
+
+            // 推入 localStorage 并刷新
+            val jsonStr = jsonArray.toString()
+                .replace("\\", "\\\\")
+                .replace("'", "\\'")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+            webView.evaluateJavascript("localStorage.setItem('time_memorial_data', '$jsonStr');", null)
             webView.evaluateJavascript("loadAll();", null)
         }
     }
