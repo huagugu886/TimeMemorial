@@ -2303,6 +2303,7 @@ function openAddModalForEdit(m) {
     if (document.getElementById('positionSlider')) {
       document.getElementById('positionSlider').value = imagePosition;
     }
+    document.getElementById('positionPicker').classList.add('show');
   } else {
     document.getElementById('previewContainer').classList.remove('show');
     document.getElementById('uploadArea').style.display = '';
