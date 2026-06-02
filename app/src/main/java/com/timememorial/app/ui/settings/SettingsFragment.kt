@@ -22,6 +22,7 @@ import java.util.Locale
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import com.timememorial.app.data.local.AnniversaryRepository
 import com.timememorial.app.R
 
 class SettingsFragment : Fragment() {
