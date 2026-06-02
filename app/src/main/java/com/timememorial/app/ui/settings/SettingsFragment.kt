@@ -211,6 +211,8 @@ class SettingsFragment : Fragment() {
             settings.allowContentAccess = true
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
+            // 清除 WebView 内部缓存（HTTP 缓存等）
+            clearWebViewCache(context)
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
             settings.setSupportZoom(false)
@@ -234,6 +236,89 @@ class SettingsFragment : Fragment() {
                         """.trimIndent(),
                         null
                     )
+                }
+            }
+            webChromeClient = object : WebChromeClient() {
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    filePathCallback: ValueCallback<Array<Uri>>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    fileChooserCallback?.onReceiveValue(null)
+                    fileChooserCallback = filePathCallback
+
+                    val intent = fileChooserParams?.createIntent() ?: return false
+                    try {
+                        fileChooserLauncher.launch(intent)
+                    } catch (e: Exception) {
+                        fileChooserCallback = null
+                        return false
+                    }
+                    return true
+                }
+            }
+            loadUrl("file:///android_asset/settings_page.html?v=2")
+        }
+
+        return view
+    }
+
+    private fun handleFileChooserResult(result: ActivityResult) {
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            val uris = when {
+                data?.clipData != null -> {
+                    val count = data.clipData!!.itemCount
+                    Array(count) { i -> data.clipData!!.getItemAt(i).uri }
+                }
+                data?.data != null -> arrayOf(data.data!!)
+                else -> null
+            }
+            fileChooserCallback?.onReceiveValue(uris)
+        } else {
+            fileChooserCallback?.onReceiveValue(null)
+        }
+        fileChooserCallback = null
+    }
+
+    /** 将 data:image/xxx;base64,... 字符串保存到 images 目录，返回文件名 */
+    private fun saveBase64Image(dataUrl: String): String? {
+        return try {
+            val ctx = webView?.context ?: return null
+            val imageDir = File(ctx.filesDir, "images").apply { mkdirs() }
+            val mimeType = dataUrl.substringAfter(":").substringBefore(";")
+            val rawBase64 = dataUrl.substringAfter(",")
+            val ext = when {
+                mimeType.contains("png") -> "png"
+                mimeType.contains("webp") -> "webp"
+                mimeType.contains("gif") -> "gif"
+                else -> "jpg"
+            }
+            val bytes = android.util.Base64.decode(rawBase64, android.util.Base64.DEFAULT)
+            val fileName = "${java.util.UUID.randomUUID()}.$ext"
+            File(imageDir, fileName).writeBytes(bytes)
+            fileName
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsFragment", "saveBase64Image failed", e)
+            null
+        }
+    }
+
+    private fun getStatusBarHeight(): Int {
+        val insets = ViewCompat.getRootWindowInsets(requireView()) ?: return 0
+        return insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+    }
+
+    override fun onDestroyView() {
+        webView?.apply {
+            stopLoading()
+            destroy()
+        }
+        webView = null
+        super.onDestroyView()
+    }
+}
+        )
                 }
             }
             webChromeClient = object : WebChromeClient() {

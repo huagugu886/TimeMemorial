@@ -305,6 +305,47 @@
   .br-upload-icon { font-size: 28px; margin-bottom: 6px; }
   .br-upload p { font-size: 13px; color: var(--text-sec); }
 
+  /* === 自定义确认弹窗 === */
+  .cfm-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45); z-index: 2000;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s;
+  }
+  .cfm-mask.show { opacity: 1; pointer-events: auto; }
+  .cfm-box {
+    position: fixed; left: 50%; top: 50%;
+    transform: translate(-50%,-50%) scale(.9);
+    width: 82%; max-width: 320px;
+    background: var(--card-bg); border-radius: 20px;
+    box-shadow: 0 20px 60px var(--primary-shadow), 0 4px 20px rgba(0,0,0,.15);
+    z-index: 2001; overflow: hidden;
+    opacity: 0; pointer-events: none;
+    transition: all .3s cubic-bezier(.32,.72,0,1);
+    text-align: center;
+    padding: 32px 24px 24px;
+  }
+  .cfm-box.show { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
+  .cfm-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: rgba(239,68,68,.12);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px; font-size: 26px;
+    /* 深色模式下稍微提亮 */
+    filter: brightness(1.1);
+  }
+  .cfm-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .cfm-msg { font-size: 14px; color: var(--text-sec); line-height: 1.5; margin-bottom: 24px; }
+  .cfm-btns { display: flex; gap: 12px; }
+  .cfm-btns button {
+    flex: 1; padding: 12px; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: opacity .15s;
+  }
+  .cfm-btns button:active { opacity: .7; }
+  .cfm-cancel { background: var(--divider); color: var(--text-sec); }
+  .cfm-ok { background: var(--primary); color: #fff; }
+
   .br-status {
     padding: 10px 12px; border-radius: 10px; font-size: 13px;
     margin-top: 10px; display: none; line-height: 1.5;
@@ -405,10 +446,10 @@
     <div class="txt"><div class="txt-main">备份与恢复</div></div>
     <div class="right"><span class="chev">›</span></div>
   </div>
-  <div class="row">
+  <div class="row" id="rowClearCache">
     <div class="ico ico-w">🗑️</div>
     <div class="txt"><div class="txt-main">清除缓存</div></div>
-    <div class="right"><span class="val">12.3 MB</span><span class="chev">›</span></div>
+    <div class="right"><span class="val" id="cacheSize">计算中…</span><span class="chev">›</span></div>
   </div>
   <div class="row" id="rowExport">
     <div class="ico ico-b">📦</div>
@@ -516,6 +557,18 @@
   </div>
   <div class="br-foot">
     <button class="br-foot-btn" id="brFootClose">关闭</button>
+  </div>
+</div>
+
+<!-- 自定义确认弹窗 -->
+<div class="cfm-mask" id="cfmMask"></div>
+<div class="cfm-box" id="cfmBox">
+  <div class="cfm-icon">⚠️</div>
+  <div class="cfm-title" id="cfmTitle"></div>
+  <div class="cfm-msg" id="cfmMsg"></div>
+  <div class="cfm-btns">
+    <button class="cfm-cancel" id="cfmCancel">取消</button>
+    <button class="cfm-ok" id="cfmOk">确定</button>
   </div>
 </div>
 
@@ -849,6 +902,29 @@ document.getElementById('rowExport').onclick = function() {
   }
 };
 
+/* ===== 自定义确认弹窗 ===== */
+function showConfirm(title, msg) {
+  return new Promise(function(resolve) {
+    var mask = document.getElementById('cfmMask');
+    var box = document.getElementById('cfmBox');
+    document.getElementById('cfmTitle').textContent = title;
+    document.getElementById('cfmMsg').textContent = msg;
+    mask.classList.add('show');
+    box.classList.add('show');
+    function close(val) {
+      mask.classList.remove('show');
+      box.classList.remove('show');
+      document.getElementById('cfmOk').onclick = null;
+      document.getElementById('cfmCancel').onclick = null;
+      mask.onclick = null;
+      resolve(val);
+    }
+    document.getElementById('cfmOk').onclick = function() { close(true); };
+    document.getElementById('cfmCancel').onclick = function() { close(false); };
+    mask.onclick = function() { close(false); };
+  });
+}
+
 /* ===== 备份与恢复 Modal ===== */
 (function(){
   var mask = document.getElementById('brMask');
@@ -938,9 +1014,10 @@ document.getElementById('rowExport').onclick = function() {
       '<div class="br-upload-icon">✅</div><p>已选择：' + f.name + ' (' + (f.size/1024).toFixed(1) + ' KB)</p>';
   };
 
-  document.getElementById('brDoRestore').onclick = function(){
+  document.getElementById('brDoRestore').onclick = async function(){
     if (!selectedFile) return;
-    if (!confirm('⚠️ 将覆盖当前所有数据，确定恢复？')) return;
+    var confirmed = await showConfirm('恢复数据', '将覆盖当前所有数据，确定恢复？');
+    if (!confirmed) return;
     var st = document.getElementById('brRestoreStatus');
     st.className = 'br-status'; st.textContent = '正在读取文件...';
     var reader = new FileReader();
@@ -971,6 +1048,64 @@ document.getElementById('rowExport').onclick = function() {
     };
     reader.readAsText(selectedFile);
   };
+})();
+</script>
+</body>
+</html>
+document.getElementById('cacheSize');
+  var clearRow = document.getElementById('rowClearCache');
+
+  // 计算并显示缓存大小
+  function refreshCacheSize() {
+    try {
+      var sizeStr = nativeBridge.getCacheSize();
+      var size = JSON.parse(sizeStr);
+      if (size.ok) {
+        cacheSizeEl.textContent = size.display;
+      } else {
+        cacheSizeEl.textContent = '未知';
+      }
+    } catch(e) {
+      cacheSizeEl.textContent = '未知';
+    }
+  }
+
+  // 页面加载时获取缓存大小
+  refreshCacheSize();
+
+  // 点击清除缓存
+  clearRow.onclick = function() {
+    var currentSize = cacheSizeEl.textContent;
+    if (currentSize === '0 B' || currentSize === '未知' || currentSize === '计算中…') {
+      // 缓存为空，直接提示
+      showConfirm('清除缓存', '当前没有需要清除的缓存').then(function(){});
+      return;
+    }
+    showConfirm(
+      '清除缓存',
+      '将清除 ' + currentSize + ' 的临时缓存数据\n\n不会删除纪念日数据和设置'
+    ).then(function(confirmed) {
+      if (!confirmed) return;
+      // 显示加载状态
+      cacheSizeEl.textContent = '清除中…';
+      try {
+        var result = nativeBridge.clearCache();
+        var res = JSON.parse(result);
+        if (res.ok) {
+          cacheSizeEl.textContent = res.display;
+        } else {
+          cacheSizeEl.textContent = currentSize;
+          alert('清除失败：' + (res.error || '未知错误'));
+        }
+      } catch(e) {
+        cacheSizeEl.textContent = currentSize;
+        alert('清除异常：' + e.message);
+      }
+    });
+  };
+
+  // 暴露给外部刷新（可选）
+  window.__refreshCacheSize = refreshCacheSize;
 })();
 </script>
 </body>
