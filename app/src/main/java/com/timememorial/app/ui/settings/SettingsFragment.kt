@@ -221,15 +221,17 @@ class SettingsFragment : Fragment() {
             return try {
                 val ctx = webView?.context ?: return "{\"ok\":false}"
                 var cleared = 0L
-                // Clear WebView cache
-                webView?.clearCache(true)
-                webView?.clearHistory()
-                webView?.clearFormData()
                 // Clear cache directory
                 ctx.cacheDir?.let { dir ->
                     if (dir.exists()) {
                         dir.walkTopDown().filter { it.isFile }.forEach { cleared += it.length(); it.delete() }
                     }
+                }
+                // WebView methods must be called on the main thread
+                activity?.runOnUiThread {
+                    webView?.clearCache(true)
+                    webView?.clearHistory()
+                    webView?.clearFormData()
                 }
                 JSONObject().apply {
                     put("ok", true)
