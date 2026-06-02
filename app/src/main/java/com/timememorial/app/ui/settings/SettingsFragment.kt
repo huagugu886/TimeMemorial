@@ -120,7 +120,7 @@ class SettingsFragment : Fragment() {
                 for (i in 0 until data.length()) {
                     val obj = data.getJSONObject(i)
                         val map = mutableMapOf<String, Any?>()
-                        map["title"] = name
+                        map["title"] = obj.optString("title", "")
                         map["date"] = obj.optString("date", "")
                         map["category"] = obj.optString("category", "")
                         map["repeatYearly"] = obj.optBoolean("repeatYearly", true)
