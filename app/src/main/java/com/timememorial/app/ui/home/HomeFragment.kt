@@ -242,7 +242,7 @@ class HomeFragment : Fragment() {
                 .replace("\n", "\\n")
                 .replace("\r", "\\r")
             webView.evaluateJavascript("localStorage.setItem('time_memorial_data', '$jsonStr');", null)
-            webView.evaluateJavascript("loadAll();", null)
+            webView.reload()
         }
     }
 
