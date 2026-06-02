@@ -227,16 +227,43 @@ class SettingsFragment : Fragment() {
                         dir.walkTopDown().filter { it.isFile }.forEach { cleared += it.length(); it.delete() }
                     }
                 }
+                // Clear images directory (cached thumbnails etc.)
+                File(ctx.filesDir, "images").let { dir ->
+                    if (dir.exists()) {
+                        dir.walkTopDown().filter { it.isFile }.forEach { cleared += it.length(); it.delete() }
+                    }
+                }
+                // Clear temp directory
+                ctx.cacheDir?.parentFile?.let { parent ->
+                    File(parent, "code_cache").let { dir ->
+                        if (dir.exists()) {
+                            dir.walkTopDown().filter { it.isFile }.forEach { cleared += it.length(); it.delete() }
+                        }
+                    }
+                }
                 // WebView methods must be called on the main thread
                 activity?.runOnUiThread {
                     webView?.clearCache(true)
                     webView?.clearHistory()
                     webView?.clearFormData()
                 }
+                // Calculate actual remaining size
+                var remaining = 0L
+                ctx.cacheDir?.let { dir ->
+                    if (dir.exists()) {
+                        dir.walkTopDown().filter { it.isFile }.forEach { remaining += it.length() }
+                    }
+                }
+                File(ctx.filesDir, "images").let { dir ->
+                    if (dir.exists()) {
+                        dir.walkTopDown().filter { it.isFile }.forEach { remaining += it.length() }
+                    }
+                }
                 JSONObject().apply {
                     put("ok", true)
-                    put("display", "0 B")
+                    put("display", formatBytes(remaining))
                     put("cleared", cleared)
+                    put("remaining", remaining)
                 }.toString()
             } catch (e: Exception) {
                 "{\"ok\":false,\"error\":\"${e.message}\"}"

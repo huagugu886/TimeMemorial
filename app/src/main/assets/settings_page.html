@@ -1077,6 +1077,19 @@ function showConfirm(title, msg) {
 
   refreshCacheSize();
 
+  // Toast 提示函数
+  function showToast(msg, duration) {
+    duration = duration || 2000;
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
+      'background:rgba(0,0,0,0.78);color:#fff;padding:10px 22px;border-radius:20px;' +
+      'font-size:14px;z-index:9999;pointer-events:none;transition:opacity 0.3s;opacity:1;';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.opacity = '0'; }, duration);
+    setTimeout(function(){ document.body.removeChild(t); }, duration + 350);
+  }
+
   clearRow.onclick = function() {
     var currentSize = cacheSizeEl.textContent;
     if (currentSize === '0 B' || currentSize === '未知' || currentSize === '计算中…') {
@@ -1094,13 +1107,18 @@ function showConfirm(title, msg) {
         var res = JSON.parse(result);
         if (res.ok) {
           cacheSizeEl.textContent = res.display;
+          if (res.remaining === 0 || res.remaining < 1024) {
+            showToast('缓存已清除 ✅');
+          } else {
+            showToast('已清除 ' + formatSize(res.cleared) + '，剩余 ' + res.display);
+          }
         } else {
           cacheSizeEl.textContent = currentSize;
-          alert('清除失败：' + (res.error || '未知错误'));
+          showToast('清除失败：' + (res.error || '未知错误'));
         }
       } catch(e) {
         cacheSizeEl.textContent = currentSize;
-        alert('清除异常：' + e.message);
+        showToast('清除异常：' + e.message);
       }
     });
   };
