@@ -60,10 +60,28 @@ class SettingsFragment : Fragment() {
         fun exportData(): String {
             val ctx = webView?.context ?: return "{\"ok\":false}"
             try {
+                val imageDir = File(ctx.filesDir, "images")
                 val items = com.timememorial.app.data.local.AnniversaryRepository.getAll(ctx)
                 val jsonArray = org.json.JSONArray().apply {
                     items.forEach { item ->
-                        put(org.json.JSONObject(item))
+                        val obj = org.json.JSONObject(item)
+                        // 如果有 photoUri，读取图片文件内容为 base64 一起备份
+                        val photoUri = item["photoUri"] as? String ?: ""
+                        if (photoUri.isNotEmpty()) {
+                            val imgFile = File(imageDir, photoUri)
+                            if (imgFile.exists()) {
+                                val bytes = imgFile.readBytes()
+                                val mimeType = when {
+                                    photoUri.endsWith(".png") -> "image/png"
+                                    photoUri.endsWith(".webp") -> "image/webp"
+                                    photoUri.endsWith(".gif") -> "image/gif"
+                                    else -> "image/jpeg"
+                                }
+                                val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+                                obj.put("imageBase64", "data:${mimeType};base64,${base64}")
+                            }
+                        }
+                        put(obj)
                     }
                 }
                 val wrapper = JSONObject()
@@ -115,35 +133,38 @@ class SettingsFragment : Fragment() {
                     val id = (item["id"] as? Number)?.toLong() ?: continue
                     AnniversaryRepository.deleteById(requireContext(), id)
                 }
-                // 全插：将备份数据完整写入
+                // 全插：将备份数据完整写入，并同时构建首页 inject 格式
                 var count = 0
-                for (i in 0 until data.length()) {
-                    val obj = data.getJSONObject(i)
-                        val map = mutableMapOf<String, Any?>()
-                        map["title"] = obj.optString("title", "")
-                        map["date"] = obj.optString("date", "")
-                        map["category"] = obj.optString("category", "")
-                        map["repeatYearly"] = obj.optBoolean("repeatYearly", true)
-                        map["reminderDays"] = obj.optInt("reminderDays", 3)
-                        map["photoUri"] = obj.optString("photoUri", "")
-                        map["note"] = obj.optString("note", "")
-                        AnniversaryRepository.insert(requireContext(), map)
-                        count++
-                }
-                // 构建首页需要的 JSON 格式，暂存到 SharedPreferences
-                // （首页 syncToNative 会先覆盖 anniversaries.json，所以必须暂存原始数据）
                 val injectArray = org.json.JSONArray()
                 for (i in 0 until data.length()) {
                     val obj = data.getJSONObject(i)
+                    val map = mutableMapOf<String, Any?>()
+                    map["title"] = obj.optString("title", "")
+                    map["date"] = obj.optString("date", "")
+                    map["category"] = obj.optString("category", "")
+                    map["repeatYearly"] = obj.optBoolean("repeatYearly", true)
+                    map["reminderDays"] = obj.optInt("reminderDays", 3)
+                    map["note"] = obj.optString("note", "")
+                    map["favorite"] = obj.optBoolean("favorite", false)
+                    // 恢复图片：优先从 imageBase64 还原文件，否则保留原 photoUri
+                    val imageBase64 = obj.optString("imageBase64", "")
+                    var photoUri = obj.optString("photoUri", "")
+                    if (imageBase64.isNotEmpty()) {
+                        photoUri = saveBase64Image(imageBase64) ?: photoUri
+                    }
+                    map["photoUri"] = photoUri
+                    AnniversaryRepository.insert(requireContext(), map)
+                    count++
+                    // 构建首页 inject 格式（用实际恢复后的 photoUri）
                     val injectObj = org.json.JSONObject().apply {
                         put("id", obj.optLong("id", System.currentTimeMillis() + i))
                         put("title", obj.optString("title", ""))
                         put("date", obj.optString("date", ""))
                         put("desc", obj.optString("note", ""))
                         put("category", obj.optString("category", ""))
-                        put("image", obj.optString("photoUri", ""))
+                        put("image", photoUri)
                         put("imagePosition", 50)
-                        put("favorite", false)
+                        put("favorite", obj.optBoolean("favorite", false))
                         val repeatYearly = obj.optBoolean("repeatYearly", true)
                         put("repeatType", if (repeatYearly) "yearly" else "none")
                         put("remindDays", obj.optInt("reminderDays", 3))
@@ -256,6 +277,29 @@ class SettingsFragment : Fragment() {
             fileChooserCallback?.onReceiveValue(null)
         }
         fileChooserCallback = null
+    }
+
+    /** 将 data:image/xxx;base64,... 字符串保存到 images 目录，返回文件名 */
+    private fun saveBase64Image(dataUrl: String): String? {
+        return try {
+            val ctx = webView?.context ?: return null
+            val imageDir = File(ctx.filesDir, "images").apply { mkdirs() }
+            val mimeType = dataUrl.substringAfter(":").substringBefore(";")
+            val rawBase64 = dataUrl.substringAfter(",")
+            val ext = when {
+                mimeType.contains("png") -> "png"
+                mimeType.contains("webp") -> "webp"
+                mimeType.contains("gif") -> "gif"
+                else -> "jpg"
+            }
+            val bytes = android.util.Base64.decode(rawBase64, android.util.Base64.DEFAULT)
+            val fileName = "${java.util.UUID.randomUUID()}.$ext"
+            File(imageDir, fileName).writeBytes(bytes)
+            fileName
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsFragment", "saveBase64Image failed", e)
+            null
+        }
     }
 
     private fun getStatusBarHeight(): Int {
