@@ -235,14 +235,13 @@ class HomeFragment : Fragment() {
                 jsonArray.put(json)
             }
 
-            // 推入 localStorage 并刷新
+            // 通过 JS 注入函数同步数据并重渲染（不 reload，避免异步竞态）
             val jsonStr = jsonArray.toString()
                 .replace("\\", "\\\\")
                 .replace("'", "\\'")
                 .replace("\n", "\\n")
                 .replace("\r", "\\r")
-            webView.evaluateJavascript("localStorage.setItem('time_memorial_data', '$jsonStr');", null)
-            webView.reload()
+            webView.evaluateJavascript("window.__injectRestoreData && window.__injectRestoreData('$jsonStr');", null)
         }
     }
 

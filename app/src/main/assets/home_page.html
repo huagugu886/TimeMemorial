@@ -1745,6 +1745,21 @@ document.addEventListener('click', e => {
 
 // 默认示例数据已移除，新用户首次打开为空白状态
 
+// ── 原生端数据恢复注入（同步渲染，不依赖 reload）──
+function __injectRestoreData(jsonStr) {
+  try {
+    localStorage.setItem(STORAGE_KEY, jsonStr);
+    memorials = JSON.parse(jsonStr);
+    currentFilter = 'all';
+    searchQuery = '';
+    sortOrder = 'asc';
+    renderAll();
+    console.log('[Restore] injected', memorials.length, 'items, rendered OK');
+  } catch(e) {
+    console.error('[Restore] failed:', e);
+  }
+}
+
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
