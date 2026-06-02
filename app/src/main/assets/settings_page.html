@@ -509,7 +509,7 @@ updateLabels();
 // 通知 nativeBridge 同步设置
 function syncSettings() {
   var s = { reminderDays: reminderDays, reminderTime: reminderTime, repeatType: repeatType };
-  try { nativeBridge.updateReminderSettings(JSON.stringify(s)); } catch(e) {}
+  try { nativeBridge.saveReminderSettings(JSON.stringify(s)); } catch(e) {}
 }
 
 // 弹窗控制

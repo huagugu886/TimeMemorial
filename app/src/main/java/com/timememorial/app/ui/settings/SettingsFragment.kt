@@ -34,6 +34,21 @@ class SettingsFragment : Fragment() {
                 )
             }
         }
+
+        @JavascriptInterface
+        fun saveReminderSettings(jsonString: String) {
+            try {
+                val json = org.json.JSONObject(jsonString)
+                val prefs = requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+                prefs.edit()
+                    .putInt("reminder_days", json.optInt("reminderDays", 3))
+                    .putString("reminder_time", json.optString("reminderTime", "09:00"))
+                    .putString("repeat_type", json.optString("repeatType", "yearly"))
+                    .apply()
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsFragment", "saveReminderSettings failed", e)
+            }
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")

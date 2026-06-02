@@ -35,6 +35,13 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         binding.bottomNav.setupWithNavController(navController)
 
+        // Android 13+ 请求通知权限（POST_NOTIFICATIONS 已在 Manifest 声明）
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
+            }
+        }
+
         // 深色模式切换后强制刷新底栏颜色（BottomNavigationView 缓存 ColorStateList）
         refreshBottomNavColors()
 
