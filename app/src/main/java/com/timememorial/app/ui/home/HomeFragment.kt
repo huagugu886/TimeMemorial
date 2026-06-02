@@ -38,6 +38,10 @@ class HomeFragment : Fragment() {
 
     // 文件选择器
     private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
+    
+    // WebView 页面是否加载完成（防止 onPageFinished 前标志被清掉）
+    @Volatile
+    private var pageReady = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -149,6 +153,10 @@ class HomeFragment : Fragment() {
                         }
                     }
                     view?.evaluateJavascript(js, null)
+
+                    // 标记页面就绪，再检查恢复同步
+                    pageReady = true
+                    syncRestoreDataIfNeeded(view)
                 }
             }
 
@@ -204,48 +212,55 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // 检查是否有待同步的恢复数据（从 SettingsFragment restoreData 设置）
+        // 保留 onResume 检查：当页面已加载时，用户从设置页返回也能立即同步
+        syncRestoreDataIfNeeded(_binding?.webView)
+    }
+
+    /**
+     * 检查是否有待同步的恢复数据，有则注入 WebView。
+     * 在 onPageFinished 和 onResume 中调用，确保 WebView 已加载。
+     */
+    private fun syncRestoreDataIfNeeded(webView: WebView?) {
+        if (!isAdded || webView == null) return
+        if (!pageReady) return  // 页面还没加载完，跳过（标志不清除，等 onPageFinished 再试）
         val prefs = requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
-        if (prefs.getBoolean("pending_restore_sync", false)) {
-            prefs.edit().putBoolean("pending_restore_sync", false).apply()
-            android.widget.Toast.makeText(requireContext(), "数据恢复成功，正在刷新首页…", android.widget.Toast.LENGTH_SHORT).show()
-            val webView = _binding?.webView ?: return
+        if (!prefs.getBoolean("pending_restore_sync", false)) return
 
-            // 从原生存储读取恢复的数据，推入 localStorage
-            val context = requireContext()
-            val anniversaries = com.timememorial.app.data.local.AnniversaryRepository.getAll(context)
+        prefs.edit().putBoolean("pending_restore_sync", false).apply()
+        android.widget.Toast.makeText(requireContext(), "数据恢复成功，正在刷新首页…", android.widget.Toast.LENGTH_SHORT).show()
 
-            // 转换为 home_page.html 期望的 JSON 格式
-            val jsonArray = org.json.JSONArray()
-            for (item in anniversaries) {
-                val json = org.json.JSONObject().apply {
-                    put("id", item["id"] ?: 0L)
-                    put("title", item["title"] ?: "")
-                    put("date", item["date"] ?: "")
-                    put("desc", item["note"] ?: "")
-                    put("category", item["category"] ?: "")
-                    put("image", item["photoUri"] ?: "")
-                    put("imagePosition", 50)
-                    put("favorite", false)
-                    val repeatYearly = item["repeatYearly"] as? Boolean ?: true
-                    put("repeatType", if (repeatYearly) "yearly" else "none")
-                    put("remindDays", item["reminderDays"] ?: 3)
-                    put("dateType", "solar")
-                }
-                jsonArray.put(json)
+        val context = requireContext()
+        val anniversaries = com.timememorial.app.data.local.AnniversaryRepository.getAll(context)
+
+        val jsonArray = org.json.JSONArray()
+        for (item in anniversaries) {
+            val json = org.json.JSONObject().apply {
+                put("id", item["id"] ?: 0L)
+                put("title", item["title"] ?: "")
+                put("date", item["date"] ?: "")
+                put("desc", item["note"] ?: "")
+                put("category", item["category"] ?: "")
+                put("image", item["photoUri"] ?: "")
+                put("imagePosition", 50)
+                put("favorite", false)
+                val repeatYearly = item["repeatYearly"] as? Boolean ?: true
+                put("repeatType", if (repeatYearly) "yearly" else "none")
+                put("remindDays", item["reminderDays"] ?: 3)
+                put("dateType", "solar")
             }
-
-            // 通过 JS 注入函数同步数据并重渲染（不 reload，避免异步竞态）
-            val jsonStr = jsonArray.toString()
-                .replace("\\", "\\\\")
-                .replace("'", "\\'")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-            webView.evaluateJavascript("window.__injectRestoreData && window.__injectRestoreData('$jsonStr');", null)
+            jsonArray.put(json)
         }
+
+        val jsonStr = jsonArray.toString()
+            .replace("\\", "\\\\")
+            .replace("'", "\\'")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+        webView.evaluateJavascript("window.__injectRestoreData && window.__injectRestoreData('$jsonStr');", null)
     }
 
     override fun onDestroyView() {
+        pageReady = false
         fileUploadCallback?.onReceiveValue(null)
         fileUploadCallback = null
         _binding?.webView?.destroy()
