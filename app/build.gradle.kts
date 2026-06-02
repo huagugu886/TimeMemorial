@@ -1,7 +1,33 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+// ---- 自动版本号递增 ----
+// 每次构建自动 patch+1, versionCode+1
+// 手动改版本：编辑 version.properties 里的 major/minor/patch
+val versionPropsFile = file("version.properties")
+val versionProps = Properties().apply {
+    if (versionPropsFile.exists()) {
+        load(versionPropsFile.inputStream())
+    } else {
+        setProperty("major", "2")
+        setProperty("minor", "0")
+        setProperty("patch", "92")
+        setProperty("build", "135")
+    }
+}
+
+val verMajor = versionProps.getProperty("major", "2").toInt()
+val verMinor = versionProps.getProperty("minor", "0").toInt()
+val verPatch = versionProps.getProperty("patch", "92").toInt() + 1
+val verBuild = versionProps.getProperty("build", "135").toInt() + 1
+
+versionProps.setProperty("patch", verPatch.toString())
+versionProps.setProperty("build", verBuild.toString())
+versionProps.store(versionPropsFile.outputStream(), "Auto-incremented")
 
 android {
     namespace = "com.timememorial.app"
@@ -11,8 +37,8 @@ android {
         applicationId = "com.timememorial.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 135
-        versionName = "2.0.92"
+        versionCode = verBuild
+        versionName = "$verMajor.$verMinor.$verPatch"
     }
 
     buildTypes {

@@ -236,6 +236,11 @@ class SettingsFragment : Fragment() {
                         """.trimIndent(),
                         null
                     )
+                    // 从 BuildConfig 注入版本号，不再硬编码
+                    view?.evaluateJavascript(
+                        "document.getElementById('versionInfo').textContent = 'v${com.timememorial.app.BuildConfig.VERSION_NAME}';",
+                        null
+                    )
                 }
             }
             webChromeClient = object : WebChromeClient() {
