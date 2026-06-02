@@ -109,13 +109,16 @@ class SettingsFragment : Fragment() {
             return try {
                 val json = org.json.JSONObject(jsonString)
                 val data = json.getJSONArray("data")
-                val existing = AnniversaryRepository.getAll(requireContext())
-                    .mapNotNull { it["title"] as? String }.toSet()
+                // 全删：先清除所有旧数据，避免 Room DB 与 localStorage 不同步导致去重失败
+                val oldItems = AnniversaryRepository.getAll(requireContext())
+                for (item in oldItems) {
+                    val id = (item["id"] as? Number)?.toLong() ?: continue
+                    AnniversaryRepository.deleteById(requireContext(), id)
+                }
+                // 全插：将备份数据完整写入
                 var count = 0
                 for (i in 0 until data.length()) {
                     val obj = data.getJSONObject(i)
-                    val name = obj.optString("title", "")
-                    if (name !in existing) {
                         val map = mutableMapOf<String, Any?>()
                         map["title"] = name
                         map["date"] = obj.optString("date", "")
@@ -126,7 +129,6 @@ class SettingsFragment : Fragment() {
                         map["note"] = obj.optString("note", "")
                         AnniversaryRepository.insert(requireContext(), map)
                         count++
-                    }
                 }
                 // 设置标志，通知首页 WebView 同步恢复数据
                 val prefs = requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
