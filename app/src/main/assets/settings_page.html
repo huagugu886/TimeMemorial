@@ -1077,18 +1077,59 @@ function showConfirm(title, msg) {
 
   refreshCacheSize();
 
-  // Toast 提示函数
-  function showToast(msg, duration) {
-    duration = duration || 2000;
-    var t = document.createElement('div');
-    t.textContent = msg;
-    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
-      'background:rgba(0,0,0,0.78);color:#fff;padding:10px 22px;border-radius:20px;' +
-      'font-size:14px;z-index:9999;pointer-events:none;transition:opacity 0.3s;opacity:1;';
-    document.body.appendChild(t);
-    setTimeout(function(){ t.style.opacity = '0'; }, duration);
-    setTimeout(function(){ document.body.removeChild(t); }, duration + 350);
-  }
+  // Toast 提示函数（轻量 snackbar）
+  (function(){
+    var _toastEl = null;
+    var _toastTimer = null;
+    var _toastRemoveTimer = null;
+
+    // 注入样式（只执行一次）
+    var _style = document.createElement('style');
+    _style.textContent = [
+      '@keyframes tmToastIn { from { opacity:0; transform:translateX(-50%) translateY(16px) scale(.96); } to { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }',
+      '@keyframes tmToastOut { from { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } to { opacity:0; transform:translateX(-50%) translateY(12px) scale(.96); } }',
+      '@keyframes tmToastCheck { 0% { transform:scale(0); opacity:0; } 50% { transform:scale(1.2); } 100% { transform:scale(1); opacity:1; } }',
+      '.tm-toast { position:fixed; bottom:calc(80px + env(safe-area-inset-bottom,0px)); left:50%; transform:translateX(-50%); z-index:9999; pointer-events:none;',
+      '  display:flex; align-items:center; gap:8px; padding:12px 20px; border-radius:14px;',
+      '  background:var(--card-bg); box-shadow:0 4px 24px rgba(0,0,0,.1), 0 1px 4px rgba(0,0,0,.06);',
+      '  border:1px solid var(--divider); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);',
+      '  font-size:14px; font-weight:500; color:var(--text); animation:tmToastIn .3s cubic-bezier(.32,.72,0,1) forwards; }',
+      '.tm-toast.tm-toast--out { animation:tmToastOut .25s ease forwards; }',
+      '.tm-toast-ico { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }',
+      '.tm-toast-ico--ok { background:rgba(16,185,129,.12); }',
+      '.tm-toast-ico--err { background:rgba(239,68,68,.12); }',
+      '.tm-toast-ico--warn { background:rgba(251,191,36,.12); }',
+      '.tm-toast-ico svg { width:14px; height:14px; }',
+      '.tm-toast-ico svg path { stroke-dasharray:20; stroke-dashoffset:20; animation:tmToastCheck .4s .15s ease forwards; }'
+    ].join('\n');
+    document.head.appendChild(_style);
+
+    // SVG 图标
+    var _ico = {
+      ok:   '<svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>',
+      err:  '<svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+      warn: '<svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M12 2L2 20h20L12 2z"/></svg>'
+    };
+
+    window.showToast = function(msg, duration, type) {
+      duration = duration || 2200;
+      type = type || 'ok';
+
+      // 清除旧的
+      if (_toastEl) { clearTimeout(_toastTimer); clearTimeout(_toastRemoveTimer); _toastEl.remove(); _toastEl = null; }
+
+      var t = document.createElement('div');
+      t.className = 'tm-toast';
+      t.innerHTML = '<span class="tm-toast-ico tm-toast-ico--' + type + '">' + (_ico[type]||_ico.ok) + '</span><span>' + msg + '</span>';
+      document.body.appendChild(t);
+      _toastEl = t;
+
+      _toastTimer = setTimeout(function(){
+        t.classList.add('tm-toast--out');
+        _toastRemoveTimer = setTimeout(function(){ if(t.parentNode) t.remove(); _toastEl = null; }, 280);
+      }, duration);
+    };
+  })();
 
   clearRow.onclick = function() {
     var currentSize = cacheSizeEl.textContent;
@@ -1108,17 +1149,17 @@ function showConfirm(title, msg) {
         if (res.ok) {
           cacheSizeEl.textContent = res.display;
           if (res.remaining === 0 || res.remaining < 1024) {
-            showToast('缓存已清除 ✅');
+            showToast('缓存已清除');
           } else {
             showToast('已清除 ' + formatSize(res.cleared) + '，剩余 ' + res.display);
           }
         } else {
           cacheSizeEl.textContent = currentSize;
-          showToast('清除失败：' + (res.error || '未知错误'));
+          showToast('清除失败：' + (res.error || '未知错误'), 3000, 'err');
         }
       } catch(e) {
         cacheSizeEl.textContent = currentSize;
-        showToast('清除异常：' + e.message);
+        showToast('清除异常：' + e.message, 3000, 'err');
       }
     });
   };
