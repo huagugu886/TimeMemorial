@@ -90,6 +90,37 @@ class SettingsFragment : Fragment() {
                 android.util.Log.e("SettingsFragment", "saveReminderSettings failed", e)
             }
         }
+
+        @JavascriptInterface
+        fun restoreData(jsonString: String): String {
+            return try {
+                val json = org.json.JSONObject(jsonString)
+                val data = json.getJSONArray("data")
+                val existing = AnniversaryRepository.getAll(requireContext())
+                    .mapNotNull { it["title"] as? String }.toSet()
+                var count = 0
+                for (i in 0 until data.length()) {
+                    val obj = data.getJSONObject(i)
+                    val name = obj.optString("title", "")
+                    if (name !in existing) {
+                        val map = mutableMapOf<String, Any?>()
+                        map["title"] = name
+                        map["date"] = obj.optString("date", "")
+                        map["category"] = obj.optString("category", "")
+                        map["repeatYearly"] = obj.optBoolean("repeatYearly", true)
+                        map["reminderDays"] = obj.optInt("reminderDays", 3)
+                        map["photoUri"] = obj.optString("photoUri", "")
+                        map["note"] = obj.optString("note", "")
+                        AnniversaryRepository.insert(requireContext(), map)
+                        count++
+                    }
+                }
+                org.json.JSONObject().put("ok", true).put("count", count).toString()
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsFragment", "restoreData failed", e)
+                org.json.JSONObject().put("ok", false).put("error", e.message ?: "unknown").toString()
+            }
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")

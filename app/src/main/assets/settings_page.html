@@ -227,6 +227,101 @@
     background: var(--primary); opacity: 0.07; border-radius: 10px;
     pointer-events: none;
   }
+
+  /* ===== 备份与恢复 Modal ===== */
+  .br-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45); z-index: 1050;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s;
+  }
+  .br-mask.show { opacity: 1; pointer-events: auto; }
+
+  .br-sheet {
+    position: fixed; left: 50%; top: 50%;
+    transform: translate(-50%,-50%) scale(.92);
+    width: 90%; max-width: 400px; max-height: 85vh;
+    background: var(--card-bg); border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    z-index: 1060; overflow: hidden;
+    opacity: 0; pointer-events: none;
+    transition: all .3s cubic-bezier(.32,.72,0,1);
+    display: flex; flex-direction: column;
+  }
+  .br-sheet.show { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
+
+  .br-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--divider);
+  }
+  .br-head-title { font-size: 18px; font-weight: 700; }
+  .br-close {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: var(--divider); color: var(--text-sec);
+    font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .br-tabs {
+    display: flex; margin: 16px 24px 0; background: var(--bg);
+    border-radius: 12px; padding: 4px;
+  }
+  .br-tab {
+    flex: 1; padding: 10px; border: none; background: transparent;
+    font-size: 15px; font-weight: 600; color: var(--text-sec);
+    border-radius: 10px; cursor: pointer; transition: all .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .br-tab.active { background: var(--card-bg); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+  .br-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .br-pane { display: none; }
+  .br-pane.active { display: block; animation: brFadeIn .3s; }
+  @keyframes brFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .br-card {
+    background: var(--bg); border-radius: 14px; padding: 16px;
+    border: 1px solid var(--divider); margin-bottom: 12px;
+  }
+  .br-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .br-card p { font-size: 13px; color: var(--text-sec); line-height: 1.5; margin-bottom: 12px; }
+
+  .br-btn {
+    width: 100%; padding: 12px; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .br-btn:active { opacity: .7; }
+  .br-btn-primary { background: var(--primary); color: #fff; }
+  .br-btn-danger { background: #EF4444; color: #fff; margin-top: 10px; }
+  .br-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .br-upload {
+    border: 2px dashed var(--divider); border-radius: 12px;
+    padding: 24px; text-align: center; cursor: pointer;
+    transition: border-color .2s; margin-bottom: 12px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .br-upload:active { border-color: var(--primary); }
+  .br-upload-icon { font-size: 28px; margin-bottom: 6px; }
+  .br-upload p { font-size: 13px; color: var(--text-sec); }
+
+  .br-status {
+    padding: 10px 12px; border-radius: 10px; font-size: 13px;
+    margin-top: 10px; display: none; line-height: 1.5;
+    word-break: break-all;
+  }
+  .br-status.ok { display: block; background: rgba(16,185,129,.1); color: #10b981; }
+  .br-status.err { display: block; background: rgba(239,68,68,.1); color: #EF4444; }
+
+  .br-warn {
+    font-size: 12px; color: #F59E0B; background: rgba(245,158,11,.1);
+    padding: 10px 12px; border-radius: 8px; margin: 10px 0; line-height: 1.4;
+  }
+  .br-foot { padding: 0 24px 16px; text-align: center; }
+  .br-foot-btn {
+    background: none; border: none; font-size: 13px; color: var(--text-sec);
+    cursor: pointer; padding: 8px 16px; -webkit-tap-highlight-color: transparent;
+  }
 </style>
 </head>
 <body>
@@ -305,7 +400,7 @@
 <!-- 数据 -->
 <div class="group">
   <div class="group-head">数据</div>
-  <div class="row">
+  <div class="row" id="rowBackup">
     <div class="ico ico-g">📤</div>
     <div class="txt"><div class="txt-main">备份与恢复</div></div>
     <div class="right"><span class="chev">›</span></div>
@@ -380,6 +475,48 @@
     <button class="picker-done" id="repeatDone">完成</button>
   </div>
   <div class="picker-list" id="repeatList"></div>
+</div>
+
+<!-- 备份与恢复 Modal -->
+<div class="br-mask" id="brMask"></div>
+<div class="br-sheet" id="brSheet">
+  <div class="br-head">
+    <span class="br-head-title">数据备份与恢复</span>
+    <button class="br-close" id="brClose">✕</button>
+  </div>
+  <div class="br-tabs">
+    <button class="br-tab active" data-tab="backup">备份</button>
+    <button class="br-tab" data-tab="restore">恢复</button>
+  </div>
+  <div class="br-body">
+    <!-- 备份面板 -->
+    <div class="br-pane active" id="paneBackup">
+      <div class="br-card">
+        <h3>📦 导出备份</h3>
+        <p>将所有纪念日与设置导出为 JSON 文件，保存到 Download 目录。</p>
+        <button class="br-btn br-btn-primary" id="brDoBackup">立即备份</button>
+        <div class="br-status" id="brBackupStatus"></div>
+      </div>
+    </div>
+    <!-- 恢复面板 -->
+    <div class="br-pane" id="paneRestore">
+      <div class="br-card">
+        <h3>📂 从文件恢复</h3>
+        <p>选择之前导出的备份文件，将覆盖当前所有数据。</p>
+        <div class="br-upload" id="brUpload">
+          <div class="br-upload-icon">📁</div>
+          <p>点击选择 .json 备份文件</p>
+        </div>
+        <input type="file" id="brFileInput" accept=".json" style="display:none">
+        <button class="br-btn br-btn-danger" id="brDoRestore" disabled>确认恢复</button>
+        <div class="br-warn">⚠️ 恢复会覆盖当前所有数据，不可撤销</div>
+        <div class="br-status" id="brRestoreStatus"></div>
+      </div>
+    </div>
+  </div>
+  <div class="br-foot">
+    <button class="br-foot-btn" id="brFootClose">关闭</button>
+  </div>
 </div>
 
 <script>
@@ -711,6 +848,130 @@ document.getElementById('rowExport').onclick = function() {
     alert('导出异常：' + e.message);
   }
 };
+
+/* ===== 备份与恢复 Modal ===== */
+(function(){
+  var mask = document.getElementById('brMask');
+  var sheet = document.getElementById('brSheet');
+  var fileInput = document.getElementById('brFileInput');
+  var selectedFile = null;
+
+  function openBR() {
+    mask.classList.add('show');
+    sheet.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+  }
+  function closeBR() {
+    mask.classList.remove('show');
+    sheet.classList.remove('show');
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    resetBR();
+  }
+  function resetBR() {
+    selectedFile = null;
+    fileInput.value = '';
+    document.getElementById('brDoRestore').disabled = true;
+    document.getElementById('brUpload').innerHTML = '<div class="br-upload-icon">📁</div><p>点击选择 .json 备份文件</p>';
+    var bs = document.getElementById('brBackupStatus');
+    bs.className = 'br-status'; bs.textContent = '';
+    var rs = document.getElementById('brRestoreStatus');
+    rs.className = 'br-status'; rs.textContent = '';
+    switchTab('backup');
+  }
+  function switchTab(name) {
+    document.querySelectorAll('.br-tab').forEach(function(t){
+      t.classList.toggle('active', t.getAttribute('data-tab')===name);
+    });
+    document.querySelectorAll('.br-pane').forEach(function(p){
+      p.classList.remove('active');
+    });
+    document.getElementById(name==='backup'?'paneBackup':'paneRestore').classList.add('active');
+  }
+
+  // 打开弹窗
+  document.getElementById('rowBackup').onclick = openBR;
+
+  // 关闭
+  document.getElementById('brClose').onclick = closeBR;
+  document.getElementById('brFootClose').onclick = closeBR;
+  mask.onclick = closeBR;
+  mask.addEventListener('touchmove', function(e){ e.preventDefault(); }, {passive:false});
+
+  // Tab 切换
+  document.querySelectorAll('.br-tab').forEach(function(t){
+    t.onclick = function(){ switchTab(t.getAttribute('data-tab')); };
+  });
+
+  // === 备份 ===
+  document.getElementById('brDoBackup').onclick = function(){
+    var st = document.getElementById('brBackupStatus');
+    st.className = 'br-status'; st.textContent = '';
+    try {
+      var result = nativeBridge.exportData();
+      var res = JSON.parse(result);
+      if (res.ok) {
+        st.className = 'br-status ok';
+        st.textContent = '✅ 备份成功！\n' + (res.path || '');
+      } else {
+        st.className = 'br-status err';
+        st.textContent = '❌ ' + (res.error || '备份失败');
+      }
+    } catch(e) {
+      st.className = 'br-status err';
+      st.textContent = '❌ ' + e.message;
+    }
+  };
+
+  // === 恢复 ===
+  document.getElementById('brUpload').onclick = function(){ fileInput.click(); };
+
+  fileInput.onchange = function(e){
+    var f = e.target.files[0];
+    if (!f) return;
+    selectedFile = f;
+    document.getElementById('brDoRestore').disabled = false;
+    document.getElementById('brUpload').innerHTML =
+      '<div class="br-upload-icon">✅</div><p>已选择：' + f.name + ' (' + (f.size/1024).toFixed(1) + ' KB)</p>';
+  };
+
+  document.getElementById('brDoRestore').onclick = function(){
+    if (!selectedFile) return;
+    if (!confirm('⚠️ 将覆盖当前所有数据，确定恢复？')) return;
+    var st = document.getElementById('brRestoreStatus');
+    st.className = 'br-status'; st.textContent = '正在读取文件...';
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try {
+        var json = ev.target.result;
+        // 验证 JSON 格式
+        JSON.parse(json);
+        // 调用 nativeBridge 恢复
+        var result = nativeBridge.restoreData(json);
+        var res = JSON.parse(result);
+        if (res.ok) {
+          st.className = 'br-status ok';
+          st.textContent = '✅ 恢复成功！页面将刷新...';
+          setTimeout(function(){ location.reload(); }, 1500);
+        } else {
+          st.className = 'br-status err';
+          st.textContent = '❌ ' + (res.error || '恢复失败');
+        }
+      } catch(e) {
+        st.className = 'br-status err';
+        st.textContent = '❌ 文件格式错误：' + e.message;
+      }
+    };
+    reader.onerror = function(){
+      st.className = 'br-status err';
+      st.textContent = '❌ 读取文件失败';
+    };
+    reader.readAsText(selectedFile);
+  };
+})();
 </script>
 </body>
 </html>
