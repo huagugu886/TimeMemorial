@@ -202,6 +202,50 @@ class HomeFragment : Fragment() {
         fileUploadCallback = null
     }
 
+    override fun onResume() {
+        super.onResume()
+        // 检查是否有待同步的恢复数据（从 SettingsFragment restoreData 设置）
+        val prefs = requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+        if (prefs.getBoolean("pending_restore_sync", false)) {
+            prefs.edit().putBoolean("pending_restore_sync", false).apply()
+            reloadFromRestore()
+        }
+    }
+
+    fun reloadFromRestore() {
+        val webView = _binding?.webView ?: return
+        val context = requireContext()
+        val allData = com.timememorial.app.data.AnniversaryRepository.getAll(context)
+        val jsonArray = org.json.JSONArray()
+        for (item in allData) {
+            val obj = org.json.JSONObject()
+            obj.put("id", item["id"] ?: "")
+            obj.put("title", item["title"] ?: "")
+            obj.put("date", item["date"] ?: "")
+            obj.put("category", item["category"] ?: "")
+            obj.put("repeatYearly", item["repeatYearly"] ?: true)
+            obj.put("reminderDays", item["reminderDays"] ?: 3)
+            obj.put("photoUri", item["photoUri"] ?: "")
+            obj.put("note", item["note"] ?: "")
+            jsonArray.put(obj)
+        }
+        val jsonStr = org.json.JSONObject().apply { put("data", jsonArray) }.toString()
+        val escaped = android.util.Base64.encodeToString(jsonStr.toByteArray(Charsets.UTF_8), android.util.Base64.NO_WRAP)
+        webView.evaluateJavascript(
+            """
+            (function() {
+                var data = JSON.parse(atob('$escaped'));
+                if (data.data && Array.isArray(data.data)) {
+                    localStorage.setItem('anniversaries', JSON.stringify(data.data));
+                    if (typeof loadAnniversaries === 'function') loadAnniversaries();
+                    else if (typeof renderAll === 'function') renderAll();
+                    else location.reload();
+                }
+            })();
+            """.trimIndent(), null
+        )
+    }
+
     override fun onDestroyView() {
         fileUploadCallback?.onReceiveValue(null)
         fileUploadCallback = null

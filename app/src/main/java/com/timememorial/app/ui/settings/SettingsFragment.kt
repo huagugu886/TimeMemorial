@@ -128,6 +128,20 @@ class SettingsFragment : Fragment() {
                         count++
                     }
                 }
+                // 设置标志，通知首页 WebView 同步恢复数据
+                val prefs = requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+                prefs.edit().putBoolean("pending_restore_sync", true).apply()
+
+                // 导航回首页（在主线程执行）
+                activity?.runOnUiThread {
+                    try {
+                        androidx.navigation.Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
+                            .navigate(R.id.navigation_home)
+                    } catch (e: Exception) {
+                        android.util.Log.e("SettingsFragment", "navigate to home failed", e)
+                    }
+                }
+
                 org.json.JSONObject().put("ok", true).put("count", count).toString()
             } catch (e: Exception) {
                 android.util.Log.e("SettingsFragment", "restoreData failed", e)
