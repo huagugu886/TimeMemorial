@@ -563,7 +563,7 @@ mask.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passiv
 (function() {
   var hourWheel = document.getElementById('hourWheel');
   var minWheel  = document.getElementById('minWheel');
-  var MINS = [0,5,10,15,20,25,30,35,40,45,50,55];
+  var MINS = Array.from({length:60}, function(_,i){return i});
   var ITEM_H = 40;
 
   // 生成滚轮选项
