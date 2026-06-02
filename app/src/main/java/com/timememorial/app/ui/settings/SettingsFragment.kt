@@ -194,18 +194,22 @@ class SettingsFragment : Fragment() {
             return try {
                 val ctx = webView?.context ?: return "{\"ok\":false}"
                 var total = 0L
-                // WebView cache
+                // Only count actual cache directories, NOT user data
+                // 1. WebView cache
                 ctx.cacheDir?.let { dir ->
                     if (dir.exists()) {
                         dir.walkTopDown().filter { it.isFile }.forEach { total += it.length() }
                     }
                 }
-                // images directory
-                File(ctx.filesDir, "images").let { dir ->
-                    if (dir.exists()) {
-                        dir.walkTopDown().filter { it.isFile }.forEach { total += it.length() }
+                // 2. code_cache (ART/DX compiled code cache)
+                ctx.cacheDir?.parentFile?.let { parent ->
+                    File(parent, "code_cache").let { dir ->
+                        if (dir.exists()) {
+                            dir.walkTopDown().filter { it.isFile }.forEach { total += it.length() }
+                        }
                     }
                 }
+                // Do NOT include filesDir/images — that's user anniversary photos!
                 JSONObject().apply {
                     put("ok", true)
                     put("bytes", total)
@@ -221,19 +225,14 @@ class SettingsFragment : Fragment() {
             return try {
                 val ctx = webView?.context ?: return "{\"ok\":false}"
                 var cleared = 0L
-                // Clear cache directory
+                // Only clear actual cache directories, NOT user data (filesDir/images)
+                // 1. Clear cache directory
                 ctx.cacheDir?.let { dir ->
                     if (dir.exists()) {
                         dir.walkTopDown().filter { it.isFile }.forEach { cleared += it.length(); it.delete() }
                     }
                 }
-                // Clear images directory (cached thumbnails etc.)
-                File(ctx.filesDir, "images").let { dir ->
-                    if (dir.exists()) {
-                        dir.walkTopDown().filter { it.isFile }.forEach { cleared += it.length(); it.delete() }
-                    }
-                }
-                // Clear temp directory
+                // 2. Clear code_cache
                 ctx.cacheDir?.parentFile?.let { parent ->
                     File(parent, "code_cache").let { dir ->
                         if (dir.exists()) {
@@ -250,11 +249,6 @@ class SettingsFragment : Fragment() {
                 // Calculate actual remaining size
                 var remaining = 0L
                 ctx.cacheDir?.let { dir ->
-                    if (dir.exists()) {
-                        dir.walkTopDown().filter { it.isFile }.forEach { remaining += it.length() }
-                    }
-                }
-                File(ctx.filesDir, "images").let { dir ->
                     if (dir.exists()) {
                         dir.walkTopDown().filter { it.isFile }.forEach { remaining += it.length() }
                     }
