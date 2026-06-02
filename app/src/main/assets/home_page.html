@@ -1753,7 +1753,11 @@ function __injectRestoreData(jsonStr) {
     currentFilter = 'all';
     searchQuery = '';
     sortOrder = 'asc';
-    renderAll();
+    renderTabs();
+    renderCategoryGrid();
+    renderFeatured();
+    renderList();
+    syncToNative();
     console.log('[Restore] injected', memorials.length, 'items, rendered OK');
   } catch(e) {
     console.error('[Restore] failed:', e);
