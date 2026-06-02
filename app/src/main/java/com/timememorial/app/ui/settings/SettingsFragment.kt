@@ -41,6 +41,17 @@ class SettingsFragment : Fragment() {
         handleFileChooserResult(result)
     }
 
+    private fun clearWebViewCache(context: android.content.Context) {
+        try {
+            context.cacheDir?.deleteRecursively()
+            webView?.clearCache(true)
+            webView?.clearHistory()
+            webView?.clearFormData()
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsFragment", "clearWebViewCache failed", e)
+        }
+    }
+
     /** JS 桥接：让设置页切换暗色模式时同步到 SharedPreferences + AppCompatDelegate */
     inner class DarkModeBridge {
         @JavascriptInterface
@@ -61,11 +72,10 @@ class SettingsFragment : Fragment() {
             val ctx = webView?.context ?: return "{\"ok\":false}"
             try {
                 val imageDir = File(ctx.filesDir, "images")
-                val items = com.timememorial.app.data.local.AnniversaryRepository.getAll(ctx)
+                val items = AnniversaryRepository.getAll(ctx)
                 val jsonArray = org.json.JSONArray().apply {
                     items.forEach { item ->
                         val obj = org.json.JSONObject(item)
-                        // 如果有 photoUri，读取图片文件内容为 base64 一起备份
                         val photoUri = item["photoUri"] as? String ?: ""
                         if (photoUri.isNotEmpty()) {
                             val imgFile = File(imageDir, photoUri)
@@ -127,13 +137,11 @@ class SettingsFragment : Fragment() {
             return try {
                 val json = org.json.JSONObject(jsonString)
                 val data = json.getJSONArray("data")
-                // 全删：先清除所有旧数据，避免 Room DB 与 localStorage 不同步导致去重失败
                 val oldItems = AnniversaryRepository.getAll(requireContext())
                 for (item in oldItems) {
                     val id = (item["id"] as? Number)?.toLong() ?: continue
                     AnniversaryRepository.deleteById(requireContext(), id)
                 }
-                // 全插：将备份数据完整写入，并同时构建首页 inject 格式
                 var count = 0
                 val injectArray = org.json.JSONArray()
                 for (i in 0 until data.length()) {
@@ -146,7 +154,6 @@ class SettingsFragment : Fragment() {
                     map["reminderDays"] = obj.optInt("reminderDays", 3)
                     map["note"] = obj.optString("note", "")
                     map["favorite"] = obj.optBoolean("favorite", false)
-                    // 恢复图片：优先从 imageBase64 还原文件，否则保留原 photoUri
                     val imageBase64 = obj.optString("imageBase64", "")
                     var photoUri = obj.optString("photoUri", "")
                     if (imageBase64.isNotEmpty()) {
@@ -155,7 +162,6 @@ class SettingsFragment : Fragment() {
                     map["photoUri"] = photoUri
                     AnniversaryRepository.insert(requireContext(), map)
                     count++
-                    // 构建首页 inject 格式（用实际恢复后的 photoUri）
                     val injectObj = org.json.JSONObject().apply {
                         put("id", obj.optLong("id", System.currentTimeMillis() + i))
                         put("title", obj.optString("title", ""))
@@ -178,7 +184,6 @@ class SettingsFragment : Fragment() {
                     .putString("pending_restore_data", injectArray.toString())
                     .apply()
 
-                // 导航回首页（在主线程执行）
                 activity?.runOnUiThread {
                     try {
                         androidx.navigation.Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
@@ -211,7 +216,6 @@ class SettingsFragment : Fragment() {
             settings.allowContentAccess = true
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
-            // 清除 WebView 内部缓存（HTTP 缓存等）
             clearWebViewCache(context)
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
@@ -236,94 +240,10 @@ class SettingsFragment : Fragment() {
                         """.trimIndent(),
                         null
                     )
-                    // 从 BuildConfig 注入版本号，不再硬编码
                     view?.evaluateJavascript(
                         "document.getElementById('versionInfo').textContent = 'v${com.timememorial.app.BuildConfig.VERSION_NAME}';",
                         null
                     )
-                }
-            }
-            webChromeClient = object : WebChromeClient() {
-                override fun onShowFileChooser(
-                    webView: WebView?,
-                    filePathCallback: ValueCallback<Array<Uri>>?,
-                    fileChooserParams: FileChooserParams?
-                ): Boolean {
-                    fileChooserCallback?.onReceiveValue(null)
-                    fileChooserCallback = filePathCallback
-
-                    val intent = fileChooserParams?.createIntent() ?: return false
-                    try {
-                        fileChooserLauncher.launch(intent)
-                    } catch (e: Exception) {
-                        fileChooserCallback = null
-                        return false
-                    }
-                    return true
-                }
-            }
-            loadUrl("file:///android_asset/settings_page.html?v=2")
-        }
-
-        return view
-    }
-
-    private fun handleFileChooserResult(result: ActivityResult) {
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val uris = when {
-                data?.clipData != null -> {
-                    val count = data.clipData!!.itemCount
-                    Array(count) { i -> data.clipData!!.getItemAt(i).uri }
-                }
-                data?.data != null -> arrayOf(data.data!!)
-                else -> null
-            }
-            fileChooserCallback?.onReceiveValue(uris)
-        } else {
-            fileChooserCallback?.onReceiveValue(null)
-        }
-        fileChooserCallback = null
-    }
-
-    /** 将 data:image/xxx;base64,... 字符串保存到 images 目录，返回文件名 */
-    private fun saveBase64Image(dataUrl: String): String? {
-        return try {
-            val ctx = webView?.context ?: return null
-            val imageDir = File(ctx.filesDir, "images").apply { mkdirs() }
-            val mimeType = dataUrl.substringAfter(":").substringBefore(";")
-            val rawBase64 = dataUrl.substringAfter(",")
-            val ext = when {
-                mimeType.contains("png") -> "png"
-                mimeType.contains("webp") -> "webp"
-                mimeType.contains("gif") -> "gif"
-                else -> "jpg"
-            }
-            val bytes = android.util.Base64.decode(rawBase64, android.util.Base64.DEFAULT)
-            val fileName = "${java.util.UUID.randomUUID()}.$ext"
-            File(imageDir, fileName).writeBytes(bytes)
-            fileName
-        } catch (e: Exception) {
-            android.util.Log.e("SettingsFragment", "saveBase64Image failed", e)
-            null
-        }
-    }
-
-    private fun getStatusBarHeight(): Int {
-        val insets = ViewCompat.getRootWindowInsets(requireView()) ?: return 0
-        return insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-    }
-
-    override fun onDestroyView() {
-        webView?.apply {
-            stopLoading()
-            destroy()
-        }
-        webView = null
-        super.onDestroyView()
-    }
-}
-        )
                 }
             }
             webChromeClient = object : WebChromeClient() {
