@@ -256,7 +256,8 @@ class HomeFragment : Fragment() {
             .replace("'", "\\'")
             .replace("\n", "\\n")
             .replace("\r", "\\r")
-        webView.evaluateJavascript("window.__injectRestoreData && window.__injectRestoreData('$jsonStr');", null)
+        val js = "localStorage.setItem('memorials', '$jsonStr'); window.location.reload();"
+        webView.evaluateJavascript(js, null)
     }
 
     override fun onDestroyView() {

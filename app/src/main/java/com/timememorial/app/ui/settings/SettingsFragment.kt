@@ -130,9 +130,32 @@ class SettingsFragment : Fragment() {
                         AnniversaryRepository.insert(requireContext(), map)
                         count++
                 }
-                // 设置标志，通知首页 WebView 同步恢复数据
+                // 构建首页需要的 JSON 格式，暂存到 SharedPreferences
+                // （首页 syncToNative 会先覆盖 anniversaries.json，所以必须暂存原始数据）
+                val injectArray = org.json.JSONArray()
+                for (i in 0 until data.length()) {
+                    val obj = data.getJSONObject(i)
+                    val injectObj = org.json.JSONObject().apply {
+                        put("id", obj.optLong("id", System.currentTimeMillis() + i))
+                        put("title", obj.optString("title", ""))
+                        put("date", obj.optString("date", ""))
+                        put("desc", obj.optString("note", ""))
+                        put("category", obj.optString("category", ""))
+                        put("image", obj.optString("photoUri", ""))
+                        put("imagePosition", 50)
+                        put("favorite", false)
+                        val repeatYearly = obj.optBoolean("repeatYearly", true)
+                        put("repeatType", if (repeatYearly) "yearly" else "none")
+                        put("remindDays", obj.optInt("reminderDays", 3))
+                        put("dateType", "solar")
+                    }
+                    injectArray.put(injectObj)
+                }
                 val prefs = requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
-                prefs.edit().putBoolean("pending_restore_sync", true).apply()
+                prefs.edit()
+                    .putBoolean("pending_restore_sync", true)
+                    .putString("pending_restore_data", injectArray.toString())
+                    .apply()
 
                 // 导航回首页（在主线程执行）
                 activity?.runOnUiThread {
