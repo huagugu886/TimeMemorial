@@ -219,16 +219,17 @@ class HomeFragment : Fragment() {
             val jsonArray = org.json.JSONArray()
             for (item in anniversaries) {
                 val json = org.json.JSONObject().apply {
-                    put("id", item.id)
-                    put("title", item.title)
-                    put("date", item.date)
-                    put("desc", item.note ?: "")
-                    put("category", item.category)
-                    put("image", item.photoUri ?: "")
+                    put("id", item["id"] ?: 0L)
+                    put("title", item["title"] ?: "")
+                    put("date", item["date"] ?: "")
+                    put("desc", item["note"] ?: "")
+                    put("category", item["category"] ?: "")
+                    put("image", item["photoUri"] ?: "")
                     put("imagePosition", 50)
                     put("favorite", false)
-                    put("repeatType", if (item.repeatYearly) "yearly" else "none")
-                    put("remindDays", item.reminderDays)
+                    val repeatYearly = item["repeatYearly"] as? Boolean ?: true
+                    put("repeatType", if (repeatYearly) "yearly" else "none")
+                    put("remindDays", item["reminderDays"] ?: 3)
                     put("dateType", "solar")
                 }
                 jsonArray.put(json)
