@@ -1,22 +1,17 @@
 package com.timememorial.app.ui.settings
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
-import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.os.Environment
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import com.timememorial.app.reminder.ReminderSettings
 import org.json.JSONObject
@@ -33,13 +28,6 @@ import com.timememorial.app.R
 class SettingsFragment : Fragment() {
 
     private var webView: WebView? = null
-    private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
-
-    private val fileChooserLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        handleFileChooserResult(result)
-    }
 
     /** JS 桥接：让设置页切换暗色模式时同步到 SharedPreferences + AppCompatDelegate */
     inner class DarkModeBridge {
@@ -176,47 +164,11 @@ class SettingsFragment : Fragment() {
                     )
                 }
             }
-            webChromeClient = object : WebChromeClient() {
-                override fun onShowFileChooser(
-                    webView: WebView?,
-                    filePathCallback: ValueCallback<Array<Uri>>?,
-                    fileChooserParams: FileChooserParams?
-                ): Boolean {
-                    fileChooserCallback?.onReceiveValue(null)
-                    fileChooserCallback = filePathCallback
-
-                    val intent = fileChooserParams?.createIntent() ?: return false
-                    try {
-                        fileChooserLauncher.launch(intent)
-                    } catch (e: Exception) {
-                        fileChooserCallback = null
-                        return false
-                    }
-                    return true
-                }
-            }
+            webChromeClient = WebChromeClient()
             loadUrl("file:///android_asset/settings_page.html?v=2")
         }
 
         return view
-    }
-
-    private fun handleFileChooserResult(result: ActivityResult) {
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val uris = when {
-                data?.clipData != null -> {
-                    val count = data.clipData!!.itemCount
-                    Array(count) { i -> data.clipData!!.getItemAt(i).uri }
-                }
-                data?.data != null -> arrayOf(data.data!!)
-                else -> null
-            }
-            fileChooserCallback?.onReceiveValue(uris)
-        } else {
-            fileChooserCallback?.onReceiveValue(null)
-        }
-        fileChooserCallback = null
     }
 
     private fun getStatusBarHeight(): Int {
