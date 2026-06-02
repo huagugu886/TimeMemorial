@@ -4,7 +4,7 @@ import android.content.Context
 
 class AppDatabase private constructor(context: Context) {
 
-    private val dao = AnniversaryDao()
+    private val dao = AnniversaryDao(context.applicationContext)
 
     fun anniversaryDao(): AnniversaryDao = dao
 

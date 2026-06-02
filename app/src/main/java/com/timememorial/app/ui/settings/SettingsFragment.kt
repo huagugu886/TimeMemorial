@@ -47,7 +47,12 @@ class SettingsFragment : Fragment() {
         fun exportData(): String {
             val ctx = webView?.context ?: return "{\"ok\":false}"
             try {
-                val jsonArray = ReminderSettings.getAnniversaries(ctx)
+                val items = com.timememorial.app.data.local.AnniversaryRepository.getAll(ctx)
+                val jsonArray = org.json.JSONArray().apply {
+                    items.forEach { item ->
+                        put(org.json.JSONObject(item))
+                    }
+                }
                 val wrapper = JSONObject()
                 wrapper.put("version", 1)
                 wrapper.put("exportedAt", SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date()))

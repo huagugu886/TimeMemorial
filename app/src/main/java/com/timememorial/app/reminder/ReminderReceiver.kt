@@ -23,8 +23,10 @@ class ReminderReceiver : BroadcastReceiver {
         // 确保通知渠道存在
         createNotificationChannel(context)
 
-        // 获取需要提醒的纪念日列表
-        val reminders = ReminderSettings.getUpcomingReminders(context)
+        // 获取需要提醒的纪念日列表（从 Repository 单源读取）
+        val daysBefore = ReminderSettings.getDaysBefore(context)
+        val reminders = com.timememorial.app.data.local.AnniversaryRepository
+            .getUpcomingReminders(context, daysBefore)
 
         if (reminders.isEmpty()) return
 

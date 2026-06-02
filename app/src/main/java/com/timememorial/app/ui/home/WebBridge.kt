@@ -179,33 +179,37 @@ class WebBridge(private val context: Context, private val onSetBottomNavVisibili
         onSetBottomNavVisibility?.invoke(visible)
     }
 
-    // ── 纪念日数据同步到原生端（供提醒功能使用） ──
+    // ── 纪念日数据同步到原生端（单源存储 + 自动同步提醒） ──
     @JavascriptInterface
     fun syncAnniversaries(jsonString: String) {
         try {
-            android.util.Log.w("WebBridge", "syncAnniversaries CALLED, json length=${jsonString.length}")
-            android.util.Log.w("WebBridge", "syncAnniversaries json=$jsonString")
-            android.util.Log.w("WebBridge", "syncAnniversaries context.filesDir=${context.filesDir}")
-            android.util.Log.w("WebBridge", "syncAnniversaries context.packageName=${context.packageName}")
             val jsonArray = org.json.JSONArray(jsonString)
-            com.timememorial.app.reminder.ReminderSettings.saveAnniversaries(context, jsonArray)
-            android.util.Log.w("WebBridge", "syncAnniversaries saveAnniversaries DONE")
-            // 验证写入结果
-            val verify = com.timememorial.app.reminder.ReminderSettings.getAnniversaries(context)
-            android.util.Log.w("WebBridge", "syncAnniversaries verify read back count=${verify.length()}")
+            // JSONArray → List<Map>
+            val items = (0 until jsonArray.length()).map { i ->
+                val obj = jsonArray.getJSONObject(i)
+                val map = mutableMapOf<String, Any?>()
+                for (key in obj.keys()) {
+                    map[key] = obj.opt(key)
+                }
+                if (map.containsKey("id")) map["id"] = obj.optLong("id", 0L)
+                map as Map<String, Any?>
+            }
+            // 写入 Repository（JSON 文件 + 自动同步 SharedPreferences）
+            com.timememorial.app.data.local.AnniversaryRepository.writeAll(context, items)
             // 同步后立即调度提醒
             com.timememorial.app.reminder.ReminderManager.scheduleDaily(context)
-            android.util.Log.w("WebBridge", "syncAnniversaries scheduleDaily DONE")
+            android.util.Log.w("WebBridge", "syncAnniversaries OK: ${items.size} items → Repository + Prefs")
         } catch (e: Exception) {
             android.util.Log.e("WebBridge", "syncAnniversaries FAILED", e)
         }
     }
 
-    // ── 查询当前待提醒列表（供 WebView 展示） ──
+    // ── 查询当前待提醒列表（供 WebView 展示，数据来自 Repository） ──
     @JavascriptInterface
     fun getUpcomingReminders(): String {
         return try {
-            val reminders = com.timememorial.app.reminder.ReminderSettings.getUpcomingReminders(context)
+            val daysBefore = com.timememorial.app.reminder.ReminderSettings.getDaysBefore(context)
+            val reminders = com.timememorial.app.data.local.AnniversaryRepository.getUpcomingReminders(context, daysBefore)
             val jsonArray = org.json.JSONArray()
             for (r in reminders) {
                 val obj = org.json.JSONObject().apply {
