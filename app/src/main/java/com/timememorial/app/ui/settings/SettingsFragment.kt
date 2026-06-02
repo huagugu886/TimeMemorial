@@ -41,17 +41,6 @@ class SettingsFragment : Fragment() {
         handleFileChooserResult(result)
     }
 
-    private fun clearWebViewCache(context: android.content.Context) {
-        try {
-            context.cacheDir?.deleteRecursively()
-            webView?.clearCache(true)
-            webView?.clearHistory()
-            webView?.clearFormData()
-        } catch (e: Exception) {
-            android.util.Log.e("SettingsFragment", "clearWebViewCache failed", e)
-        }
-    }
-
     /** JS 桥接：让设置页切换暗色模式时同步到 SharedPreferences + AppCompatDelegate */
     inner class DarkModeBridge {
         @JavascriptInterface
@@ -199,6 +188,66 @@ class SettingsFragment : Fragment() {
                 org.json.JSONObject().put("ok", false).put("error", e.message ?: "unknown").toString()
             }
         }
+
+        @JavascriptInterface
+        fun getCacheSize(): String {
+            return try {
+                val ctx = webView?.context ?: return "{\"ok\":false}"
+                var total = 0L
+                // WebView cache
+                ctx.cacheDir?.let { dir ->
+                    if (dir.exists()) {
+                        dir.walkTopDown().filter { it.isFile }.forEach { total += it.length() }
+                    }
+                }
+                // images directory
+                File(ctx.filesDir, "images").let { dir ->
+                    if (dir.exists()) {
+                        dir.walkTopDown().filter { it.isFile }.forEach { total += it.length() }
+                    }
+                }
+                JSONObject().apply {
+                    put("ok", true)
+                    put("bytes", total)
+                    put("display", formatBytes(total))
+                }.toString()
+            } catch (e: Exception) {
+                "{\"ok\":false,\"error\":\"${e.message}\"}"
+            }
+        }
+
+        @JavascriptInterface
+        fun clearCache(): String {
+            return try {
+                val ctx = webView?.context ?: return "{\"ok\":false}"
+                var cleared = 0L
+                // Clear WebView cache
+                webView?.clearCache(true)
+                webView?.clearHistory()
+                webView?.clearFormData()
+                // Clear cache directory
+                ctx.cacheDir?.let { dir ->
+                    if (dir.exists()) {
+                        dir.walkTopDown().filter { it.isFile }.forEach { cleared += it.length(); it.delete() }
+                    }
+                }
+                JSONObject().apply {
+                    put("ok", true)
+                    put("display", "0 B")
+                    put("cleared", cleared)
+                }.toString()
+            } catch (e: Exception) {
+                "{\"ok\":false,\"error\":\"${e.message}\"}"
+            }
+        }
+    }
+
+    private fun formatBytes(bytes: Long): String {
+        return when {
+            bytes < 1024 -> "$bytes B"
+            bytes < 1024 * 1024 -> "${String.format("%.1f", bytes / 1024.0)} KB"
+            else -> "${String.format("%.1f", bytes / (1024.0 * 1024.0))} MB"
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -216,7 +265,6 @@ class SettingsFragment : Fragment() {
             settings.allowContentAccess = true
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
-            clearWebViewCache(context)
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
             settings.setSupportZoom(false)

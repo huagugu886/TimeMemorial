@@ -1049,19 +1049,24 @@ function showConfirm(title, msg) {
     reader.readAsText(selectedFile);
   };
 })();
-</script>
-</body>
-</html>
-document.getElementById('cacheSize');
+
+/* ===== 清除缓存 ===== */
+(function(){
+  var cacheSizeEl = document.getElementById('cacheSize');
   var clearRow = document.getElementById('rowClearCache');
 
-  // 计算并显示缓存大小
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/(1024*1024)).toFixed(1) + ' MB';
+  }
+
   function refreshCacheSize() {
     try {
       var sizeStr = nativeBridge.getCacheSize();
       var size = JSON.parse(sizeStr);
       if (size.ok) {
-        cacheSizeEl.textContent = size.display;
+        cacheSizeEl.textContent = formatSize(size.bytes);
       } else {
         cacheSizeEl.textContent = '未知';
       }
@@ -1070,14 +1075,11 @@ document.getElementById('cacheSize');
     }
   }
 
-  // 页面加载时获取缓存大小
   refreshCacheSize();
 
-  // 点击清除缓存
   clearRow.onclick = function() {
     var currentSize = cacheSizeEl.textContent;
     if (currentSize === '0 B' || currentSize === '未知' || currentSize === '计算中…') {
-      // 缓存为空，直接提示
       showConfirm('清除缓存', '当前没有需要清除的缓存').then(function(){});
       return;
     }
@@ -1086,7 +1088,6 @@ document.getElementById('cacheSize');
       '将清除 ' + currentSize + ' 的临时缓存数据\n\n不会删除纪念日数据和设置'
     ).then(function(confirmed) {
       if (!confirmed) return;
-      // 显示加载状态
       cacheSizeEl.textContent = '清除中…';
       try {
         var result = nativeBridge.clearCache();
@@ -1104,7 +1105,6 @@ document.getElementById('cacheSize');
     });
   };
 
-  // 暴露给外部刷新（可选）
   window.__refreshCacheSize = refreshCacheSize;
 })();
 </script>
