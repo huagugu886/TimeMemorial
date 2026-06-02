@@ -208,42 +208,11 @@ class HomeFragment : Fragment() {
         val prefs = requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
         if (prefs.getBoolean("pending_restore_sync", false)) {
             prefs.edit().putBoolean("pending_restore_sync", false).apply()
-            reloadFromRestore()
+            android.widget.Toast.makeText(requireContext(), "数据恢复成功，正在刷新首页…", android.widget.Toast.LENGTH_SHORT).show()
+            val webView = _binding?.webView ?: return
+            webView.evaluateJavascript("localStorage.removeItem('anniversaries');", null)
+            webView.evaluateJavascript("loadAll();", null)
         }
-    }
-
-    fun reloadFromRestore() {
-        val webView = _binding?.webView ?: return
-        val context = requireContext()
-        val allData = com.timememorial.app.data.local.AnniversaryRepository.getAll(context)
-        val jsonArray = org.json.JSONArray()
-        for (item in allData) {
-            val obj = org.json.JSONObject()
-            obj.put("id", item["id"] ?: "")
-            obj.put("title", item["title"] ?: "")
-            obj.put("date", item["date"] ?: "")
-            obj.put("category", item["category"] ?: "")
-            obj.put("repeatYearly", item["repeatYearly"] ?: true)
-            obj.put("reminderDays", item["reminderDays"] ?: 3)
-            obj.put("photoUri", item["photoUri"] ?: "")
-            obj.put("note", item["note"] ?: "")
-            jsonArray.put(obj)
-        }
-        val jsonStr = org.json.JSONObject().apply { put("data", jsonArray) }.toString()
-        val escaped = android.util.Base64.encodeToString(jsonStr.toByteArray(Charsets.UTF_8), android.util.Base64.NO_WRAP)
-        webView.evaluateJavascript(
-            """
-            (function() {
-                var data = JSON.parse(atob('$escaped'));
-                if (data.data && Array.isArray(data.data)) {
-                    localStorage.setItem('anniversaries', JSON.stringify(data.data));
-                    if (typeof loadAnniversaries === 'function') loadAnniversaries();
-                    else if (typeof renderAll === 'function') renderAll();
-                    else location.reload();
-                }
-            })();
-            """.trimIndent(), null
-        )
     }
 
     override fun onDestroyView() {
