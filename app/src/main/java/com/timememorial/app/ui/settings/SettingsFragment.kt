@@ -104,6 +104,7 @@ class SettingsFragment : Fragment() {
         fun setThemeColor(name: String) {
             requireContext().getSharedPreferences("timememorial_prefs", android.content.Context.MODE_PRIVATE)
                 .edit().putString("theme_color", name).apply()
+            activity?.runOnUiThread { (activity as? com.timememorial.app.MainActivity)?.refreshBottomNavColors() }
         }
 
         @JavascriptInterface

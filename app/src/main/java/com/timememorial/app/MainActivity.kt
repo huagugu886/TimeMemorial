@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** 强制刷新底栏颜色，解决深色模式切换后不生效的问题 */
-    private fun refreshBottomNavColors() {
+    fun refreshBottomNavColors() {
         val nightMode = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
