@@ -109,6 +109,6 @@ class MainActivity : AppCompatActivity() {
         )
         val colors = intArrayOf(checked, unchecked)
         binding.bottomNav.itemIconTintList = android.content.res.ColorStateList(states, colors)
-        binding.bottomNav.itemTextColorList = android.content.res.ColorStateList(states, colors)
+        binding.bottomNav.itemTextColor = android.content.res.ColorStateList(states, colors)
     }
 }
