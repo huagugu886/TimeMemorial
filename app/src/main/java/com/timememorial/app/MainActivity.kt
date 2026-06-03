@@ -50,6 +50,14 @@ class MainActivity : AppCompatActivity() {
         // 深色模式切换后强制刷新底栏颜色（BottomNavigationView 缓存 ColorStateList）
         refreshBottomNavColors()
 
+        // Android 12+ 窗口背景模糊：让底栏和系统导航栏区域产生毛玻璃效果
+        if (android.os.Build.VERSION.SDK_INT >= 31) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+            window.attributes = window.attributes.apply {
+                blurBehindRadius = 40
+            }
+        }
+
         // 底栏：只吃导航栏底部 insets，阻止键盘(IME)把它顶上去
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -99,8 +107,9 @@ class MainActivity : AppCompatActivity() {
         val nightMode = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        val bg = if (night) android.graphics.Color.parseColor("#1F2937")
-                else android.graphics.Color.parseColor("#FFFFFF")
+        // 半透明背景：配合窗口模糊实现毛玻璃效果
+        val bg = if (night) 0xCC1A1A28.toInt()   // 深色 80% 不透明
+                else 0xC0FFFFFF.toInt()            // 白色 75% 不透明
         binding.bottomNav.setBackgroundColor(bg)
 
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
