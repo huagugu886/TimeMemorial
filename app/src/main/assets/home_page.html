@@ -353,7 +353,7 @@ body:has(.detail-overlay.show) .fab { display: none !important; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 20px 12px;
+  padding: calc(var(--sb-height, 48px) + 12px) 20px 12px;
   position: sticky;
   top: 0;
   background: var(--card-bg);
@@ -1337,7 +1337,7 @@ body.dark-mode .sort-btn {
   -webkit-overflow-scrolling: touch;
 }
 .cal-year-selector.show .cal-year-panel { transform: scale(1); }
-.cal-year-panel-title { font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 16px; color: #1F2937; position: sticky; top: 0; background: inherit; padding-bottom: 8px; z-index: 1; }
+.cal-year-panel-title { font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 12px; color: #1F2937; position: sticky; top: 0; background: inherit; padding: 8px 0 12px; z-index: 1; }
 .cal-year-panel::-webkit-scrollbar { width: 4px; }
 .cal-year-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
 body.dark-mode .cal-year-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
@@ -2848,10 +2848,16 @@ function openCalendarPopup() {
   }
   renderCalendar();
   document.getElementById('calendarPopup').classList.add('show');
+  // 锁住底层 modal-sheet 滚动，防止手势穿透
+  var ms = document.querySelector('.modal-sheet');
+  if (ms) { ms._prevOverflow = ms.style.overflow; ms.style.overflow = 'hidden'; }
 }
 
 function closeCalendarPopup() {
   document.getElementById('calendarPopup').classList.remove('show');
+  // 恢复 modal-sheet 滚动
+  var ms = document.querySelector('.modal-sheet');
+  if (ms) { ms.style.overflow = ms._prevOverflow || ''; }
 }
 
 function calPrevMonth() {
