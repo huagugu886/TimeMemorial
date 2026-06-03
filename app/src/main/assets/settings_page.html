@@ -1111,3 +1111,21 @@ function showConfirm(title, msg) {
       }
     } catch(e) {
       cacheSizeEl.textContent = '未知';
+    }
+  }
+
+  refreshCacheSize();
+
+  clearRow.onclick = function() {
+    showConfirm('清除缓存', '确定要清除应用缓存吗？').then(function(ok) {
+      if (!ok) return;
+      try {
+        nativeBridge.clearCache();
+        cacheSizeEl.textContent = '0 B';
+      } catch(e) {}
+    });
+  };
+})();
+</script>
+</body>
+</html>
