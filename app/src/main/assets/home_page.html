@@ -862,9 +862,7 @@ body.keyboard-open #bottomNav {
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
 }
-.modal-open { position: fixed; width: 100%; overflow: hidden !important; }
-.modal-open * { overflow: hidden !important; }
-html.modal-open { overflow: hidden !important; }
+.modal-open {}
 
 /* ========== 删除确认弹窗 ========== */
 .dc-overlay {
@@ -2225,8 +2223,7 @@ function openDetail(id) {
 
   document.getElementById('detailInfo').innerHTML = infoHtml;
 
-  document.body.dataset.scrollY = window.scrollY;
-  document.body.style.top = -window.scrollY + 'px';
+  lockScroll();
   document.body.classList.add('modal-open');
   document.getElementById('detailModal').classList.add('show');
 }
@@ -2235,14 +2232,14 @@ function openDetail(id) {
 document.getElementById('detailClose').addEventListener('click', () => {
   document.getElementById('detailModal').classList.remove('show');
   document.body.classList.remove('modal-open');
+  unlockScroll();
   currentDetailId = null;
 });
 document.getElementById('detailModal').addEventListener('click', e => {
   if (e.target === document.getElementById('detailModal')) {
     document.getElementById('detailModal').classList.remove('show');
     document.body.classList.remove('modal-open');
-    document.body.style.top = '';
-    window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+    unlockScroll();
     currentDetailId = null;
   }
 });
@@ -2255,8 +2252,7 @@ document.getElementById('detailEditBtn').addEventListener('click', () => {
   // 关闭详情弹窗
   document.getElementById('detailModal').classList.remove('show');
   document.body.classList.remove('modal-open');
-  document.body.style.top = '';
-  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+  unlockScroll();
   currentDetailId = null;
   // 导航到编辑页面（如果Android端支持）
   if (window.Android && window.Android.navigateToEdit) {
@@ -2322,9 +2318,8 @@ function openAddModalForEdit(m) {
 
   // 打开弹窗
   clearTimeout(_addModalCloseTimer);
-  document.body.dataset.scrollY = window.scrollY;
+  lockScroll();
   document.body.classList.add('modal-open');
-  document.body.style.top = `-${window.scrollY}px`;
   addModal.classList.add('show');
 }
 
@@ -2332,8 +2327,7 @@ document.getElementById('detailModal').addEventListener('click', e => {
   if (e.target === document.getElementById('detailModal')) {
     document.getElementById('detailModal').classList.remove('show');
     document.body.classList.remove('modal-open');
-    document.body.style.top = '';
-    window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+    unlockScroll();
     currentDetailId = null;
   }
 });
@@ -2352,6 +2346,7 @@ document.getElementById('detailDeleteBtn').addEventListener('click', async () =>
   syncToNative();
   document.getElementById('detailModal').classList.remove('show');
   document.body.classList.remove('modal-open');
+  unlockScroll();
   currentDetailId = null;
   renderFeatured();
   renderList();
@@ -2409,12 +2404,39 @@ document.getElementById('fabBtn').addEventListener('click', () => {
     document.getElementById('previewContainer').classList.remove('show');
     document.getElementById('uploadArea').style.display = '';
     document.getElementById('favToggle').classList.remove('on');
-    document.body.dataset.scrollY = window.scrollY;
+    lockScroll();
     document.body.classList.add('modal-open');
-    document.body.style.top = -window.scrollY + 'px';
     addModal.classList.add('show');
   }
 });
+
+// ========== 滚动锁定工具（不依赖 position:fixed） ==========
+var _lockedScrollY = 0;
+var _scrollLockHandler = null;
+var _scrollLockActive = false;
+// 弹窗/弹层内部所有可能滚动的容器，放行它们的滚动
+var _SCROLL_WHITELIST = '.modal-sheet,.modal-body,.modal-overlay,.modal-content,.detail-sheet,.detail-overlay,.dc-body,.settings-section';
+function lockScroll() {
+  _lockedScrollY = window.scrollY;
+  _scrollLockActive = true;
+  _scrollLockHandler = function(e) {
+    if (!e || !e.target) return;
+    // 滚动事件来自弹窗内部内容 → 放行
+    if (e.target.closest && e.target.closest(_SCROLL_WHITELIST)) return;
+    // 背景页滚动 → 拦截，钉在原位
+    if (_scrollLockActive && window.scrollY !== _lockedScrollY) {
+      window.scrollTo(0, _lockedScrollY);
+    }
+  };
+  window.addEventListener('scroll', _scrollLockHandler, { passive: false });
+}
+function unlockScroll() {
+  _scrollLockActive = false;
+  if (_scrollLockHandler) {
+    window.removeEventListener('scroll', _scrollLockHandler);
+    _scrollLockHandler = null;
+  }
+}
 
 // ========== 统一关闭添加/编辑弹窗（带过渡动画） ==========
 var _addModalCloseTimer = null;
@@ -2426,8 +2448,7 @@ function closeAddModal() {
   clearTimeout(_addModalCloseTimer);
   _addModalCloseTimer = setTimeout(function() {
     document.body.classList.remove('modal-open');
-    document.body.style.top = '';
-    window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+    unlockScroll();
   }, 350);
 }
 
@@ -2962,8 +2983,7 @@ window.__handleBackPress = function() {
     if (dm && dm.classList.contains('show')) {
         dm.classList.remove('show');
         document.body.classList.remove('modal-open');
-        document.body.style.top = '';
-        window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+        unlockScroll();
         currentDetailId = null;
         return 'handled';
     }
