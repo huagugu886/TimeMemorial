@@ -22,6 +22,8 @@
   --tag-collection: #EE5A24;
   --shadow: 0 4px 20px rgba(124, 92, 252, 0.15);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* 状态栏高度：由 JS 从 URL 参数 sat= 注入，fallback 到 env() 再 fallback 到 48px */
+  --sb-height: 48px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -37,7 +39,7 @@ body {
 /* ========== 头部 ========== */
 .header {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  padding: calc(env(safe-area-inset-top, 20px) + 12px) 20px 24px;
+  padding: calc(var(--sb-height, env(safe-area-inset-top, 20px)) + 12px) 20px 24px;
   border-radius: 0 0 28px 28px;
   position: relative;
   overflow: hidden;
@@ -1038,7 +1040,7 @@ body.keyboard-open #bottomNav {
 }
 .fullscreen-img-viewer .fv-close {
   position: absolute;
-  top: calc(env(safe-area-inset-top, 12px) + 12px);
+  top: calc(var(--sb-height, env(safe-area-inset-top, 20px)) + 12px);
   right: 16px;
   width: 36px; height: 36px;
   border-radius: 50%;
@@ -1630,6 +1632,19 @@ body.dark-mode .dp-year-item.current {
 </div>
 
 <script>
+// ========== 状态栏高度注入 ==========
+// 从 URL 参数 sat= 读取 Kotlin 端计算的状态栏高度(dp)，写入 CSS 变量 --sb-height
+// Android WebView 中 env(safe-area-inset-top) 不可靠（小米等厂商），必须用原生传值兜底
+(function() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var sat = parseFloat(params.get('sat'));
+    if (sat && sat > 0) {
+      document.documentElement.style.setProperty('--sb-height', sat + 'px');
+    }
+  } catch(e) {}
+})();
+
 // ========== 数据层 ==========
 const STORAGE_KEY = 'time_memorial_data';
 
@@ -2998,6 +3013,56 @@ document.getElementById('dateInput').addEventListener('click', function(e) {
 document.getElementById('dateInput').addEventListener('keydown', function(e) {
   e.preventDefault();
 });
+
+// ========== Android 系统返回手势拦截 ==========
+// 由 HomeFragment.kt 的 OnBackPressedCallback 调用
+// 返回 'handled' 表示弹窗已关闭，不退出 app；返回 'exit' 表示可以退出
+window.__handleBackPress = function() {
+  // 按 z-index 从高到低检查弹窗，优先关闭最顶层
+  // 1. 全屏图片查看器 (z-index: 10000)
+  var fv = document.getElementById('fullscreenImgViewer');
+  if (fv && fv.classList.contains('active')) {
+    fv.classList.remove('active');
+    return 'handled';
+  }
+  // 2. 删除确认弹窗 / 操作结果弹窗 / 自定义分类弹窗 (z-index: 300)
+  var dc = document.getElementById('dcOverlay');
+  if (dc && dc.classList.contains('show')) {
+    dc.classList.remove('show');
+    return 'handled';
+  }
+  var al = document.getElementById('alOverlay');
+  if (al && al.classList.contains('show')) {
+    al.classList.remove('show');
+    return 'handled';
+  }
+  var cc = document.getElementById('ccOverlay');
+  if (cc && cc.classList.contains('show')) {
+    cc.classList.remove('show');
+    return 'handled';
+  }
+  // 3. 日期选择器 (z-index: 可能有)
+  var dp = document.getElementById('dpOverlay');
+  if (dp && dp.classList.contains('show')) {
+    dp.classList.remove('show');
+    return 'handled';
+  }
+  // 4. 详情弹窗 / 添加编辑弹窗 (z-index: 200)
+  var detail = document.getElementById('detailModal');
+  if (detail && detail.classList.contains('show')) {
+    detail.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    return 'handled';
+  }
+  var modal = document.getElementById('addModal');
+  if (modal && modal.classList.contains('show')) {
+    modal.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    return 'handled';
+  }
+  // 无弹窗打开，返回 exit 让 Kotlin 执行默认退出逻辑
+  return 'exit';
+};
 </script>
 
 <!-- 自定义日期选择器 -->
