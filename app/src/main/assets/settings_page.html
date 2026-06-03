@@ -659,9 +659,8 @@ function applyTheme(themeName, isDark) {
 const dmSwitch = document.getElementById('dm');
 const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
 
-function applyDark(dark) {
-  document.body.style.opacity = '0';
-  setTimeout(() => {
+function applyDark(dark, animate) {
+  function doApply() {
     const s = document.documentElement.style;
     if (dark) {
       s.setProperty('--bg','#111827'); s.setProperty('--card-bg','#1F2937');
@@ -674,21 +673,26 @@ function applyDark(dark) {
     }
     document.documentElement.style.backgroundColor = dark ? '#111827' : '#F8F6FF';
     applyTheme(localStorage.getItem('themeColor') || 'purple', dark);
-    document.body.style.opacity = '1';
-  }, 200);
+  }
+  if (animate) {
+    document.body.style.opacity = '0';
+    setTimeout(function() { doApply(); document.body.style.opacity = '1'; }, 200);
+  } else {
+    doApply();
+  }
 }
 
 // 初始化深色模式
 const saved = localStorage.getItem('darkMode');
 if (saved === 'on') {
   dmSwitch.checked = true;
-  applyDark(true);
+  applyDark(true, false);
 } else if (saved === 'off') {
   dmSwitch.checked = false;
-  applyDark(false);
+  applyDark(false, false);
 } else {
   dmSwitch.checked = sysDark.matches;
-  applyDark(sysDark.matches);
+  applyDark(sysDark.matches, false);
 }
 
 // 用户手动切换深色模式 → 保存偏好
