@@ -6,9 +6,9 @@
 <title>时光纪念</title>
 <style>
 :root {
-  --primary: #7C5CFC;
-  --primary-light: #A78BFA;
-  --primary-dark: #5B3FD4;
+  --primary: #8B5CF6;
+  --primary-light: #C4B5FD;
+  --primary-dark: #6D28D9;
   --bg: #F5F5FA;
   --card-bg: #FFFFFF;
   --text: #1A1A2E;
@@ -20,7 +20,8 @@
   --tag-other: #636E72;
   --tag-favorite: #EE5A24;
   --tag-collection: #EE5A24;
-  --shadow: 0 4px 20px rgba(124, 92, 252, 0.15);
+  --shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
+  --fab-shadow: rgba(139, 92, 246, 0.45);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   /* 状态栏高度：由 JS 从 URL 参数 sat= 注入，fallback 到 env() 再 fallback 到 48px */
   --sb-height: 48px;
@@ -296,11 +297,11 @@ body {
   width: clamp(52px, 8vw, 64px) !important;
   height: clamp(52px, 8vw, 64px) !important;
   border-radius: 50% !important;
-  background: linear-gradient(135deg, #7C5CFC, #A78BFA) !important;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light)) !important;
   color: #fff !important;
   font-size: 28px !important;
   border: none !important;
-  box-shadow: 0 6px 24px rgba(124, 92, 252, 0.45) !important;
+  box-shadow: 0 6px 24px var(--fab-shadow) !important;
   cursor: pointer !important;
   z-index: 9999 !important;
   display: flex !important;
@@ -2823,7 +2824,8 @@ syncToNative();
     blue:   { light: { p:'#3B82F6', pl:'#93C5FD', pd:'#1D4ED8', sh:'rgba(59,130,246,.15)' }, dark: { p:'#60A5FA', pl:'#2563EB', pd:'#1E40AF', sh:'rgba(96,165,250,.2)' } },
     pink:   { light: { p:'#EC4899', pl:'#F9A8D4', pd:'#BE185D', sh:'rgba(236,72,153,.15)' }, dark: { p:'#F472B6', pl:'#DB2777', pd:'#9D174D', sh:'rgba(244,114,182,.2)' } },
     rose:   { light: { p:'#F43F5E', pl:'#FDA4AF', pd:'#BE123C', sh:'rgba(244,63,94,.15)' }, dark: { p:'#FB7185', pl:'#E11D48', pd:'#9F1239', sh:'rgba(251,113,133,.2)' } },
-    teal:   { light: { p:'#14B8A6', pl:'#5EEAD4', pd:'#0F766E', sh:'rgba(20,184,166,.15)' }, dark: { p:'#2DD4BF', pl:'#0D9488', pd:'#115E59', sh:'rgba(45,212,191,.2)' } }
+    teal:   { light: { p:'#14B8A6', pl:'#5EEAD4', pd:'#0F766E', sh:'rgba(20,184,166,.15)' }, dark: { p:'#2DD4BF', pl:'#0D9488', pd:'#115E59', sh:'rgba(45,212,191,.2)' } },
+    red:    { light: { p:'#EF4444', pl:'#FCA5A5', pd:'#B91C1C', sh:'rgba(239,68,68,.15)' }, dark: { p:'#F87171', pl:'#DC2626', pd:'#991B1B', sh:'rgba(248,113,113,.2)' } }
   };
   function getDark() {
     var dm = localStorage.getItem('darkMode');
@@ -2839,6 +2841,7 @@ syncToNative();
     s.setProperty('--primary-light', c.pl);
     s.setProperty('--primary-dark', c.pd);
     s.setProperty('--shadow', '0 4px 20px ' + c.sh);
+    s.setProperty('--fab-shadow', c.sh.replace(/[\d.]+\)$/, '0.45)'));
   }
   applyTheme(localStorage.getItem('themeColor') || 'purple');
   window.addEventListener('storage', function(e) {
