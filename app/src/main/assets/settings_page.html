@@ -23,6 +23,7 @@
     color: var(--text);
     min-height: 100vh;
     padding: 0 20px 40px;
+    transition: opacity 0.25s ease;
   }
 
   /* 顶部 */
@@ -52,7 +53,6 @@
     border-radius: var(--radius);
     margin-bottom: 16px;
     overflow: hidden;
-    transition: background-color 0.35s ease;
   }
   .group:first-of-type {
     margin-top: -14px;
@@ -660,18 +660,22 @@ const dmSwitch = document.getElementById('dm');
 const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 function applyDark(dark) {
-  const s = document.documentElement.style;
-  if (dark) {
-    s.setProperty('--bg','#111827'); s.setProperty('--card-bg','#1F2937');
-    s.setProperty('--text','#F9FAFB'); s.setProperty('--text-sec','#6B7280');
-    s.setProperty('--divider','#374151'); s.setProperty('--switch-off','#4B5563');
-  } else {
-    s.setProperty('--bg','#F8F6FF'); s.setProperty('--card-bg','#FFFFFF');
-    s.setProperty('--text','#1F2937'); s.setProperty('--text-sec','#9CA3AF');
-    s.setProperty('--divider','#F3F4F6'); s.setProperty('--switch-off','#E5E7EB');
-  }
-  // 深色模式切换后重新应用主题色（确保主题色覆盖默认值）
-  applyTheme(localStorage.getItem('themeColor') || 'purple', dark);
+  document.body.style.opacity = '0';
+  setTimeout(() => {
+    const s = document.documentElement.style;
+    if (dark) {
+      s.setProperty('--bg','#111827'); s.setProperty('--card-bg','#1F2937');
+      s.setProperty('--text','#F9FAFB'); s.setProperty('--text-sec','#6B7280');
+      s.setProperty('--divider','#374151'); s.setProperty('--switch-off','#4B5563');
+    } else {
+      s.setProperty('--bg','#F8F6FF'); s.setProperty('--card-bg','#FFFFFF');
+      s.setProperty('--text','#1F2937'); s.setProperty('--text-sec','#9CA3AF');
+      s.setProperty('--divider','#F3F4F6'); s.setProperty('--switch-off','#E5E7EB');
+    }
+    document.documentElement.style.backgroundColor = dark ? '#111827' : '#F8F6FF';
+    applyTheme(localStorage.getItem('themeColor') || 'purple', dark);
+    document.body.style.opacity = '1';
+  }, 200);
 }
 
 // 初始化深色模式
@@ -1154,4 +1158,62 @@ function showConfirm(title, msg) {
 })();
 </script>
 </body>
+</html>
+</html>
+!ok) return;
+      try {
+        nativeBridge.clearCache();
+        cacheSizeEl.textContent = '0 B';
+      } catch(e) {}
+    });
+  };
+})();
+</script>
+</body>
+</html>
+</html>
+  } catch(e) {}
+    });
+  };
+})();
+</script>
+</body>
+</html>
+} catch(e) {}
+    });
+  };
+})();
+</script>
+</body>
+</html>
+    }
+  }
+
+  refreshCacheSize();
+
+  clearRow.onclick = function() {
+    showConfirm('清除缓存', '确定要清除应用缓存吗？').then(function(ok) {
+      if (!ok) return;
+      try {
+        nativeBridge.clearCache();
+        cacheSizeEl.textContent = '0 B';
+      } catch(e) {}
+    });
+  };
+})();
+</script>
+</body>
+</html>
+</html>
+!ok) return;
+      try {
+        nativeBridge.clearCache();
+        cacheSizeEl.textContent = '0 B';
+      } catch(e) {}
+    });
+  };
+})();
+</script>
+</body>
+</html>
 </html>
