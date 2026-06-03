@@ -2477,6 +2477,12 @@ document.getElementById('fabBtn').addEventListener('click', () => {
       c.classList.toggle('active', c.dataset.cat === 'love');
     });
     document.getElementById('previewContainer').classList.remove('show');
+    // 彻底清除图片预览，防止残留
+    var _pImg = document.getElementById('previewImg');
+    if (_pImg) _pImg.src = '';
+    var _ppImg = document.getElementById('positionPreviewImg');
+    if (_ppImg) _ppImg.src = '';
+    document.getElementById('positionPicker').classList.remove('show');
     document.getElementById('uploadArea').style.display = '';
     document.getElementById('favToggle').classList.remove('on');
     document.body.dataset.scrollY = window.scrollY;
@@ -2487,10 +2493,23 @@ document.getElementById('fabBtn').addEventListener('click', () => {
 });
 
 // ========== 事件：关闭弹窗 ==========
+function resetAddModalImg() {
+  selectedImage = '';
+  imagePosition = 50;
+  var _pImg = document.getElementById('previewImg');
+  if (_pImg) _pImg.src = '';
+  var _ppImg = document.getElementById('positionPreviewImg');
+  if (_ppImg) _ppImg.src = '';
+  document.getElementById('previewContainer').classList.remove('show');
+  document.getElementById('positionPicker').classList.remove('show');
+  document.getElementById('uploadArea').style.display = '';
+  document.getElementById('imageInput').value = '';
+}
 document.getElementById('closeModal').addEventListener('click', () => {
     document.body.classList.remove('modal-open');
   document.body.style.top = '';
   addModal.classList.remove('show');
+  resetAddModalImg();
   window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
 });
 addModal.addEventListener('click', e => {
@@ -2498,6 +2517,7 @@ addModal.addEventListener('click', e => {
   document.body.style.top = '';
   if (e.target === addModal) {
     addModal.classList.remove('show');
+    resetAddModalImg();
     window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
   }
 });
