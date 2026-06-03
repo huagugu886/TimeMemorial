@@ -64,11 +64,11 @@ class MainActivity : AppCompatActivity() {
         // 再 dispatch 给子 fragment（FragmentContainerView 默认不转发 insets）
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.nav_host_fragment.updatePadding(top = systemBars.top)
+            binding.navHostFragment.updatePadding(top = systemBars.top)
 
             // 转发给子 view，让 fragment 内部也能收到 insets
-            for (i in 0 until binding.nav_host_fragment.childCount) {
-                ViewCompat.dispatchApplyWindowInsets(binding.nav_host_fragment.getChildAt(i), insets)
+            for (i in 0 until binding.navHostFragment.childCount) {
+                ViewCompat.dispatchApplyWindowInsets(binding.navHostFragment.getChildAt(i), insets)
             }
 
             // 键盘弹出时，用 JS 把当前聚焦的输入框滚到可见区域
