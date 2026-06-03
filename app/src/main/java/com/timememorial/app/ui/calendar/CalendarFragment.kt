@@ -93,7 +93,7 @@ class CalendarFragment : Fragment() {
                 }
             )
 
-            loadUrl("file:///android_asset/calendar_page.html?v=1")
+            loadUrl("file:///android_asset/calendar_page.html?v=2&sat=${getStatusBarHeightDp()}")
         }
     }
 

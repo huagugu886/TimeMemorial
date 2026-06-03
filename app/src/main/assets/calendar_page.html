@@ -17,9 +17,11 @@
 </script>
 <script>
 (function(){
-  var sat = Math.max(20, (window.outerHeight - window.innerHeight) / (window.devicePixelRatio || 1));
-  if (window.visualViewport) sat = Math.max(20, window.innerHeight - window.visualViewport.height);
-  document.documentElement.style.setProperty('--sat', sat + 'px');
+  var p = new URLSearchParams(window.location.search);
+  var sat = parseFloat(p.get('sat'));
+  if (!isNaN(sat) && sat > 0) {
+    document.documentElement.style.setProperty('--sat', sat + 'px');
+  }
 })();
 </script>
 <style>

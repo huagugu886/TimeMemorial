@@ -349,7 +349,7 @@ class SettingsFragment : Fragment() {
                     return true
                 }
             }
-            loadUrl("file:///android_asset/settings_page.html?v=2")
+            loadUrl("file:///android_asset/settings_page.html?v=3&sat=${getStatusBarHeightDp()}")
 
             handleWebViewBack(this)
         }

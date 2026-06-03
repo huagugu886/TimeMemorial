@@ -157,7 +157,7 @@ class HomeFragment : Fragment() {
                 }
             }
 
-            loadUrl("file:///android_asset/home_page.html?v=9")
+            loadUrl("file:///android_asset/home_page.html?v=10&sat=${getStatusBarHeightDp()}")
         }
 
         // 注册系统返回手势/按键处理（SPA 子页面返回）
