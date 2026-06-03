@@ -1537,34 +1537,6 @@ body.dark-mode .cal-today-btn:active { background: #4B5563; }
         </div>
       </div>
 
-      <!-- 日历弹窗 -->
-      <div id="calendarPopup" class="calendar-popup">
-        <div class="calendar-overlay" onclick="closeCalendarPopup()"></div>
-        <div class="calendar-panel">
-          <div class="calendar-header">
-            <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
-            <span id="calTitle" class="cal-title" onclick="showCalYearSelector()"></span>
-            <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
-          </div>
-          <div class="calendar-weekdays">
-            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
-          </div>
-          <div id="calendarGrid" class="calendar-grid"></div>
-          <div class="calendar-footer">
-            <button class="cal-today-btn" onclick="calGoToday()">今天</button>
-            <button class="cal-confirm-btn" onclick="calConfirm()">确定</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 日历年份选择器 -->
-      <div class="cal-year-selector" id="calYearSelector" onclick="closeCalYearSelector(event)">
-        <div class="cal-year-panel" id="calYearPanel">
-          <div class="cal-year-panel-title">选择年份</div>
-          <div class="cal-year-grid" id="calYearGrid"></div>
-        </div>
-      </div>
-
       <!-- 描述 -->
       <div class="form-group">
         <label>描述</label>
@@ -1613,6 +1585,34 @@ body.dark-mode .cal-today-btn:active { background: #4B5563; }
 
       <!-- 提交 -->
       <button class="submit-btn" id="submitBtn">保存纪念日</button>
+    </div>
+  </div>
+
+  <!-- 日历弹窗（从 modal-sheet 移出，避免 transform 导致圆角丢失） -->
+  <div id="calendarPopup" class="calendar-popup">
+    <div class="calendar-overlay" onclick="closeCalendarPopup()"></div>
+    <div class="calendar-panel">
+      <div class="calendar-header">
+        <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
+        <span id="calTitle" class="cal-title" onclick="showCalYearSelector()"></span>
+        <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
+      </div>
+      <div class="calendar-weekdays">
+        <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+      </div>
+      <div id="calendarGrid" class="calendar-grid"></div>
+      <div class="calendar-footer">
+        <button class="cal-today-btn" onclick="calGoToday()">今天</button>
+        <button class="cal-confirm-btn" onclick="calConfirm()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 日历年份选择器（从 modal-sheet 移出） -->
+  <div class="cal-year-selector" id="calYearSelector" onclick="closeCalYearSelector(event)">
+    <div class="cal-year-panel" id="calYearPanel">
+      <div class="cal-year-panel-title">选择年份</div>
+      <div class="cal-year-grid" id="calYearGrid"></div>
     </div>
   </div>
 </div>
