@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>设置</title>
+<script>
+(function(){
+  var sat = Math.max(20, (window.outerHeight - window.innerHeight) / (window.devicePixelRatio || 1));
+  if (window.visualViewport) sat = Math.max(20, window.innerHeight - window.visualViewport.height);
+  document.documentElement.style.setProperty('--sat', sat + 'px');
+})();
+</script>
 <style>
   :root {
     --bg: #F8F6FF;
@@ -14,6 +21,7 @@
     --divider: #F3F4F6;
     --switch-off: #E5E7EB;
     --radius: 20px;
+    --sat: 52px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { background: var(--bg); }
@@ -28,7 +36,7 @@
 
   /* 顶部 */
   .header {
-    padding: 52px 24px 20px;
+    padding: calc(var(--sat) + 16px) 24px 20px;
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
     margin: 0 -20px;
     border-radius: 0 0 28px 28px;

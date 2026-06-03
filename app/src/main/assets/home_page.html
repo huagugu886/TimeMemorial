@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>时光纪念</title>
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js"></script>
+<script>
+(function(){
+  var sat = Math.max(20, (window.outerHeight - window.innerHeight) / (window.devicePixelRatio || 1));
+  if (window.visualViewport) sat = Math.max(20, window.innerHeight - window.visualViewport.height);
+  document.documentElement.style.setProperty('--sat', sat + 'px');
+})();
+</script>
 <style>
 :root {
   --primary: #7C5CFC;
@@ -23,6 +30,7 @@
   --tag-collection: #EE5A24;
   --shadow: 0 4px 20px rgba(124, 92, 252, 0.15);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --sat: 48px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -38,7 +46,7 @@ body {
 /* ========== 头部 ========== */
 .header {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  padding: calc(env(safe-area-inset-top, 20px) + 12px) 20px 24px;
+  padding: calc(var(--sat) + 12px) 20px 24px;
   border-radius: 0 0 28px 28px;
   position: relative;
   overflow: hidden;

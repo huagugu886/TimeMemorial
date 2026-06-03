@@ -15,6 +15,13 @@
     }
   })();
 </script>
+<script>
+(function(){
+  var sat = Math.max(20, (window.outerHeight - window.innerHeight) / (window.devicePixelRatio || 1));
+  if (window.visualViewport) sat = Math.max(20, window.innerHeight - window.visualViewport.height);
+  document.documentElement.style.setProperty('--sat', sat + 'px');
+})();
+</script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { background: var(--surface); }
@@ -32,6 +39,7 @@ html { background: var(--surface); }
   --today-text: #FFFFFF;
   --card-radius: 16px;
   --shadow: 0 2px 12px rgba(108,99,255,0.08);
+  --sat: 48px;
 }
 
 body {
@@ -48,7 +56,7 @@ body {
 /* ===== 顶部区域 ===== */
 .header {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  padding: 48px 20px 16px;
+  padding: calc(var(--sat) + 12px) 20px 16px;
   border-radius: 0 0 28px 28px;
   position: relative;
   overflow: hidden;
