@@ -12,6 +12,7 @@ import androidx.core.view.updatePadding
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.timememorial.app.databinding.ActivityMainBinding
+import com.timememorial.app.reminder.ReminderManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,6 +33,12 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
         binding.bottomNav.setupWithNavController(navController)
+
+        // 冷启动时恢复纪念日提醒闹钟
+        val prefs = getSharedPreferences("reminder_settings", MODE_PRIVATE)
+        if (prefs.getBoolean("enabled", false)) {
+            ReminderManager.scheduleDaily(this)
+        }
 
         // Android 13+ 请求通知权限（POST_NOTIFICATIONS 已在 Manifest 声明）
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {

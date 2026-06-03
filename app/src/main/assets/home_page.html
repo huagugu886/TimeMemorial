@@ -313,13 +313,14 @@ body:has(.detail-overlay.show) .fab { display: none !important; }
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.5);
   z-index: 200;
-  display: none;
+  display: flex;
   align-items: flex-end;
   justify-content: center;
-  animation: fadeIn 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
-.modal-overlay.show { display: flex; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-overlay.show { opacity: 1; pointer-events: auto; }
 
 .modal-sheet {
   background: var(--card-bg);
@@ -328,8 +329,10 @@ body:has(.detail-overlay.show) .fab { display: none !important; }
   max-height: calc(92vh - var(--sb-height, 48px));
   overflow-y: auto;
   padding: 0;
-  animation: slideUp 0.3s ease;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
+.modal-overlay.show .modal-sheet { transform: translateY(0); }
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
@@ -2318,6 +2321,7 @@ function openAddModalForEdit(m) {
   document.getElementById('submitBtn').textContent = '更新纪念日';
 
   // 打开弹窗
+  clearTimeout(_addModalCloseTimer);
   document.body.dataset.scrollY = window.scrollY;
   document.body.classList.add('modal-open');
   document.body.style.top = `-${window.scrollY}px`;
@@ -2412,19 +2416,26 @@ document.getElementById('fabBtn').addEventListener('click', () => {
   }
 });
 
-// ========== 事件：关闭弹窗 ==========
-document.getElementById('closeModal').addEventListener('click', () => {
+// ========== 统一关闭添加/编辑弹窗（带过渡动画） ==========
+var _addModalCloseTimer = null;
+function closeAddModal() {
+  var am = document.getElementById('addModal');
+  if (!am) return;
+  editingId = null;
+  am.classList.remove('show');
+  clearTimeout(_addModalCloseTimer);
+  _addModalCloseTimer = setTimeout(function() {
     document.body.classList.remove('modal-open');
-  document.body.style.top = '';
-  addModal.classList.remove('show');
-  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
-});
-addModal.addEventListener('click', e => {
-    document.body.classList.remove('modal-open');
-  document.body.style.top = '';
-  if (e.target === addModal) {
-    addModal.classList.remove('show');
+    document.body.style.top = '';
     window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+  }, 400);
+}
+
+// ========== 事件：关闭弹窗 ==========
+document.getElementById('closeModal').addEventListener('click', closeAddModal);
+addModal.addEventListener('click', e => {
+  if (e.target === addModal) {
+    closeAddModal();
   }
 });
 
@@ -2572,8 +2583,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
   saveData(memorials);
   syncToNative();
 
-  document.body.classList.remove('modal-open');
-  addModal.classList.remove('show');
+  closeAddModal();
   renderFeatured();
   renderList();
   showToast(toastMsg);
@@ -2944,11 +2954,7 @@ window.__handleBackPress = function() {
     // 6. 添加/编辑弹窗
     var am = document.getElementById('addModal');
     if (am && am.classList.contains('show')) {
-        editingId = null;
-        document.body.classList.remove('modal-open');
-        document.body.style.top = '';
-        am.classList.remove('show');
-        window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+        closeAddModal();
         return 'handled';
     }
     // 7. 详情弹窗

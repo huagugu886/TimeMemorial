@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import com.timememorial.app.reminder.ReminderManager
 import com.timememorial.app.reminder.ReminderSettings
 import org.json.JSONObject
 import java.io.File
@@ -112,18 +113,27 @@ class SettingsFragment : Fragment() {
         fun saveReminderSettings(jsonString: String) {
             try {
                 val json = org.json.JSONObject(jsonString)
-                val prefs = requireContext().getSharedPreferences("reminder_settings", android.content.Context.MODE_PRIVATE)
+                val ctx = requireContext()
+                val prefs = ctx.getSharedPreferences("reminder_settings", android.content.Context.MODE_PRIVATE)
                 val timeParts = json.optString("reminderTime", "09:00").split(":")
                 val hour = timeParts.getOrNull(0)?.toIntOrNull() ?: 9
                 val minute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
+                val enabled = json.optBoolean("enabled", true)
 
                 prefs.edit()
-                    .putBoolean("enabled", true)
+                    .putBoolean("enabled", enabled)
                     .putInt("days_before", json.optInt("reminderDays", 3))
                     .putInt("hour", hour)
                     .putInt("minute", minute)
                     .putString("default_repeat", json.optString("repeatType", "yearly"))
                     .apply()
+
+                // 保存配置后立即调度/取消闹钟
+                if (enabled) {
+                    ReminderManager.scheduleDaily(ctx)
+                } else {
+                    ReminderManager.cancel(ctx)
+                }
             } catch (e: Exception) {
                 android.util.Log.e("SettingsFragment", "saveReminderSettings failed", e)
             }
