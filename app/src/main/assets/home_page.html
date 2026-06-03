@@ -2908,6 +2908,61 @@ function renderCalendar() {
     }
   }, true);
 })();
+
+// ========== 系统返回键处理 ==========
+window.__handleBackPress = function() {
+    // 1. 全屏图片查看器
+    var fv = document.getElementById('fullscreenImgViewer');
+    if (fv && fv.classList.contains('active')) {
+        closeFullscreenViewer();
+        return 'handled';
+    }
+    // 2. 删除确认弹窗
+    var dc = document.getElementById('dcOverlay');
+    if (dc && dc.classList.contains('show')) {
+        dc.classList.remove('show');
+        return 'handled';
+    }
+    // 3. 操作结果弹窗
+    var al = document.getElementById('alOverlay');
+    if (al && al.classList.contains('show')) {
+        al.classList.remove('show');
+        return 'handled';
+    }
+    // 4. 自定义分类弹窗
+    var cc = document.getElementById('ccOverlay');
+    if (cc && cc.classList.contains('show')) {
+        cc.classList.remove('show');
+        return 'handled';
+    }
+    // 5. 日历选择器
+    var cal = document.getElementById('calendarPopup');
+    if (cal && cal.classList.contains('show')) {
+        closeCalendarPopup();
+        return 'handled';
+    }
+    // 6. 添加/编辑弹窗
+    var am = document.getElementById('addModal');
+    if (am && am.classList.contains('show')) {
+        editingId = null;
+        document.body.classList.remove('modal-open');
+        document.body.style.top = '';
+        am.classList.remove('show');
+        window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+        return 'handled';
+    }
+    // 7. 详情弹窗
+    var dm = document.getElementById('detailModal');
+    if (dm && dm.classList.contains('show')) {
+        dm.classList.remove('show');
+        document.body.classList.remove('modal-open');
+        document.body.style.top = '';
+        window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+        currentDetailId = null;
+        return 'handled';
+    }
+    return 'exit';
+};
 </script>
 
 <!-- 删除确认弹窗 -->

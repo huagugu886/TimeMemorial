@@ -25,7 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import com.timememorial.app.R
-import com.timememorial.app.ui.handleWebViewBack
+import androidx.activity.OnBackPressedCallback
 
 class HomeFragment : Fragment() {
 
@@ -161,8 +161,29 @@ class HomeFragment : Fragment() {
                 }
             }
 
-            loadUrl("file:///android_asset/home_page.html?v=8")
+            loadUrl("file:///android_asset/home_page.html?v=9")
         }
+
+        // 注册系统返回手势/按键处理（SPA 子页面返回）
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (binding.webView.canGoBack()) {
+                        binding.webView.goBack()
+                    } else {
+                        binding.webView.evaluateJavascript(
+                            "(function(){ if(typeof window.__handleBackPress==='function') return window.__handleBackPress(); return 'exit'; })()"
+                        ) { result ->
+                            val r = result?.trim('"') ?: "exit"
+                            if (r == "exit") {
+                                isEnabled = false
+                                requireActivity().onBackPressedDispatcher.onBackPressed()
+                            }
+                        }
+                    }
+                }
+            }
+        )
     }
 
     /**
