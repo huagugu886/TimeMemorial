@@ -108,10 +108,8 @@ class MainActivity : AppCompatActivity() {
         val nightMode = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        // 半透明背景：配合窗口模糊实现毛玻璃效果
-        val bg = if (night) 0xCC1A1A28.toInt()   // 深色 80% 不透明
-                else 0xC0FFFFFF.toInt()            // 白色 75% 不透明
-        binding.bottomNav.setBackgroundColor(bg)
+        // 完全透明：让 BlurView 的毛玻璃效果透出来
+        binding.bottomNav.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
         // 同步更新毛玻璃 overlay 颜色
         binding.blurView.setOverlayColor(if (night) 0x33000000 else 0x33FFFFFF)
