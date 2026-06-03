@@ -78,5 +78,5 @@ dependencies {
     implementation("androidx.webkit:webkit:1.12.1")
 
     // 实时毛玻璃模糊效果
-    implementation("com.eightbitlab:realtimeblurview:1.2.1")
+    implementation("com.github.Dimezis:BlurView:version-3.2.0")
 }

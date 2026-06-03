@@ -50,10 +50,15 @@ class MainActivity : AppCompatActivity() {
         // 深色模式切换后强制刷新底栏颜色（BottomNavigationView 缓存 ColorStateList）
         refreshBottomNavColors()
 
-        // 配置毛玻璃模糊 overlay 颜色（亮/暗模式切换时同步更新）
-        val nightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
-        val isDark = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        binding.blurBar.setOverlayColor(if (isDark) 0x33000000 else 0x33FFFFFF)
+        // 配置毛玻璃模糊效果
+        val decorView = window.decorView
+        val wallpaperBackground = decorView.background
+        binding.blurView.setupWith(binding.blurTarget, wallpaperBackground)
+            .setBlurRadius(16f)
+        // 设置模糊叠加层颜色（亮/暗模式切换时同步更新）
+        val nightMode2 = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val isDark2 = nightMode2 == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        binding.blurView.setOverlayColor(if (isDark2) 0x33000000 else 0x33FFFFFF)
 
         // 底栏：只吃导航栏底部 insets，阻止键盘(IME)把它顶上去
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
@@ -110,7 +115,7 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.setBackgroundColor(bg)
 
         // 同步更新毛玻璃 overlay 颜色
-        binding.blurBar.setOverlayColor(if (night) 0x33000000 else 0x33FFFFFF)
+        binding.blurView.setOverlayColor(if (night) 0x33000000 else 0x33FFFFFF)
 
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
             .getString("theme_color", "purple") ?: "purple"
