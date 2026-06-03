@@ -168,18 +168,22 @@ class HomeFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner, object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (binding.webView.canGoBack()) {
-                        binding.webView.goBack()
-                    } else {
-                        binding.webView.evaluateJavascript(
-                            "(function(){ if(typeof window.__handleBackPress==='function') return window.__handleBackPress(); return 'exit'; })()"
-                        ) { result ->
-                            val r = result?.trim('"') ?: "exit"
-                            if (r == "exit") {
+                    // 优先检查 WebView 内是否有打开的弹窗（添加/编辑/详情等）
+                    // 有则关闭弹窗（保留 CSS 过渡动画），不走 goBack()
+                    binding.webView.evaluateJavascript(
+                        "(function(){ if(typeof window.__handleBackPress==='function') return window.__handleBackPress(); return 'exit'; })()"
+                    ) { result ->
+                        val r = result?.trim('"') ?: "exit"
+                        if (r != "handled") {
+                            // JS 侧没有需要关闭的弹窗，走原生返回逻辑
+                            if (binding.webView.canGoBack()) {
+                                binding.webView.goBack()
+                            } else {
                                 isEnabled = false
                                 requireActivity().onBackPressedDispatcher.onBackPressed()
                             }
                         }
+                        // r == "handled"：弹窗已关闭（带动画），消费本次返回
                     }
                 }
             }
