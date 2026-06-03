@@ -3031,7 +3031,7 @@ window.__handleBackPress = function() {
   // 1. 全屏图片查看器 (z-index: 10000)
   var fv = document.getElementById('fullscreenImgViewer');
   if (fv && fv.classList.contains('active')) {
-    fv.classList.remove('active');
+    closeFullscreenViewer();
     return 'handled';
   }
   // 2. 删除确认弹窗 / 操作结果弹窗 / 自定义分类弹窗 (z-index: 300)
