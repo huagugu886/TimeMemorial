@@ -516,7 +516,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: none;
+  touch-action: manipulation;
 }
 .year-selector.show { opacity: 1; pointer-events: auto; }
 .year-panel {
@@ -1034,22 +1034,32 @@ document.getElementById('detailModal').addEventListener('touchmove', e => {
 function showYearSelector() {
   const grid = document.getElementById('yearGrid');
   grid.innerHTML = '';
-  const startYear = currentYear - 6;
-  for (let y = startYear; y <= currentYear + 6; y++) {
+  const startYear = 1950;
+  const endYear = 2040;
+  for (let y = startYear; y <= endYear; y++) {
     const cell = document.createElement('div');
     cell.className = 'year-cell' + (y === currentYear ? ' current' : '');
     cell.textContent = y;
+    cell.id = 'yc-' + y;
     cell.addEventListener('click', () => {
       currentYear = y;
       updateTitle();
       renderCalendar();
       renderEvents();
       document.getElementById('yearSelector').classList.remove('show');
+      document.body.style.overflow = '';
     });
     grid.appendChild(cell);
   }
   document.getElementById('yearSelector').classList.add('show');
   document.body.style.overflow = 'hidden';
+  const panel = document.querySelector('.year-panel');
+  const cur = document.getElementById('yc-' + currentYear);
+  if (panel && cur) {
+    setTimeout(() => {
+      panel.scrollTop = cur.offsetTop - panel.offsetTop - 60;
+    }, 50);
+  }
 }
 
 function closeYearSelector(e) {
