@@ -50,8 +50,8 @@ class MainActivity : AppCompatActivity() {
         // 深色模式切换后强制刷新底栏颜色（BottomNavigationView 缓存 ColorStateList）
         refreshBottomNavColors()
 
-        // 配置毛玻璃模糊效果
-        binding.blurView.setupWith(binding.blurTarget, eightbitlab.com.blurview.RenderEffectBlur())
+        // 配置毛玻璃模糊效果（自动根据 API 版本选择算法）
+        binding.blurView.setupWith(binding.blurTarget)
             .setBlurRadius(16f)
             .setBlurAutoUpdate(true)
         // 设置模糊叠加层颜色（亮/暗模式切换时同步更新）
