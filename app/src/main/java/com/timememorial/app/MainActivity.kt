@@ -51,10 +51,9 @@ class MainActivity : AppCompatActivity() {
         refreshBottomNavColors()
 
         // 配置毛玻璃模糊效果
-        val decorView = window.decorView
-        val wallpaperBackground = decorView.background
-        binding.blurView.setupWith(binding.blurTarget, wallpaperBackground)
+        binding.blurView.setupWith(binding.blurTarget, eightbitlab.com.blurview.RenderEffectBlur())
             .setBlurRadius(16f)
+            .setBlurAutoUpdate(true)
         // 设置模糊叠加层颜色（亮/暗模式切换时同步更新）
         val nightMode2 = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val isDark2 = nightMode2 == android.content.res.Configuration.UI_MODE_NIGHT_YES
