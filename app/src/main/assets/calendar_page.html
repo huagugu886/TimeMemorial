@@ -516,6 +516,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: none;
 }
 .year-selector.show { opacity: 1; pointer-events: auto; }
 .year-panel {
@@ -527,6 +528,9 @@ body {
   overflow-y: auto;
   transform: scale(0.9);
   transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 .year-selector.show .year-panel { transform: scale(1); }
 .year-panel-title {
@@ -1045,11 +1049,13 @@ function showYearSelector() {
     grid.appendChild(cell);
   }
   document.getElementById('yearSelector').classList.add('show');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeYearSelector(e) {
   if (e.target === document.getElementById('yearSelector')) {
     document.getElementById('yearSelector').classList.remove('show');
+    document.body.style.overflow = '';
   }
 }
 
