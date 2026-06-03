@@ -6,7 +6,7 @@
 <title>设置</title>
 <style>
   :root {
-    --bg: #F2F0F7;
+    --bg: #F8F6FF;
     --card-bg: #FFFFFF;
     --primary: #8B5CF6;
     --text: #1F2937;
@@ -16,6 +16,7 @@
     --radius: 20px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--bg); }
   body {
     font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
     background: var(--bg);
@@ -659,7 +660,7 @@ function applyDark(dark) {
     s.setProperty('--text','#F9FAFB'); s.setProperty('--text-sec','#6B7280');
     s.setProperty('--divider','#374151'); s.setProperty('--switch-off','#4B5563');
   } else {
-    s.setProperty('--bg','#F2F0F7'); s.setProperty('--card-bg','#FFFFFF');
+    s.setProperty('--bg','#F8F6FF'); s.setProperty('--card-bg','#FFFFFF');
     s.setProperty('--text','#1F2937'); s.setProperty('--text-sec','#9CA3AF');
     s.setProperty('--divider','#F3F4F6'); s.setProperty('--switch-off','#E5E7EB');
   }

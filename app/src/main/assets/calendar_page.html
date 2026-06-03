@@ -6,6 +6,7 @@
 <title>TimeMemorial · 日历</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--surface); }
 :root {
   --primary: #6C63FF;
   --primary-dark: #4A45B5;
@@ -540,7 +541,7 @@ body {
 
 /* 深色模式 */
 body.dark-mode {
-  --surface: #111827;
+  --surface: #0D0D14;
   --card: #1F2937;
   --text-primary: #F9FAFB;
   --text-secondary: #94A3B8;
@@ -1045,6 +1046,7 @@ document.querySelector('.header').addEventListener('touchend', e => {
   function sync(v) {
     if (v) document.body.classList.add('dark-mode');
     else document.body.classList.remove('dark-mode');
+    document.documentElement.style.background = v ? '#0D0D14' : '#F8F6FF';
   }
   var saved = localStorage.getItem('darkMode');
   if (saved === 'on') {
