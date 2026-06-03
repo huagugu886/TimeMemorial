@@ -29,6 +29,7 @@ import androidx.fragment.app.Fragment
 import com.timememorial.app.data.local.AnniversaryRepository
 import com.timememorial.app.R
 import com.timememorial.app.ui.handleWebViewBack
+import com.timememorial.app.ui.getStatusBarHeightDp
 
 class SettingsFragment : Fragment() {
 
