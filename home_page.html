@@ -30,8 +30,17 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
   background: var(--bg);
   color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 可滚动内容区 ========== */
+.scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ========== 头部 ========== */
@@ -747,6 +756,9 @@ textarea.form-input {
 <!-- ========== 分类标签（动态渲染） ========== -->
 <div class="tabs" id="tabs"></div>
 
+<!-- ========== 可滚动内容区（分割线下方） ========== -->
+<div class="scroll-content">
+
 <!-- ========== 精选回忆 ========== -->
 <div class="section-header">
   <h2>⭐ 精选回忆</h2>
@@ -763,6 +775,8 @@ textarea.form-input {
   <div class="empty-icon">📭</div>
   <p>还没有纪念日<br>点击右下角 <b>+</b> 添加第一个吧</p>
 </div>
+
+</div><!-- end .scroll-content -->
 
 <!-- ========== FAB按钮 ========== -->
 <button class="fab" id="fabBtn">＋</button>
@@ -1091,18 +1105,14 @@ function openDetail(id) {
   }
   document.getElementById('detailInfo').innerHTML = infoHtml;
 
-  document.body.dataset.scrollY = window.scrollY;
-  document.body.classList.add('modal-open');
-  document.body.style.top = -window.scrollY + 'px';
+  document.body.dataset.scrollY = document.querySelector('.scroll-content').scrollTop;
   document.getElementById('detailModal').classList.add('show');
 }
 
 // 关闭详情
 function closeDetailModal() {
   document.getElementById('detailModal').classList.remove('show');
-  document.body.classList.remove('modal-open');
-  document.body.style.top = '';
-  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+  document.querySelector('.scroll-content').scrollTop = parseInt(document.body.dataset.scrollY || '0');
   currentDetailId = null;
 }
 document.getElementById('detailClose').addEventListener('click', closeDetailModal);
