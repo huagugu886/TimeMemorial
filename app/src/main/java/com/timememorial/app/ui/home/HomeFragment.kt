@@ -26,6 +26,8 @@ import java.util.Date
 import java.util.Locale
 import com.timememorial.app.R
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class HomeFragment : Fragment() {
 
@@ -66,7 +68,14 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            v.setPadding(0, insets.top, 0, 0)
+            windowInsets
+        }
+
         binding.webView.apply {
+            background = android.graphics.Color.TRANSPARENT
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = true
@@ -137,23 +146,16 @@ class HomeFragment : Fragment() {
                 }
             }, "nativeBridge")
 
-            // 注入状态栏高度 CSS 变量 + 暗色模式主题
+            // 暗色模式主题
             val isDarkMode = resources.configuration.uiMode and
                     android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
                     android.content.res.Configuration.UI_MODE_NIGHT_YES
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    val sbHeight = resources.getIdentifier(
-                        "status_bar_height", "dimen", "android"
-                    ).let { if (it > 0) resources.getDimensionPixelSize(it) else 48 }
-                    val js = buildString {
-                        append("document.documentElement.style.setProperty('--sb-height', '${sbHeight}px');")
-                        if (isDarkMode) {
-                            append("document.body.setAttribute('data-theme','dark');")
-                        }
+                    if (isDarkMode) {
+                        view?.evaluateJavascript("document.body.setAttribute('data-theme','dark');", null)
                     }
-                    view?.evaluateJavascript(js, null)
 
                     // 标记页面就绪，再检查恢复同步
                     pageReady = true

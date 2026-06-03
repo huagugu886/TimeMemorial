@@ -34,7 +34,14 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            v.setPadding(0, insets.top, 0, 0)
+            windowInsets
+        }
+
         binding.webView.apply {
+            background = android.graphics.Color.TRANSPARENT
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
@@ -52,7 +59,7 @@ class CalendarFragment : Fragment() {
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
 
-            // 页面加载完成后注入状态栏高度 + 暗色模式主题
+            // 页面加载完成后注入暗色模式主题
             val isDarkMode = resources.configuration.uiMode and
                     android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
                     android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -63,8 +70,6 @@ class CalendarFragment : Fragment() {
                     view?.evaluateJavascript(
                         """
                         (function() {
-                            var sbHeight = ${getStatusBarHeight()};
-                            document.documentElement.style.setProperty('--sb-height', sbHeight + 'px');
                             // 隐藏底部导航栏（原生已有底栏）
                             var bottomNav = document.querySelector('.bottom-nav');
                             if (bottomNav) bottomNav.style.display = 'none';
@@ -98,11 +103,6 @@ class CalendarFragment : Fragment() {
 
             loadUrl("file:///android_asset/calendar_page.html?v=1")
         }
-    }
-
-    private fun getStatusBarHeight(): Int {
-        val insets = ViewCompat.getRootWindowInsets(binding.root)
-        return insets?.getInsets(WindowInsetsCompat.Type.statusBars())?.top ?: 0
     }
 
     override fun onDestroyView() {

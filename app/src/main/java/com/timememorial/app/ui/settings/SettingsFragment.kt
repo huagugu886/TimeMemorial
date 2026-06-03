@@ -299,7 +299,14 @@ class SettingsFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
         webView = view.findViewById(R.id.webView)
 
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            v.setPadding(0, insets.top, 0, 0)
+            windowInsets
+        }
+
         webView?.apply {
+            background = android.graphics.Color.TRANSPARENT
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = true
@@ -317,11 +324,6 @@ class SettingsFragment : Fragment() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    val sbHeight = getStatusBarHeight()
-                    view?.evaluateJavascript(
-                        "document.documentElement.style.setProperty('--sb-height', '${sbHeight}px');",
-                        null
-                    )
                     view?.evaluateJavascript(
                         """
                         var bn = document.querySelector('.bottom-nav');
@@ -401,11 +403,6 @@ class SettingsFragment : Fragment() {
             android.util.Log.e("SettingsFragment", "saveBase64Image failed", e)
             null
         }
-    }
-
-    private fun getStatusBarHeight(): Int {
-        val insets = ViewCompat.getRootWindowInsets(requireView()) ?: return 0
-        return insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
     }
 
     override fun onDestroyView() {
