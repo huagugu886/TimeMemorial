@@ -306,7 +306,7 @@ class SettingsFragment : Fragment() {
         }
 
         webView?.apply {
-            background = android.graphics.Color.TRANSPARENT
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = true

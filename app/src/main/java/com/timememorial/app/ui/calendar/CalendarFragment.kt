@@ -41,7 +41,7 @@ class CalendarFragment : Fragment() {
         }
 
         binding.webView.apply {
-            background = android.graphics.Color.TRANSPARENT
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
