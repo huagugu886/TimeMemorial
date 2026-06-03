@@ -11,6 +11,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.timememorial.app.R
 import com.timememorial.app.databinding.FragmentCalendarBinding
@@ -72,6 +73,24 @@ class CalendarFragment : Fragment() {
                     )
                 }
             }
+
+            // 返回键拦截：详情弹窗打开时先关弹窗
+            requireActivity().onBackPressedDispatcher.addCallback(
+                viewLifecycleOwner, object : OnBackPressedCallback(true) {
+                    override fun handleOnBackPressed() {
+                        webView.evaluateJavascript(
+                            "typeof isDetailOpen==='function'&&isDetailOpen()"
+                        ) { result ->
+                            if (result?.trim('"') == "true") {
+                                webView.evaluateJavascript("closeDetailForce()", null)
+                            } else {
+                                isEnabled = false
+                                requireActivity().onBackPressedDispatcher.onBackPressed()
+                            }
+                        }
+                    }
+                }
+            )
 
             loadUrl("file:///android_asset/calendar_page.html?v=1")
         }

@@ -985,6 +985,10 @@ function closeDetailForce() {
   document.getElementById('detailModal').classList.remove('show');
   document.body.style.overflow = '';
 }
+// 供 Kotlin 调用：查询详情弹窗是否打开
+function isDetailOpen() {
+  return document.getElementById('detailModal').classList.contains('show');
+}
 
 // 滑动关闭
 let touchStartY = 0;
