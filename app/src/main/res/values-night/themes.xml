@@ -11,9 +11,4 @@
         <item name="android:windowLightStatusBar">false</item>
     </style>
 
-    <style name="DatePickerTheme" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/purple_primary</item>
-        <item name="colorAccent">@color/purple_primary</item>
-        <item name="android:textColorPrimary">@color/text_primary</item>
-    </style>
 </resources>

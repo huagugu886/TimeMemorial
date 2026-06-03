@@ -2575,6 +2575,111 @@ syncToNative();
   });
 })();
 
+// ========== 自定义日期选择器 ==========
+(function() {
+  const input = document.getElementById('dateInput');
+  const desc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  Object.defineProperty(input, 'value', {
+    get: function() { return desc.get.call(this); },
+    set: function(v) {
+      desc.set.call(this, v);
+      syncDatePickerDisplay(v);
+    }
+  });
+})();
+
+function syncDatePickerDisplay(val) {
+  const text = document.getElementById('datePickerText');
+  if (!text) return;
+  if (val) {
+    const p = val.split('-');
+    if (p.length === 3) {
+      text.textContent = p[0] + '年' + parseInt(p[1]) + '月' + parseInt(p[2]) + '日';
+      text.classList.remove('placeholder');
+    } else {
+      text.textContent = val;
+      text.classList.remove('placeholder');
+    }
+  } else {
+    text.textContent = '选择日期';
+    text.classList.add('placeholder');
+  }
+}
+
+let dpYear, dpMonth, dpSelectedDate;
+
+function openDatePicker() {
+  const val = document.getElementById('dateInput').value;
+  if (val && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+    const parts = val.split('-');
+    dpYear = parseInt(parts[0]);
+    dpMonth = parseInt(parts[1]) - 1;
+    dpSelectedDate = val;
+  } else {
+    const now = new Date();
+    dpYear = now.getFullYear();
+    dpMonth = now.getMonth();
+    dpSelectedDate = '';
+  }
+  renderCalendar();
+  document.getElementById('dpOverlay').classList.add('show');
+}
+
+function renderCalendar() {
+  document.getElementById('dpMonthTitle').textContent = dpYear + '年' + (dpMonth + 1) + '月';
+  const today = new Date();
+  const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  const firstDay = new Date(dpYear, dpMonth, 1).getDay();
+  const startOffset = (firstDay + 6) % 7;
+  const daysInMonth = new Date(dpYear, dpMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(dpYear, dpMonth, 0).getDate();
+  let html = '';
+  for (let i = startOffset - 1; i >= 0; i--) {
+    html += '<div class="dp-day other-month">' + (daysInPrevMonth - i) + '</div>';
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = dpYear + '-' + String(dpMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const cls = ['dp-day'];
+    if (ds === todayStr) cls.push('today');
+    if (ds === dpSelectedDate) cls.push('selected');
+    html += '<div class="' + cls.join(' ') + '" onclick="selectDate(\'' + ds + '\')">' + d + '</div>';
+  }
+  const totalCells = startOffset + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) {
+    html += '<div class="dp-day other-month">' + i + '</div>';
+  }
+  document.getElementById('dpDays').innerHTML = html;
+}
+
+function selectDate(dateStr) {
+  dpSelectedDate = dateStr;
+  renderCalendar();
+}
+
+function dpPrevMonth() {
+  dpMonth--;
+  if (dpMonth < 0) { dpMonth = 11; dpYear--; }
+  renderCalendar();
+}
+
+function dpNextMonth() {
+  dpMonth++;
+  if (dpMonth > 11) { dpMonth = 0; dpYear++; }
+  renderCalendar();
+}
+
+function dpConfirm() {
+  if (dpSelectedDate) {
+    document.getElementById('dateInput').value = dpSelectedDate;
+  }
+  document.getElementById('dpOverlay').classList.remove('show');
+}
+
+function dpCancel() {
+  document.getElementById('dpOverlay').classList.remove('show');
+}
+
 // ========== 农历/公历切换 ==========
 let currentDateType = 'solar';
 function toggleDateType() {
