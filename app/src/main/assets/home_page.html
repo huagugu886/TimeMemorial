@@ -1319,6 +1319,41 @@ body.dark-mode .sort-btn {
   transition: background 0.2s;
 }
 .cal-title:hover { background: #F3F4F6; }
+/* ===== 日历年份选择器 ===== */
+.cal-year-selector {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 10000;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-year-selector.show { opacity: 1; pointer-events: auto; }
+.cal-year-panel {
+  background: #fff; border-radius: 20px; padding: 20px;
+  width: 300px; max-height: 420px; overflow-y: auto;
+  transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  -webkit-overflow-scrolling: touch;
+}
+.cal-year-selector.show .cal-year-panel { transform: scale(1); }
+.cal-year-panel-title { font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 16px; color: #1F2937; position: sticky; top: 0; background: inherit; padding-bottom: 8px; z-index: 1; }
+.cal-year-panel::-webkit-scrollbar { width: 4px; }
+.cal-year-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+body.dark-mode .cal-year-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+.cal-year-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cal-year-cell {
+  padding: 12px 0; text-align: center; font-size: 15px; font-weight: 500;
+  border-radius: 12px; cursor: pointer; transition: all 0.2s; color: #1F2937;
+}
+.cal-year-cell:active { transform: scale(0.93); }
+.cal-year-cell.current { background: #7C3AED; color: #fff; font-weight: 700; }
+.cal-year-cell:hover { background: #F3F4F6; }
+.cal-year-cell.current:hover { background: #7C3AED; }
+body.dark-mode .cal-year-panel { background: #1F2937; }
+body.dark-mode .cal-year-panel-title { color: #F9FAFB; }
+body.dark-mode .cal-year-cell { color: #F9FAFB; }
+body.dark-mode .cal-year-cell:hover { background: #374151; }
+body.dark-mode .cal-year-cell.current:hover { background: #7C3AED; }
 .cal-nav-btn {
   width: 36px; height: 36px;
   border: none;
@@ -1507,7 +1542,7 @@ body.dark-mode .cal-today-btn:active { background: #4B5563; }
         <div class="calendar-panel">
           <div class="calendar-header">
             <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
-            <span id="calTitle" class="cal-title"></span>
+            <span id="calTitle" class="cal-title" onclick="showCalYearSelector()"></span>
             <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
           </div>
           <div class="calendar-weekdays">
@@ -1518,6 +1553,14 @@ body.dark-mode .cal-today-btn:active { background: #4B5563; }
             <button class="cal-today-btn" onclick="calGoToday()">今天</button>
             <button class="cal-confirm-btn" onclick="calConfirm()">确定</button>
           </div>
+        </div>
+      </div>
+
+      <!-- 日历年份选择器 -->
+      <div class="cal-year-selector" id="calYearSelector" onclick="closeCalYearSelector(event)">
+        <div class="cal-year-panel" id="calYearPanel">
+          <div class="cal-year-panel-title">选择年份</div>
+          <div class="cal-year-grid" id="calYearGrid"></div>
         </div>
       </div>
 
@@ -2873,6 +2916,43 @@ function updateDateDisplay() {
   display.style.color = 'var(--text)';
 }
 
+// ===== 日历年份选择器 =====
+function showCalYearSelector() {
+  const grid = document.getElementById('calYearGrid');
+  grid.innerHTML = '';
+  const minYear = 1900;
+  const maxYear = 2100;
+  for (let y = minYear; y <= maxYear; y++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-year-cell' + (y === calYear ? ' current' : '');
+    cell.textContent = y;
+    cell.id = 'calYearCell' + y;
+    cell.addEventListener('click', () => {
+      calYear = y;
+      renderCalendar();
+      document.getElementById('calYearSelector').classList.remove('show');
+    });
+    grid.appendChild(cell);
+  }
+  document.getElementById('calYearSelector').classList.add('show');
+  // 滚动到当前选中年份
+  setTimeout(() => {
+    const currentCell = document.getElementById('calYearCell' + calYear);
+    if (currentCell) {
+      const panel = document.getElementById('calYearPanel');
+      const cellTop = currentCell.offsetTop;
+      const panelHeight = panel.clientHeight;
+      panel.scrollTop = cellTop - panelHeight / 2 + currentCell.clientHeight / 2;
+    }
+  }, 50);
+}
+
+function closeCalYearSelector(e) {
+  if (e.target === document.getElementById('calYearSelector')) {
+    document.getElementById('calYearSelector').classList.remove('show');
+  }
+}
+
 function renderCalendar() {
   const title = document.getElementById('calTitle');
   title.textContent = `${calYear}年 ${calMonth + 1}月`;
@@ -2981,7 +3061,13 @@ window.__handleBackPress = function() {
         cc.classList.remove('show');
         return 'handled';
     }
-    // 5. 日历选择器
+    // 5. 日历年份选择器
+    var ys = document.getElementById('calYearSelector');
+    if (ys && ys.classList.contains('show')) {
+        ys.classList.remove('show');
+        return 'handled';
+    }
+    // 6. 日历选择器
     var cal = document.getElementById('calendarPopup');
     if (cal && cal.classList.contains('show')) {
         closeCalendarPopup();
@@ -3009,6 +3095,101 @@ window.__handleBackPress = function() {
 <!-- 删除确认弹窗 -->
 <div class="dc-overlay" id="dcOverlay">
   <div class="dc-box">
+    <div class="dc-icon">🗑️</div>
+    <h4>确认删除</h4>
+    <p id="dcText"></p>
+    <div class="dc-btns">
+      <button class="dc-cancel" id="dcCancel">取消</button>
+      <button class="dc-ok" id="dcOk">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 操作结果弹窗 -->
+<div class="al-overlay" id="alOverlay">
+  <div class="al-box">
+    <div class="al-icon">✅</div>
+    <h4>操作成功</h4>
+    <p id="alText"></p>
+    <button class="al-btn-ok" id="alOk">好的</button>
+  </div>
+</div>
+
+<!-- 全屏图片查看器 -->
+<div class="fullscreen-img-viewer" id="fullscreenImgViewer">
+  <button class="fv-close" id="fvClose">✕</button>
+  <img class="fv-img" id="fvImg" src="">
+</div>
+
+</body>
+</html>
+iv class="dc-box">
+    <div class="dc-icon">🗑️</div>
+    <h4>确认删除</h4>
+    <p id="dcText"></p>
+    <div class="dc-btns">
+      <button class="dc-cancel" id="dcCancel">取消</button>
+      <button class="dc-ok" id="dcOk">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 操作结果弹窗 -->
+<div class="al-overlay" id="alOverlay">
+  <div class="al-box">
+    <div class="al-icon">✅</div>
+    <h4>操作成功</h4>
+    <p id="alText"></p>
+    <button class="al-btn-ok" id="alOk">好的</button>
+  </div>
+</div>
+
+<!-- 全屏图片查看器 -->
+<div class="fullscreen-img-viewer" id="fullscreenImgViewer">
+  <button class="fv-close" id="fvClose">✕</button>
+  <img class="fv-img" id="fvImg" src="">
+</div>
+
+</body>
+</html>
+iv class="fullscreen-img-viewer" id="fullscreenImgViewer">
+  <button class="fv-close" id="fvClose">✕</button>
+  <img class="fv-img" id="fvImg" src="">
+</div>
+
+</body>
+</html>
+>✕</button>
+  <img class="fv-img" id="fvImg" src="">
+</div>
+
+</body>
+</html>
+n>
+      <button class="dc-ok" id="dcOk">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 操作结果弹窗 -->
+<div class="al-overlay" id="alOverlay">
+  <div class="al-box">
+    <div class="al-icon">✅</div>
+    <h4>操作成功</h4>
+    <p id="alText"></p>
+    <button class="al-btn-ok" id="alOk">好的</button>
+  </div>
+</div>
+
+<!-- 全屏图片查看器 -->
+<div class="fullscreen-img-viewer" id="fullscreenImgViewer">
+  <button class="fv-close" id="fvClose">✕</button>
+  <img class="fv-img" id="fvImg" src="">
+</div>
+
+</body>
+</html>
+iv class="dc-box">
     <div class="dc-icon">🗑️</div>
     <h4>确认删除</h4>
     <p id="dcText"></p>
