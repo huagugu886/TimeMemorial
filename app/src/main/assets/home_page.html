@@ -1709,12 +1709,6 @@ function daysBetween(dateStr, dataType) {
   target.setHours(0,0,0,0);
   return Math.floor((now - target) / (1000 * 60 * 60 * 24));
 }
-  const now = new Date();
-  now.setHours(0,0,0,0);
-  const target = new Date(dateStr);
-  target.setHours(0,0,0,0);
-  return Math.floor((now - target) / (1000 * 60 * 60 * 24));
-}
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
