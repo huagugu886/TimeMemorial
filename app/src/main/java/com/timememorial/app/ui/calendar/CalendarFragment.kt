@@ -34,12 +34,6 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(0, insets.top, 0, 0)
-            windowInsets
-        }
-
         binding.webView.apply {
             setBackgroundColor(android.graphics.Color.TRANSPARENT)
             settings.apply {

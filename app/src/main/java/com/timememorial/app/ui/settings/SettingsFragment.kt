@@ -25,8 +25,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.timememorial.app.data.local.AnniversaryRepository
 import com.timememorial.app.R
@@ -298,12 +296,6 @@ class SettingsFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
         webView = view.findViewById(R.id.webView)
-
-        ViewCompat.setOnApplyWindowInsetsListener(view) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.setPadding(0, insets.top, 0, 0)
-            windowInsets
-        }
 
         webView?.apply {
             setBackgroundColor(android.graphics.Color.TRANSPARENT)
