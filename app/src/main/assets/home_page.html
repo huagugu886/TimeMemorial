@@ -2306,6 +2306,8 @@ function openAddModalForEdit(m) {
   } else {
     document.getElementById('previewContainer').classList.remove('show');
     document.getElementById('uploadArea').style.display = '';
+    document.getElementById('positionPicker').classList.remove('show');
+    document.getElementById('positionPreviewImg').src = '';
   }
 
   // 收藏开关
@@ -2403,6 +2405,8 @@ document.getElementById('fabBtn').addEventListener('click', () => {
     });
     document.getElementById('previewContainer').classList.remove('show');
     document.getElementById('uploadArea').style.display = '';
+    document.getElementById('positionPicker').classList.remove('show');
+    document.getElementById('positionPreviewImg').src = '';
     document.getElementById('favToggle').classList.remove('on');
     lockScroll();
     document.body.classList.add('modal-open');
@@ -2526,6 +2530,7 @@ document.getElementById('removeImg').addEventListener('click', () => {
   uploadArea.style.display = '';
   imageInput.value = '';
   document.getElementById('positionPicker').classList.remove('show');
+  document.getElementById('positionPreviewImg').src = '';
 });
 
 // ========== 事件：位置滑块 ==========
