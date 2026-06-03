@@ -2719,6 +2719,9 @@ syncToNative();
     s.setProperty('--primary-light', c.pl);
     s.setProperty('--primary-dark', c.pd);
     s.setProperty('--shadow', '0 4px 20px ' + c.sh);
+    if (window.nativeBridge && window.nativeBridge.setThemeColor) {
+      window.nativeBridge.setThemeColor(name);
+    }
   }
   applyTheme(localStorage.getItem('themeColor') || 'purple');
   window.addEventListener('storage', function(e) {

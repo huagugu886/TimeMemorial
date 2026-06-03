@@ -84,14 +84,33 @@ class MainActivity : AppCompatActivity() {
 
     /** 强制刷新底栏颜色，解决深色模式切换后不生效的问题 */
     private fun refreshBottomNavColors() {
-        val bottomNav = binding.bottomNav
-        // 重新加载 color state list，清除缓存
-        val colorStateList = ContextCompat.getColorStateList(this, R.color.bottom_nav_color)
-        bottomNav.itemIconTintList = colorStateList
-        bottomNav.itemTextColor = colorStateList
-        // 背景色跟随主题
-        bottomNav.setBackgroundColor(
-            MaterialColors.getColor(bottomNav, com.google.android.material.R.attr.colorSurface, 0)
+        val nightMode = resources.configuration.uiMode and
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val bg = if (night) android.graphics.Color.parseColor("#1F2937")
+                else android.graphics.Color.parseColor("#FFFFFF")
+        binding.bottomNav.setBackgroundColor(bg)
+
+        val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
+            .getString("theme_color", "purple") ?: "purple"
+        val night2 = night
+        val primaryMap = mapOf(
+          "purple" to if (night2) "#A78BFA" else "#8B5CF6",
+          "blue"   to if (night2) "#60A5FA" else "#3B82F6",
+          "pink"   to if (night2) "#F472B6" else "#EC4899",
+          "rose"   to if (night2) "#FB7185" else "#F43F5E",
+          "teal"   to if (night2) "#2DD4BF" else "#14B8A6",
+          "red"    to if (night2) "#F87171" else "#EF4444"
         )
+        val checked = android.graphics.Color.parseColor(primaryMap[themeName] ?: primaryMap["purple"]!!)
+        val unchecked = if (night) android.graphics.Color.parseColor("#94A3B8")
+                        else android.graphics.Color.parseColor("#6B7280")
+        val states = arrayOf(
+          intArrayOf(android.R.attr.state_checked),
+          intArrayOf()
+        )
+        val colors = intArrayOf(checked, unchecked)
+        binding.bottomNav.itemIconTintList = android.content.res.ColorStateList(states, colors)
+        binding.bottomNav.itemTextColorList = android.content.res.ColorStateList(states, colors)
     }
 }

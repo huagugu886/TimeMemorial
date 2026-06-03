@@ -101,6 +101,12 @@ class SettingsFragment : Fragment() {
         }
 
         @JavascriptInterface
+        fun setThemeColor(name: String) {
+            requireContext().getSharedPreferences("timememorial_prefs", android.content.Context.MODE_PRIVATE)
+                .edit().putString("theme_color", name).apply()
+        }
+
+        @JavascriptInterface
         fun saveReminderSettings(jsonString: String) {
             try {
                 val json = org.json.JSONObject(jsonString)

@@ -35,7 +35,7 @@ body {
 
 /* ===== 顶部区域 ===== */
 .header {
-  background: linear-gradient(135deg, #6C63FF 0%, #8B83FF 50%, #A78BFA 100%);
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
   padding: 48px 20px 16px;
   border-radius: 0 0 28px 28px;
   position: relative;
@@ -552,7 +552,7 @@ body.dark-mode {
   --shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 body.dark-mode .header {
-  background: linear-gradient(135deg, #312E81 0%, #4338CA 50%, #6366F1 100%);
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--primary-light));
 }
 body.dark-mode .event-card:active {
   background: #2D2D44;
@@ -1082,6 +1082,9 @@ document.querySelector('.header').addEventListener('touchend', e => {
     // 日历 header 渐变也跟着变
     var header = document.querySelector('.header');
     if (header) header.style.background = 'linear-gradient(135deg, ' + c.pd + ' 0%, ' + c.p + ' 50%, ' + c.pl + ' 100%)';
+    if (window.nativeBridge && window.nativeBridge.setThemeColor) {
+      window.nativeBridge.setThemeColor(name);
+    }
   }
   applyTheme(localStorage.getItem('themeColor') || 'purple');
   window.addEventListener('storage', function(e) {
@@ -1095,5 +1098,7 @@ updateTitle();
 renderCalendar();
 renderEvents();
 </script>
+</body>
+</html>ript>
 </body>
 </html>
