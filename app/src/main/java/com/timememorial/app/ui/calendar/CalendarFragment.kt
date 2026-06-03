@@ -15,6 +15,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.timememorial.app.R
 import com.timememorial.app.databinding.FragmentCalendarBinding
+import com.timememorial.app.ui.handleWebViewBack
 
 class CalendarFragment : Fragment() {
 
@@ -75,17 +76,17 @@ class CalendarFragment : Fragment() {
             }
 
             // 系统返回手势：WebView 有历史记录时 goBack()，否则放行
-            handleWebViewBack(webView)
+            handleWebViewBack(this)
 
             // 返回键拦截：详情弹窗打开时先关弹窗
             requireActivity().onBackPressedDispatcher.addCallback(
                 viewLifecycleOwner, object : OnBackPressedCallback(true) {
                     override fun handleOnBackPressed() {
-                        webView.evaluateJavascript(
+                        binding.webView.evaluateJavascript(
                             "typeof isDetailOpen==='function'&&isDetailOpen()"
                         ) { result ->
                             if (result?.trim('"') == "true") {
-                                webView.evaluateJavascript("closeDetailForce()", null)
+                                binding.webView.evaluateJavascript("closeDetailForce()", null)
                             } else {
                                 isEnabled = false
                                 requireActivity().onBackPressedDispatcher.onBackPressed()

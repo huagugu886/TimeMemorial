@@ -29,6 +29,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.timememorial.app.data.local.AnniversaryRepository
 import com.timememorial.app.R
+import com.timememorial.app.ui.handleWebViewBack
 
 class SettingsFragment : Fragment() {
 
@@ -404,8 +405,5 @@ class SettingsFragment : Fragment() {
         }
         webView = null
         super.onDestroyView()
-    }
-}
-w()
     }
 }
