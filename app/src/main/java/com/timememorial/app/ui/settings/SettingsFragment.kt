@@ -25,6 +25,8 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.timememorial.app.data.local.AnniversaryRepository
 import com.timememorial.app.R
@@ -295,6 +297,14 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
+
+        // 状态栏 insets：给根 LinearLayout 加 top padding，内容不与状态栏重叠
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(v.paddingLeft, systemBars.top, v.paddingRight, v.paddingBottom)
+            insets
+        }
+
         webView = view.findViewById(R.id.webView)
 
         webView?.apply {

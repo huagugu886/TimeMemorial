@@ -34,6 +34,13 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 状态栏 insets：给根 LinearLayout 加 top padding，内容不与状态栏重叠
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(v.paddingLeft, systemBars.top, v.paddingRight, v.paddingBottom)
+            insets
+        }
+
         binding.webView.apply {
             setBackgroundColor(android.graphics.Color.TRANSPARENT)
             settings.apply {

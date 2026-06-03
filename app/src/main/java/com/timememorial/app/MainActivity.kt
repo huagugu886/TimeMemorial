@@ -60,13 +60,10 @@ class MainActivity : AppCompatActivity() {
                 .build()
         }
 
-        // 统一处理状态栏 insets：给 FragmentContainerView 加 top padding，
-        // 再 dispatch 给子 fragment（FragmentContainerView 默认不转发 insets）
+        // FragmentContainerView 默认不转发 insets 给子 fragment，
+        // 手动 dispatch 让各 fragment 自行处理（home 用 viewport-fit=cover，
+        // calendar/settings 在根 view 上加 top padding）
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.navHostFragment.updatePadding(top = systemBars.top)
-
-            // 转发给子 view，让 fragment 内部也能收到 insets
             for (i in 0 until binding.navHostFragment.childCount) {
                 ViewCompat.dispatchApplyWindowInsets(binding.navHostFragment.getChildAt(i), insets)
             }
