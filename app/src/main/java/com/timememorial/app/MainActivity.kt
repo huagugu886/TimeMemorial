@@ -11,8 +11,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import androidx.core.content.ContextCompat
-import com.google.android.material.color.MaterialColors
 import com.timememorial.app.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
