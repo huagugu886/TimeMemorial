@@ -1408,6 +1408,76 @@ body.dark-mode .dp-btn-cancel {
 body.dark-mode .dp-buttons {
   border-top-color: #374151;
 }
+body.dark-mode .dp-header {
+  background: linear-gradient(135deg, #5B3FD9, #7B5FE0);
+}
+body.dark-mode .dp-btn-ok {
+  background: linear-gradient(135deg, #5B3FD9, #7B5FE0);
+  box-shadow: 0 4px 12px rgba(91,63,217,0.3);
+}
+
+/* ========== 年份选择器 ========== */
+.dp-year-panel {
+  display: none;
+  max-height: 45vh;
+  overflow-y: auto;
+  padding: 8px 12px 8px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.dp-year-panel.show {
+  display: block;
+  opacity: 1;
+}
+.dp-year-nav {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 12px;
+}
+.dp-year-back {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: none;
+  background: var(--primary, #7C5CFC);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.dp-year-back:active { transform: scale(0.95); }
+.dp-year-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.dp-year-item {
+  padding: 10px 0;
+  text-align: center;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text, #1A1A2E);
+  background: #F3F4F6;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.dp-year-item:active { background: rgba(124,92,252,0.15); }
+.dp-year-item.current {
+  background: var(--primary, #7C5CFC);
+  color: #fff;
+  font-weight: 700;
+}
+body.dark-mode .dp-year-item {
+  background: #374151;
+  color: #F9FAFB;
+}
+body.dark-mode .dp-year-item:active { background: #4B5563; }
+body.dark-mode .dp-year-item.current {
+  background: var(--primary, #7C5CFC);
+  color: #fff;
+}
 </style>
 </head>
 <body>
@@ -2834,6 +2904,56 @@ function dpCancel() {
   document.getElementById('dpOverlay').classList.remove('show');
 }
 
+// ========== 年份选择器 ==========
+function toggleYearPicker() {
+  const yearPanel = document.getElementById('dpYearPanel');
+  const nav = document.querySelector('.dp-nav');
+  const weekdays = document.querySelector('.dp-weekdays');
+  const days = document.getElementById('dpDays');
+  const isShowing = yearPanel.classList.contains('show');
+
+  if (isShowing) {
+    yearPanel.classList.remove('show');
+    yearPanel.style.opacity = '0';
+    nav.style.display = '';
+    weekdays.style.display = '';
+    days.style.display = '';
+  } else {
+    renderYearGrid();
+    nav.style.display = 'none';
+    weekdays.style.display = 'none';
+    days.style.display = 'none';
+    yearPanel.classList.add('show');
+    // trigger reflow for transition
+    void yearPanel.offsetHeight;
+    yearPanel.style.opacity = '1';
+  }
+}
+
+function renderYearGrid() {
+  const grid = document.getElementById('dpYearGrid');
+  const curYear = dpYear;
+  const startYear = curYear - 50;
+  const endYear = curYear + 50;
+  let html = '';
+  for (let y = startYear; y <= endYear; y++) {
+    const cls = y === curYear ? 'dp-year-item current' : 'dp-year-item';
+    html += '<div class="' + cls + '" onclick="selectYear(' + y + ')">' + y + '</div>';
+  }
+  grid.innerHTML = html;
+  // 滚动到当前年份
+  setTimeout(() => {
+    const cur = grid.querySelector('.current');
+    if (cur) cur.scrollIntoView({ block: 'center', behavior: 'instant' });
+  }, 60);
+}
+
+function selectYear(year) {
+  dpYear = year;
+  toggleYearPicker();
+  renderCalendar();
+}
+
 // ========== 农历/公历切换 ==========
 let currentDateType = 'solar';
 function toggleDateType() {
@@ -2861,13 +2981,19 @@ document.getElementById('dateInput').addEventListener('keydown', function(e) {
     </div>
     <div class="dp-nav">
       <button class="dp-nav-btn" onclick="dpPrevMonth()">◀</button>
-      <span class="dp-nav-title" id="dpMonthTitle"></span>
+      <span class="dp-nav-title" id="dpMonthTitle" onclick="toggleYearPicker()" style="cursor:pointer"></span>
       <button class="dp-nav-btn" onclick="dpNextMonth()">▶</button>
     </div>
     <div class="dp-weekdays">
       <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
     </div>
     <div class="dp-days" id="dpDays"></div>
+    <div class="dp-year-panel" id="dpYearPanel">
+      <div class="dp-year-nav">
+        <button class="dp-year-back" onclick="toggleYearPicker()">← 返回月视图</button>
+      </div>
+      <div class="dp-year-grid" id="dpYearGrid"></div>
+    </div>
     <div class="dp-buttons">
       <button class="dp-btn dp-btn-clear" onclick="document.getElementById('dateInput').value='';dpCancel()">清除</button>
       <button class="dp-btn dp-btn-cancel" onclick="dpCancel()">取消</button>
