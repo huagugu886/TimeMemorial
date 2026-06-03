@@ -344,6 +344,8 @@ class SettingsFragment : Fragment() {
                 }
             }
             loadUrl("file:///android_asset/settings_page.html?v=2")
+
+            handleWebViewBack(this)
         }
 
         return view
@@ -402,5 +404,8 @@ class SettingsFragment : Fragment() {
         }
         webView = null
         super.onDestroyView()
+    }
+}
+w()
     }
 }

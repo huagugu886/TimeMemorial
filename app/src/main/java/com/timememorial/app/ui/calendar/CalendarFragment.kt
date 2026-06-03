@@ -74,6 +74,9 @@ class CalendarFragment : Fragment() {
                 }
             }
 
+            // 系统返回手势：WebView 有历史记录时 goBack()，否则放行
+            handleWebViewBack(webView)
+
             // 返回键拦截：详情弹窗打开时先关弹窗
             requireActivity().onBackPressedDispatcher.addCallback(
                 viewLifecycleOwner, object : OnBackPressedCallback(true) {
