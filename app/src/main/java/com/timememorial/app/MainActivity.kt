@@ -29,8 +29,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.navigationBarColor = android.graphics.Color.TRANSPARENT
-
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
@@ -98,7 +96,6 @@ class MainActivity : AppCompatActivity() {
 
     /** 强制刷新底栏颜色，解决深色模式切换后不生效的问题 */
     fun refreshBottomNavColors() {
-        window.navigationBarColor = android.graphics.Color.TRANSPARENT
         val nightMode = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
