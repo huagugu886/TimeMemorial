@@ -50,8 +50,17 @@ body {
   color: var(--text-primary);
   max-width: 420px;
   margin: 0 auto;
-  min-height: 100vh;
-  overflow-x: hidden;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 可滚动内容区 ========== */
+.scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: 80px;
 }
 
@@ -62,6 +71,7 @@ body {
   border-radius: 0 0 28px 28px;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 .header::before {
   content: '';
@@ -613,8 +623,11 @@ body.dark-mode .bottom-nav {
   <div class="calendar-grid" id="calendarGrid"></div>
 </div>
 
+<!-- 可滚动内容区 -->
+<div class="scroll-content">
 <!-- 事件列表 -->
 <div class="content-area" id="contentArea"></div>
+</div>
 
 <!-- 底部导航 -->
 <div class="bottom-nav">

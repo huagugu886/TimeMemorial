@@ -31,9 +31,20 @@
     font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
-    padding: 0 20px 40px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     transition: opacity 0.25s ease;
+  }
+
+  /* ========== 可滚动内容区 ========== */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 20px 40px;
+    margin-top: -14px;
   }
 
   /* 顶部 */
@@ -44,6 +55,7 @@
     border-radius: 0 0 28px 28px;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .header::after {
     content: '';
@@ -65,7 +77,7 @@
     overflow: hidden;
   }
   .group:first-of-type {
-    margin-top: -14px;
+    margin-top: 0;
     position: relative;
     z-index: 1;
   }
@@ -410,6 +422,7 @@
 
 <div class="header"><h1>设置</h1></div>
 
+<div class="scroll-content">
 <!-- 外观 -->
 <div class="group">
   <div class="group-head">外观</div>
@@ -516,6 +529,7 @@
   <div class="foot-name">TimeMemorial</div>
   <div class="foot-ver" id="appVer">Version</div>
 </div>
+</div><!-- .scroll-content -->
 
 <!-- === 选择器组件 === -->
 <div class="picker-mask" id="pickerMask"></div>
@@ -765,16 +779,10 @@ var mask = document.getElementById('pickerMask');
 function openSheet(id) {
   mask.classList.add('show');
   document.getElementById(id).classList.add('show');
-  document.body.style.overflow = 'hidden';
-  document.body.style.position = 'fixed';
-  document.body.style.width = '100%';
 }
 function closeAll() {
   mask.classList.remove('show');
   document.querySelectorAll('.picker-sheet').forEach(s => s.classList.remove('show'));
-  document.body.style.overflow = '';
-  document.body.style.position = '';
-  document.body.style.width = '';
 }
 mask.onclick = closeAll;
 mask.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
@@ -993,16 +1001,10 @@ function showConfirm(title, msg) {
   function openBR() {
     mask.classList.add('show');
     sheet.classList.add('show');
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
   }
   function closeBR() {
     mask.classList.remove('show');
     sheet.classList.remove('show');
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
     resetBR();
   }
   function resetBR() {
