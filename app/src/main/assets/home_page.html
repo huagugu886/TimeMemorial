@@ -1254,6 +1254,160 @@ body.dark-mode .sort-btn {
   background: #374151;
   color: #94A3B8;
 }
+
+/* ========== 自定义日期选择器 ========== */
+.dp-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 250;
+  display: none; align-items: flex-end; justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.dp-overlay.show { display: flex; }
+.dp-sheet {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  padding: 0 0 env(safe-area-inset-bottom, 0px);
+  animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.dp-header {
+  background: linear-gradient(135deg, #7C5CFC, #9B7DFF);
+  padding: 24px 20px 18px;
+  border-radius: 20px 20px 0 0;
+  text-align: center;
+}
+.dp-header .dp-date-display {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+.dp-header .dp-date-display.placeholder {
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+}
+.dp-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 8px;
+}
+.dp-nav-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #F3F4F6;
+  color: #374151;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.dp-nav-btn:active { background: #E5E7EB; }
+.dp-nav-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text, #1A1A2E);
+}
+.dp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 4px 12px 0;
+  text-align: center;
+}
+.dp-weekdays span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9CA3AF;
+  padding: 6px 0;
+}
+.dp-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 4px 12px 8px;
+  text-align: center;
+}
+.dp-day {
+  padding: 8px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text, #1A1A2E);
+  border-radius: 50%;
+  cursor: pointer;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 2px auto;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.dp-day:active { background: rgba(124,92,252,0.08); }
+.dp-day.other-month { color: #D1D5DB; }
+.dp-day.today {
+  border: 2px solid var(--primary, #7C5CFC);
+  font-weight: 700;
+}
+.dp-day.selected {
+  background: var(--primary, #7C5CFC);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(124,92,252,0.3);
+}
+.dp-buttons {
+  display: flex;
+  gap: 12px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid #F3F4F6;
+}
+.dp-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.dp-btn:active { transform: scale(0.97); }
+.dp-btn-clear {
+  background: #F5F5FA;
+  color: #EF4444;
+}
+.dp-btn-cancel {
+  background: #F5F5FA;
+  color: #6B7280;
+}
+.dp-btn-ok {
+  background: linear-gradient(135deg, #7C5CFC, #A78BFA);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(124,92,252,0.3);
+}
+/* 暗黑模式 */
+body.dark-mode .dp-sheet {
+  background: #1F2937;
+}
+body.dark-mode .dp-nav-btn {
+  background: #374151;
+  color: #94A3B8;
+}
+body.dark-mode .dp-nav-btn:active { background: #4B5563; }
+body.dark-mode .dp-nav-title {
+  color: #F9FAFB;
+}
+body.dark-mode .dp-day {
+  color: #F9FAFB;
+}
+body.dark-mode .dp-day.other-month { color: #4B5563; }
+body.dark-mode .dp-weekdays span { color: #6B7280; }
+body.dark-mode .dp-btn-clear,
+body.dark-mode .dp-btn-cancel {
+  background: #374151;
+  color: #94A3B8;
+}
+body.dark-mode .dp-buttons {
+  border-top-color: #374151;
+}
 </style>
 </head>
 <body>
@@ -2687,7 +2841,40 @@ function toggleDateType() {
   document.getElementById('dateTypeLabel').textContent = 
     currentDateType === 'lunar' ? '🌙 农历' : '📅 公历';
 }
+
+// 拦截 dateInput 点击，使用自定义日期选择器
+document.getElementById('dateInput').addEventListener('click', function(e) {
+  e.preventDefault();
+  openDatePicker();
+});
+// 阻止键盘输入日期（只允许通过自定义选择器选日期）
+document.getElementById('dateInput').addEventListener('keydown', function(e) {
+  e.preventDefault();
+});
 </script>
+
+<!-- 自定义日期选择器 -->
+<div class="dp-overlay" id="dpOverlay">
+  <div class="dp-sheet">
+    <div class="dp-header">
+      <div class="dp-date-display placeholder" id="datePickerText">选择日期</div>
+    </div>
+    <div class="dp-nav">
+      <button class="dp-nav-btn" onclick="dpPrevMonth()">◀</button>
+      <span class="dp-nav-title" id="dpMonthTitle"></span>
+      <button class="dp-nav-btn" onclick="dpNextMonth()">▶</button>
+    </div>
+    <div class="dp-weekdays">
+      <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+    </div>
+    <div class="dp-days" id="dpDays"></div>
+    <div class="dp-buttons">
+      <button class="dp-btn dp-btn-clear" onclick="document.getElementById('dateInput').value='';dpCancel()">清除</button>
+      <button class="dp-btn dp-btn-cancel" onclick="dpCancel()">取消</button>
+      <button class="dp-btn dp-btn-ok" onclick="dpConfirm()">设置</button>
+    </div>
+  </div>
+</div>
 
 <!-- 删除确认弹窗 -->
 <div class="dc-overlay" id="dcOverlay">
