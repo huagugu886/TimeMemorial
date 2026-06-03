@@ -2365,6 +2365,7 @@ function openAddModalForEdit(m) {
   // 图片预览
   if (selectedImage) {
     document.getElementById('previewContainer').classList.add('show');
+    document.getElementById('positionPicker').classList.add('show');
     document.getElementById('uploadArea').style.display = 'none';
     // 设置预览容器中的图片
     const previewImgEl = document.getElementById('previewImg');
@@ -2381,7 +2382,13 @@ function openAddModalForEdit(m) {
     }
   } else {
     document.getElementById('previewContainer').classList.remove('show');
+    document.getElementById('positionPicker').classList.remove('show');
     document.getElementById('uploadArea').style.display = '';
+    // 清除残留图片
+    var _pi = document.getElementById('previewImg');
+    if (_pi) _pi.src = '';
+    var _ppi = document.getElementById('positionPreviewImg');
+    if (_ppi) _ppi.src = '';
   }
 
   // 收藏开关
