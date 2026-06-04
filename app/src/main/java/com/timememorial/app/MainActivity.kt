@@ -88,10 +88,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 给内容区设置底部 padding，防止被底栏完全遮挡
-        // 只补偿底栏高度，不加额外留白，让内容自然延伸到屏幕底部
         binding.bottomNav.post {
             val navHeight = binding.bottomNav.height
-            binding.navHostFragment.setPadding(0, 0, 0, navHeight)
+            val density = resources.displayMetrics.density
+            val bottomMarginPx = (8 * density).toInt()
+            binding.navHostFragment.setPadding(0, 0, 0, navHeight + bottomMarginPx)
         }
     }
 
@@ -106,16 +107,26 @@ class MainActivity : AppCompatActivity() {
         val nightMode = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val density = resources.displayMetrics.density
 
         // 系统导航栏颜色同步
         window.navigationBarColor = if (night) android.graphics.Color.BLACK
                                     else android.graphics.Color.WHITE
 
-        // 选中项胶囊：深色用半透明白，浅色用半透明黑
-        val selectedColor = if (night) android.graphics.Color.parseColor("#22FFFFFF")
-                            else android.graphics.Color.parseColor("#22000000")
+        // 胶囊底栏背景：HyperOS 风格
+        val capsuleColor = if (night) android.graphics.Color.parseColor("#2A2A2A")
+                           else android.graphics.Color.parseColor("#F0F0F0")
+        val capsuleBg = android.graphics.drawable.GradientDrawable().apply {
+            cornerRadius = 28f * density
+            setColor(capsuleColor)
+        }
+        binding.bottomNav.background = capsuleBg
+
+        // 选中项高亮胶囊
+        val selectedColor = if (night) android.graphics.Color.parseColor("#40FFFFFF")
+                            else android.graphics.Color.parseColor("#D0D0D0")
         val selectedBg = android.graphics.drawable.GradientDrawable().apply {
-            cornerRadius = 20f * resources.displayMetrics.density
+            cornerRadius = 22f * density
             setColor(selectedColor)
         }
         val transparentBg = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
