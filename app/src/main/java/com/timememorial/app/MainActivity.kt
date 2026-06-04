@@ -34,6 +34,17 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         binding.bottomNav.setupWithNavController(navController)
 
+        // 压缩底栏：减小内部 padding 让图标文字适配 60dp 高度
+        binding.bottomNav.post {
+            val vPad = (4 * resources.displayMetrics.density).toInt()
+            binding.bottomNav.setPadding(
+                binding.bottomNav.paddingLeft,
+                vPad,
+                binding.bottomNav.paddingRight,
+                vPad
+            )
+        }
+
         // 冷启动时恢复纪念日提醒闹钟
         val prefs = getSharedPreferences("reminder_settings", MODE_PRIVATE)
         if (prefs.getBoolean("enabled", false)) {

@@ -21,4 +21,9 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
+
+    <style name="BottomNavText" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">10sp</item>
+        <item name="android:lineSpacingExtra">-2dp</item>
+    </style>
 </resources>
