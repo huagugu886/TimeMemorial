@@ -19,9 +19,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 深色模式由 TimeMemorialApp.onCreate() 统一读取 SharedPreferences 并设置
-        // 此处不再硬编码 AppCompatDelegate，避免覆盖用户选择
-
         // 沉浸式状态栏：让内容绘制到状态栏下方
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -40,24 +37,26 @@ class MainActivity : AppCompatActivity() {
             ReminderManager.scheduleDaily(this)
         }
 
-        // Android 13+ 请求通知权限（POST_NOTIFICATIONS 已在 Manifest 声明）
+        // Android 13+ 请求通知权限
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
             }
         }
 
-        // 深色模式切换后强制刷新底栏颜色（BottomNavigationView 缓存 ColorStateList）
+        // 深色模式切换后强制刷新底栏颜色
         refreshBottomNavColors()
 
-        // 配置毛玻璃模糊效果（自动根据 API 版本选择算法）
+        // ====== 毛玻璃模糊效果 ======
+        // blurTarget 覆盖全屏，BlurView 叠在底栏位置，实时模糊背后内容
         binding.blurView.setupWith(binding.blurTarget)
-            .setBlurRadius(16f)
+            .setBlurRadius(25f)
             .setBlurAutoUpdate(true)
-        // 设置模糊叠加层颜色（亮/暗模式切换时同步更新）
-        val nightMode2 = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
-        val isDark2 = nightMode2 == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        binding.blurView.setOverlayColor(if (isDark2) 0x33000000 else 0x33FFFFFF)
+        // 根据亮/暗模式设置半透明叠加层
+        val nightMode = resources.configuration.uiMode and
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val isDark = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        binding.blurView.setOverlayColor(if (isDark) 0x20000000 else 0x20FFFFFF)
 
         // 底栏：只吃导航栏底部 insets，阻止键盘(IME)把它顶上去
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
@@ -69,9 +68,7 @@ class MainActivity : AppCompatActivity() {
                 .build()
         }
 
-        // FragmentContainerView 默认不转发 insets 给子 fragment，
-        // 手动 dispatch 让各 fragment 自行处理（home 用 viewport-fit=cover，
-        // calendar/settings 在根 view 上加 top padding）
+        // FragmentContainerView 默认不转发 insets 给子 fragment
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             for (i in 0 until binding.navHostFragment.childCount) {
                 ViewCompat.dispatchApplyWindowInsets(binding.navHostFragment.getChildAt(i), insets)
@@ -99,7 +96,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // 从设置页切深色模式回来时，确保底栏颜色同步
         refreshBottomNavColors()
     }
 
@@ -108,22 +104,22 @@ class MainActivity : AppCompatActivity() {
         val nightMode = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        // 完全透明：让 BlurView 的毛玻璃效果透出来
+
+        // 底栏完全透明，让 BlurView 的毛玻璃效果透出来
         binding.bottomNav.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
-        // 同步更新毛玻璃 overlay 颜色
-        binding.blurView.setOverlayColor(if (night) 0x33000000 else 0x33FFFFFF)
+        // 同步更新毛玻璃 overlay 颜色（12% 不透明度，保留通透感）
+        binding.blurView.setOverlayColor(if (night) 0x20000000 else 0x20FFFFFF)
 
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
             .getString("theme_color", "purple") ?: "purple"
-        val night2 = night
         val primaryMap = mapOf(
-          "purple" to if (night2) "#A78BFA" else "#8B5CF6",
-          "blue"   to if (night2) "#60A5FA" else "#3B82F6",
-          "pink"   to if (night2) "#F472B6" else "#EC4899",
-          "rose"   to if (night2) "#FB7185" else "#F43F5E",
-          "teal"   to if (night2) "#2DD4BF" else "#14B8A6",
-          "red"    to if (night2) "#F87171" else "#EF4444"
+          "purple" to if (night) "#A78BFA" else "#8B5CF6",
+          "blue"   to if (night) "#60A5FA" else "#3B82F6",
+          "pink"   to if (night) "#F472B6" else "#EC4899",
+          "rose"   to if (night) "#FB7185" else "#F43F5E",
+          "teal"   to if (night) "#2DD4BF" else "#14B8A6",
+          "red"    to if (night) "#F87171" else "#EF4444"
         )
         val checked = android.graphics.Color.parseColor(primaryMap[themeName] ?: primaryMap["purple"]!!)
         val unchecked = if (night) android.graphics.Color.parseColor("#94A3B8")

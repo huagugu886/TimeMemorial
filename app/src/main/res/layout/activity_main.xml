@@ -10,7 +10,7 @@
         android:id="@+id/blur_target"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_nav_container"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -25,33 +25,26 @@
 
     </eightbitlab.com.blurview.BlurTarget>
 
-    <!-- 毛玻璃底栏容器 -->
-    <FrameLayout
-        android:id="@+id/bottom_nav_container"
+    <!-- 毛玻璃底栏：BlurView 直接约束在底部，覆盖在内容层上方 -->
+    <eightbitlab.com.blurview.BlurView
+        android:id="@+id/blur_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:blurOverlayColor="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <eightbitlab.com.blurview.BlurView
-            android:id="@+id/blur_view"
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:blurOverlayColor="@android:color/transparent">
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            app:itemIconTint="@color/bottom_nav_color"
+            app:itemTextColor="@color/bottom_nav_color"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_nav_menu" />
 
-            <com.google.android.material.bottomnavigation.BottomNavigationView
-                android:id="@+id/bottom_nav"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                app:itemIconTint="@color/bottom_nav_color"
-                app:itemTextColor="@color/bottom_nav_color"
-                app:labelVisibilityMode="labeled"
-                app:menu="@menu/bottom_nav_menu" />
-
-        </eightbitlab.com.blurview.BlurView>
-
-    </FrameLayout>
+    </eightbitlab.com.blurview.BlurView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
