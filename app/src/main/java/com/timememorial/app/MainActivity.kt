@@ -101,7 +101,13 @@ class MainActivity : AppCompatActivity() {
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
         val bg = if (night) android.graphics.Color.parseColor("#1F2937")
                 else android.graphics.Color.parseColor("#FFFFFF")
-        binding.bottomNav.setBackgroundColor(bg)
+        // 使用 GradientDrawable 保留圆角，避免 setBackgroundColor 覆盖 drawable
+        val bgDrawable = android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            setColor(bg)
+            cornerRadius = 40f // 20dp 圆角
+        }
+        binding.bottomNav.background = bgDrawable
 
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
             .getString("theme_color", "purple") ?: "purple"
