@@ -46,9 +46,10 @@ class MainActivity : AppCompatActivity() {
         refreshBottomNavColors()
 
         // ====== 毛玻璃模糊效果 ======
-        val decorView = window.decorView as android.view.ViewGroup
-        val rootView = decorView.findViewById<android.view.View>(android.R.id.content)
-        binding.blurView.setupWith(rootView as android.view.ViewGroup)
+        val decorView = window.decorView
+        val windowBackground = decorView.background
+        binding.blurView.setupWith(binding.blurTarget)
+            .setFrameClearDrawable(windowBackground)
             .setBlurRadius(16f)
             .setBlurAutoUpdate(true)
         val nightMode = resources.configuration.uiMode and
