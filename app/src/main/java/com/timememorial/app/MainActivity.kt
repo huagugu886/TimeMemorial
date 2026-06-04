@@ -129,6 +129,12 @@ class MainActivity : AppCompatActivity() {
         )
         binding.bottomNav.background = capsuleBg
         binding.bottomNav.elevation = 12 * density
+
+        // 底部渐变遮罩：深色/浅色模式同步切换
+        val fadeRes = if (night) R.drawable.bg_bottom_fade_dark
+                      else R.drawable.bg_bottom_fade_light
+        binding.bottomFade.setBackgroundResource(fadeRes)
+
         // 同步系统导航栏颜色，和底栏一致
         window.navigationBarColor = bg
 
