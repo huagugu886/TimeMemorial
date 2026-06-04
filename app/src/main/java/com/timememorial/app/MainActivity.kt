@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 沉浸式状态栏：让内容绘制到状态栏下方
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         super.onCreate(savedInstanceState)
@@ -44,21 +43,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 深色模式切换后强制刷新底栏颜色
         refreshBottomNavColors()
 
         // ====== 毛玻璃模糊效果 ======
-        // blurTarget 覆盖全屏，BlurView 叠在底栏位置，实时模糊背后内容
+        // BlurView 贴底，模糊源是它正上方的 BlurTarget（内容区）
         binding.blurView.setupWith(binding.blurTarget)
             .setBlurRadius(25f)
             .setBlurAutoUpdate(true)
-        // 根据亮/暗模式设置半透明叠加层
         val nightMode = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val isDark = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
         binding.blurView.setOverlayColor(if (isDark) 0x20000000 else 0x20FFFFFF)
 
-        // 底栏：只吃导航栏底部 insets，阻止键盘(IME)把它顶上去
+        // 底栏 insets：吃掉导航栏底部 padding，防止键盘把它顶上去
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updatePadding(bottom = systemBars.bottom)
@@ -69,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // FragmentContainerView 默认不转发 insets 给子 fragment
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             for (i in 0 until binding.navHostFragment.childCount) {
                 ViewCompat.dispatchApplyWindowInsets(binding.navHostFragment.getChildAt(i), insets)
             }
@@ -108,7 +105,6 @@ class MainActivity : AppCompatActivity() {
         // 底栏完全透明，让 BlurView 的毛玻璃效果透出来
         binding.bottomNav.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
-        // 同步更新毛玻璃 overlay 颜色（12% 不透明度，保留通透感）
         binding.blurView.setOverlayColor(if (night) 0x20000000 else 0x20FFFFFF)
 
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
