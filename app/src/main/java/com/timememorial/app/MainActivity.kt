@@ -46,10 +46,13 @@ class MainActivity : AppCompatActivity() {
         refreshBottomNavColors()
 
         // ====== 毛玻璃模糊效果 ======
+        val isDark = (resources.configuration.uiMode and
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
         binding.blurView.setupWith(binding.blurTarget)
-            .setBlurRadius(20f)
+            .setBlurRadius(10f)
+            .setOverlayColor(if (isDark) 0x18000000 else 0x18FFFFFF)
             .setBlurAutoUpdate(true)
-        // overlay 由 XML blurOverlayColor 统一控制
 
         // 底栏 insets：吃掉导航栏底部 padding，防止键盘把它顶上去
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
@@ -101,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         // 底栏完全透明，让 BlurView 的毛玻璃效果透出来
         binding.bottomNav.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
-        binding.blurView.setOverlayColor(if (night) 0x10000000 else 0x10FFFFFF)
+        binding.blurView.setOverlayColor(if (night) 0x12000000 else 0x12FFFFFF)
 
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
             .getString("theme_color", "purple") ?: "purple"
