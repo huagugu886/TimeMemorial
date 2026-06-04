@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- 半透明底色：深色模式下深灰，浅色模式下浅灰 -->
+    <solid android:color="#26000000" />
+    <corners android:radius="28dp" />
+</shape>

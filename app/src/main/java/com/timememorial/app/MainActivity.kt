@@ -91,8 +91,8 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.post {
             val navHeight = binding.bottomNav.height
             val density = resources.displayMetrics.density
-            val bottomMarginPx = (12 * density).toInt()  // 底部间距 12dp
-            val extraPaddingPx = (8 * density).toInt()   // 额外呼吸间距 8dp
+            val bottomMarginPx = (8 * density).toInt()
+            val extraPaddingPx = (12 * density).toInt()
             binding.navHostFragment.setPadding(0, 0, 0, navHeight + bottomMarginPx + extraPaddingPx)
         }
     }
@@ -113,7 +113,33 @@ class MainActivity : AppCompatActivity() {
         window.navigationBarColor = if (night) android.graphics.Color.BLACK
                                     else android.graphics.Color.WHITE
 
-        // 主题色：选中项高亮
+        // 胶囊背景：深色模式用深灰半透明，浅色模式用浅灰半透明
+        val capsuleColor = if (night) android.graphics.Color.parseColor("#26FFFFFF")
+                           else android.graphics.Color.parseColor("#26000000")
+        val capsuleBg = android.graphics.drawable.GradientDrawable().apply {
+            cornerRadius = 28f * resources.displayMetrics.density
+            setColor(capsuleColor)
+        }
+        binding.bottomNav.background = capsuleBg
+
+        // 选中项胶囊
+        val selectedColor = if (night) android.graphics.Color.parseColor("#33FFFFFF")
+                            else android.graphics.Color.parseColor("#33000000")
+        val selectedBg = android.graphics.drawable.GradientDrawable().apply {
+            cornerRadius = 20f * resources.displayMetrics.density
+            setColor(selectedColor)
+        }
+        val rippleBg = android.graphics.drawable.GradientDrawable().apply {
+            cornerRadius = 20f * resources.displayMetrics.density
+            setColor(android.graphics.Color.TRANSPARENT)
+        }
+        val itemSelector = android.graphics.drawable.StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_checked), selectedBg)
+            addState(intArrayOf(), rippleBg)
+        }
+        binding.bottomNav.itemBackground = itemSelector
+
+        // 主题色：选中项图标和文字颜色
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
             .getString("theme_color", "purple") ?: "purple"
         val primaryMap = mapOf(

@@ -22,18 +22,25 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- 底部导航：最朴素的 BottomNavigationView，无背景无阴影 -->
+    <!-- 底部导航：半透明胶囊容器，选中项有独立高亮 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp"
-        app:itemIconSize="24dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="@drawable/bg_nav_capsule"
+        app:elevation="6dp"
+        app:itemIconSize="22dp"
         app:itemIconTint="@color/bottom_nav_color"
         app:itemTextColor="@color/bottom_nav_color"
-        app:itemBackground="@android:color/transparent"
+        app:itemBackground="@drawable/bg_nav_item_selector"
         app:itemRippleColor="@android:color/transparent"
+        app:itemPaddingStart="12dp"
+        app:itemPaddingEnd="12dp"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"
