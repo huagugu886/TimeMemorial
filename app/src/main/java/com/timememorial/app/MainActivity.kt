@@ -46,14 +46,15 @@ class MainActivity : AppCompatActivity() {
         refreshBottomNavColors()
 
         // ====== 毛玻璃模糊效果 ======
-        // BlurView 贴底，模糊源是它正上方的 BlurTarget（内容区）
-        binding.blurView.setupWith(binding.blurTarget)
-            .setBlurRadius(25f)
+        val decorView = window.decorView as android.view.ViewGroup
+        val rootView = decorView.findViewById<android.view.View>(android.R.id.content)
+        binding.blurView.setupWith(rootView as android.view.ViewGroup)
+            .setBlurRadius(16f)
             .setBlurAutoUpdate(true)
         val nightMode = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val isDark = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        binding.blurView.setOverlayColor(if (isDark) 0x20000000 else 0x20FFFFFF)
+        binding.blurView.setOverlayColor(if (isDark) 0x10000000 else 0x10FFFFFF)
 
         // 底栏 insets：吃掉导航栏底部 padding，防止键盘把它顶上去
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
@@ -105,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         // 底栏完全透明，让 BlurView 的毛玻璃效果透出来
         binding.bottomNav.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
-        binding.blurView.setOverlayColor(if (night) 0x20000000 else 0x20FFFFFF)
+        binding.blurView.setOverlayColor(if (night) 0x10000000 else 0x10FFFFFF)
 
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
             .getString("theme_color", "purple") ?: "purple"
