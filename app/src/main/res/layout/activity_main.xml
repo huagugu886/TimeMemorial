@@ -22,18 +22,13 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- 底部导航：半透明胶囊容器，选中项有独立高亮 -->
+    <!-- 底部导航：透明底栏，选中项仅显示高亮胶囊，内容从下方穿过 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="8dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:background="@drawable/bg_nav_capsule"
-        app:elevation="6dp"
+        android:background="@android:color/transparent"
+        app:elevation="0dp"
         app:itemIconSize="22dp"
         app:itemIconTint="@color/bottom_nav_color"
         app:itemTextColor="@color/bottom_nav_color"

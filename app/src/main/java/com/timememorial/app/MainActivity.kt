@@ -87,13 +87,11 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // 给内容区设置底部 padding，防止被悬浮底栏遮挡
+        // 给内容区设置底部 padding，防止被底栏完全遮挡
+        // 只补偿底栏高度，不加额外留白，让内容自然延伸到屏幕底部
         binding.bottomNav.post {
             val navHeight = binding.bottomNav.height
-            val density = resources.displayMetrics.density
-            val bottomMarginPx = (8 * density).toInt()
-            val extraPaddingPx = (12 * density).toInt()
-            binding.navHostFragment.setPadding(0, 0, 0, navHeight + bottomMarginPx + extraPaddingPx)
+            binding.navHostFragment.setPadding(0, 0, 0, navHeight)
         }
     }
 
@@ -113,29 +111,17 @@ class MainActivity : AppCompatActivity() {
         window.navigationBarColor = if (night) android.graphics.Color.BLACK
                                     else android.graphics.Color.WHITE
 
-        // 胶囊背景：深色模式用深灰半透明，浅色模式用浅灰半透明
-        val capsuleColor = if (night) android.graphics.Color.parseColor("#26FFFFFF")
-                           else android.graphics.Color.parseColor("#26000000")
-        val capsuleBg = android.graphics.drawable.GradientDrawable().apply {
-            cornerRadius = 28f * resources.displayMetrics.density
-            setColor(capsuleColor)
-        }
-        binding.bottomNav.background = capsuleBg
-
-        // 选中项胶囊
-        val selectedColor = if (night) android.graphics.Color.parseColor("#33FFFFFF")
-                            else android.graphics.Color.parseColor("#33000000")
+        // 选中项胶囊：深色用半透明白，浅色用半透明黑
+        val selectedColor = if (night) android.graphics.Color.parseColor("#22FFFFFF")
+                            else android.graphics.Color.parseColor("#22000000")
         val selectedBg = android.graphics.drawable.GradientDrawable().apply {
             cornerRadius = 20f * resources.displayMetrics.density
             setColor(selectedColor)
         }
-        val rippleBg = android.graphics.drawable.GradientDrawable().apply {
-            cornerRadius = 20f * resources.displayMetrics.density
-            setColor(android.graphics.Color.TRANSPARENT)
-        }
+        val transparentBg = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
         val itemSelector = android.graphics.drawable.StateListDrawable().apply {
             addState(intArrayOf(android.R.attr.state_checked), selectedBg)
-            addState(intArrayOf(), rippleBg)
+            addState(intArrayOf(), transparentBg)
         }
         binding.bottomNav.itemBackground = itemSelector
 
