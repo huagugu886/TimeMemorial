@@ -21,4 +21,11 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
+
+    <!-- 去掉 BottomNavigationView 默认顶部分隔线 -->
+    <style name="Widget.TimeMemorial.BottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="elevation">0dp</item>
+        <item name="itemRippleColor">@android:color/transparent</item>
+        <item name="itemBackground">@android:color/transparent</item>
+    </style>
 </resources>
