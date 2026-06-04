@@ -108,12 +108,10 @@ class MainActivity : AppCompatActivity() {
         val nightMode = resources.configuration.uiMode and
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        val bg = if (night) android.graphics.Color.parseColor("#1F2937")
-                else android.graphics.Color.parseColor("#FFFFFF")
 
-        // 底栏完全透明，同步系统导航栏颜色
-        binding.bottomNav.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-        window.navigationBarColor = bg
+        // 系统导航栏颜色同步
+        window.navigationBarColor = if (night) android.graphics.Color.BLACK
+                                    else android.graphics.Color.WHITE
 
         // 主题色：选中项高亮
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)

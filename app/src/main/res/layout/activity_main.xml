@@ -22,22 +22,18 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- 底部导航：完全透明，无胶囊背景，悬浮在内容上方 -->
+    <!-- 底部导航：最朴素的 BottomNavigationView，无背景无阴影 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
-        style="@style/Widget.TimeMemorial.BottomNav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"
-        android:paddingTop="0dp"
-        android:paddingBottom="8dp"
+        android:background="@android:color/transparent"
+        app:elevation="0dp"
         app:itemIconSize="24dp"
         app:itemIconTint="@color/bottom_nav_color"
         app:itemTextColor="@color/bottom_nav_color"
         app:itemBackground="@android:color/transparent"
-        app:itemSpacing="8dp"
+        app:itemRippleColor="@android:color/transparent"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"
