@@ -1,5 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="RoundedCorner" parent="">
         <item name="cornerSize">12dp</item>
+    </style>
+
+    <!-- 底部导航：完全透明，胶囊背景去掉，只保留选中项的圆形高亮 -->
+    <style name="Widget.TimeMemorial.BottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="elevation">0dp</item>
+        <item name="itemRippleColor">@android:color/transparent</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.TimeMemorial.BottomNav.Indicator</item>
+    </style>
+
+    <!-- 选中项指示器：淡紫圆形，和主题色一致 -->
+    <style name="Widget.TimeMemorial.BottomNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#208B5CF6</item>
+        <item name="android:width">56dp</item>
+        <item name="android:height">32dp</item>
+        <item name="shapeAppearance">@style/Widget.TimeMemorial.BottomNav.Indicator.Shape</item>
+    </style>
+
+    <style name="Widget.TimeMemorial.BottomNav.Indicator.Shape" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
     </style>
 </resources>

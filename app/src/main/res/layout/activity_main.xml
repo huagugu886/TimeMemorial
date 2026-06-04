@@ -22,7 +22,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- 底部导航胶囊：直接悬浮在画面上，无额外容器 -->
+    <!-- 底部导航：完全透明，无胶囊背景，悬浮在内容上方 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         style="@style/Widget.TimeMemorial.BottomNav"
@@ -33,13 +33,10 @@
         android:layout_marginBottom="12dp"
         android:paddingTop="0dp"
         android:paddingBottom="8dp"
-        android:background="@drawable/bg_bottom_nav_capsule"
-        app:elevation="8dp"
         app:itemIconSize="24dp"
         app:itemIconTint="@color/bottom_nav_color"
         app:itemTextColor="@color/bottom_nav_color"
         app:itemBackground="@android:color/transparent"
-        app:itemRippleColor="@android:color/transparent"
         app:itemSpacing="8dp"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"

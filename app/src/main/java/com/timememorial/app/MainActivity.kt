@@ -110,39 +110,21 @@ class MainActivity : AppCompatActivity() {
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
         val bg = if (night) android.graphics.Color.parseColor("#1F2937")
                 else android.graphics.Color.parseColor("#FFFFFF")
-        val density = resources.displayMetrics.density
-        val cornerRadius = 28f * density
-        val radii = FloatArray(8) { cornerRadius }
 
-        // 胶囊背景：阴影层 + 主体层，28dp 圆角
-        val shadowLayer = android.graphics.drawable.GradientDrawable().apply {
-            cornerRadii = radii
-            setColor(if (night) android.graphics.Color.parseColor("#40000000")
-                     else android.graphics.Color.parseColor("#20000000"))
-        }
-        val mainBg = android.graphics.drawable.GradientDrawable().apply {
-            cornerRadii = radii
-            setColor(bg)
-        }
-        val capsuleBg = android.graphics.drawable.LayerDrawable(
-            arrayOf(shadowLayer, mainBg)
-        )
-        binding.bottomNav.background = capsuleBg
-        binding.bottomNav.elevation = 12 * density
-
-        // 同步系统导航栏颜色，和底栏一致
+        // 底栏完全透明，同步系统导航栏颜色
+        binding.bottomNav.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         window.navigationBarColor = bg
 
+        // 主题色：选中项高亮
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
             .getString("theme_color", "purple") ?: "purple"
-        val night2 = night
         val primaryMap = mapOf(
-          "purple" to if (night2) "#A78BFA" else "#8B5CF6",
-          "blue"   to if (night2) "#60A5FA" else "#3B82F6",
-          "pink"   to if (night2) "#F472B6" else "#EC4899",
-          "rose"   to if (night2) "#FB7185" else "#F43F5E",
-          "teal"   to if (night2) "#2DD4BF" else "#14B8A6",
-          "red"    to if (night2) "#F87171" else "#EF4444"
+          "purple" to if (night) "#A78BFA" else "#8B5CF6",
+          "blue"   to if (night) "#60A5FA" else "#3B82F6",
+          "pink"   to if (night) "#F472B6" else "#EC4899",
+          "rose"   to if (night) "#FB7185" else "#F43F5E",
+          "teal"   to if (night) "#2DD4BF" else "#14B8A6",
+          "red"    to if (night) "#F87171" else "#EF4444"
         )
         val checked = android.graphics.Color.parseColor(primaryMap[themeName] ?: primaryMap["purple"]!!)
         val unchecked = if (night) android.graphics.Color.parseColor("#94A3B8")
