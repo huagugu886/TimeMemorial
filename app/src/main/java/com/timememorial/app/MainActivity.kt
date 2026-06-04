@@ -101,8 +101,25 @@ class MainActivity : AppCompatActivity() {
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
         val bg = if (night) android.graphics.Color.parseColor("#1F2937")
                 else android.graphics.Color.parseColor("#FFFFFF")
-        binding.bottomNav.setBackgroundColor(bg)
-        binding.bottomNav.elevation = resources.displayMetrics.density * 8
+        val density = resources.displayMetrics.density
+        val cornerRadius = 28f * density
+        val radii = FloatArray(8) { cornerRadius }
+
+        // 胶囊背景：阴影层 + 主体层，28dp 圆角
+        val shadowLayer = android.graphics.drawable.GradientDrawable().apply {
+            cornerRadii = radii
+            setColor(if (night) android.graphics.Color.parseColor("#40000000")
+                     else android.graphics.Color.parseColor("#20000000"))
+        }
+        val mainBg = android.graphics.drawable.GradientDrawable().apply {
+            cornerRadii = radii
+            setColor(bg)
+        }
+        val capsuleBg = android.graphics.drawable.LayerDrawable(
+            arrayOf(shadowLayer, mainBg)
+        )
+        binding.bottomNav.background = capsuleBg
+        binding.bottomNav.elevation = 12 * density
         // 同步系统导航栏颜色，和底栏一致
         window.navigationBarColor = bg
 
