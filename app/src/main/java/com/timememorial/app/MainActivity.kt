@@ -86,6 +86,15 @@ class MainActivity : AppCompatActivity() {
             }
             insets
         }
+
+        // 给内容区设置底部 padding，防止被悬浮底栏遮挡
+        binding.bottomNav.post {
+            val navHeight = binding.bottomNav.height
+            val density = resources.displayMetrics.density
+            val bottomMarginPx = (12 * density).toInt()  // 底部间距 12dp
+            val extraPaddingPx = (8 * density).toInt()   // 额外呼吸间距 8dp
+            binding.navHostFragment.setPadding(0, 0, 0, navHeight + bottomMarginPx + extraPaddingPx)
+        }
     }
 
     override fun onResume() {
