@@ -1,0 +1,13 @@
+/data/data/com.termux/files/usr/bin/bash: /data/local/tmp/.bash_ipc/bash_watcher_v2.sh: No such file or directory
+/data/data/com.termux/files/usr/bin/bash: /data/local/tmp/.bash_ipc/bash_watcher_v2.sh: No such file or directory
+[v2] Bash IPC Watcher started. Waiting for commands...
+[2026-05-27 23:34:22] 执行: [test-001] echo 'IPC通道测试成功 喵~' && date && whoami
+/sdcard/Download/.bash_ipc/bash_watcher_v2.sh: line 38: jq: command not found
+[2026-05-27 23:34:22] 完成 [test-001], exit=0
+[v3] Watcher started (no jq). Waiting for commands...
+[v3] Watcher started (no jq). Waiting for commands...
+[2026-05-27 23:36:13] Exec: [test-v3-001] echo 'IPC通道测试成功 喵~' && date && whoami
+[2026-05-27 23:36:13] Exec: [test-v3-001] echo 'IPC通道测试成功 喵~' && date && whoami
+[2026-05-27 23:36:13] Done [test-v3-001] exit=0
+[2026-05-27 23:36:13] Done [test-v3-001] exit=0
+[minimal] started

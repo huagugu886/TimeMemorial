@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>设置</title>
+<script>
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  var sat = parseFloat(p.get('sat'));
+  if (!isNaN(sat) && sat > 0) {
+    document.documentElement.style.setProperty('--sat', sat + 'px');
+  }
+})();
+</script>
+<style>
+  :root {
+    --bg: #F8F6FF;
+    --card-bg: #FFFFFF;
+    --primary: #8B5CF6;
+    --primary-light: #C4B5FD;
+    --primary-dark: #6D28D9;
+    --text: #1F2937;
+    --text-sec: #9CA3AF;
+    --divider: #F3F4F6;
+    --switch-off: #E5E7EB;
+    --radius: 20px;
+    --sat: 52px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.25s ease;
+  }
+
+  /* ========== 可滚动内容区 ========== */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 20px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 顶部 */
+  .header {
+    padding: calc(var(--sat) + 8px) 24px 20px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: 0 0 28px 28px;
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 180px;
+    height: 180px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+
+  /* 分组 */
+  .group {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .group:first-of-type {
+    margin-top: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .group-head {
+    padding: 16px 20px 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-sec);
+    letter-spacing: 0.3px;
+  }
+
+  /* 行 */
+  .row {
+    display: flex;
+    align-items: center;
+    padding: 13px 20px;
+    gap: 14px;
+    position: relative;
+    transition: background .12s;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .row:active { background: var(--divider); }
+  .row + .row::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 54px; right: 0;
+    height: 1px;
+    background: var(--divider);
+  }
+
+  /* 图标 */
+  .ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .ico-p { background: rgba(139,92,246,.15); }
+  .ico-b { background: rgba(59,130,246,.15); }
+  .ico-k { background: rgba(236,72,153,.15); }
+  .ico-o { background: rgba(251,191,36,.15); }
+  .ico-g { background: rgba(16,185,129,.15); }
+  .ico-r { background: rgba(239,68,68,.15); }
+  .ico-w { background: rgba(107,114,128,.15); }
+
+  /* 文字区 */
+  .txt { flex: 1; min-width: 0; }
+  .txt-main { font-size: 16px; font-weight: 450; line-height: 1.3; }
+  .txt-sub { font-size: 12px; color: var(--text-sec); margin-top: 1px; }
+
+  /* 右侧 */
+  .right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .val { font-size: 15px; color: var(--text-sec); }
+  .chev { color: #D1D5DB; font-size: 13px; font-weight: 600; }
+
+  /* 开关 */
+  .sw { position: relative; width: 51px; height: 31px; flex-shrink: 0; }
+  .sw input { opacity: 0; width: 0; height: 0; }
+  .sw .sl {
+    position: absolute; inset: 0; background: var(--switch-off);
+    border-radius: 16px; transition: background .25s; cursor: pointer;
+  }
+  .sw .sl::before {
+    content: ''; position: absolute; width: 27px; height: 27px;
+    left: 2px; top: 2px; background: #fff; border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12); transition: transform .25s;
+  }
+  .sw input:checked + .sl { background: var(--primary); }
+  .sw input:checked + .sl::before { transform: translateX(20px); }
+
+  /* 主题色 — 内嵌在卡片行内 */
+  .colors {
+    display: flex; gap: 12px; padding: 4px 20px 16px;
+  }
+  .dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; transition: transform .15s, box-shadow .2s, border-color .2s;
+    border: 2.5px solid transparent;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+  .dot:active { transform: scale(.92); }
+  .dot.on {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(139,92,246,.25), 0 2px 8px rgba(139,92,246,.3);
+  }
+  .c1 { background: #8B5CF6; }
+  .c2 { background: #3B82F6; }
+  .c3 { background: #EC4899; }
+  .c4 { background: #F43F5E; }
+  .c5 { background: #14B8A6; }
+  .c6 { background: #EF4444; }
+
+  /* 主题色切换 — 动态图标背景 & 底部图标 */
+  [data-theme="purple"] .ico-p { background: rgba(139,92,246,.15); }
+  [data-theme="blue"] .ico-p { background: rgba(59,130,246,.15); }
+  [data-theme="pink"] .ico-p { background: rgba(236,72,153,.15); }
+  [data-theme="rose"] .ico-p { background: rgba(244,63,94,.15); }
+  [data-theme="teal"] .ico-p { background: rgba(20,184,166,.15); }
+  [data-theme="red"] .ico-p { background: rgba(239,68,68,.15); }
+
+  [data-theme="purple"] .dot.on { border-color: #8B5CF6; box-shadow: 0 0 0 3px rgba(139,92,246,.25), 0 2px 8px rgba(139,92,246,.3); }
+  [data-theme="blue"] .dot.on { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,.25), 0 2px 8px rgba(59,130,246,.3); }
+  [data-theme="pink"] .dot.on { border-color: #EC4899; box-shadow: 0 0 0 3px rgba(236,72,153,.25), 0 2px 8px rgba(236,72,153,.3); }
+  [data-theme="rose"] .dot.on { border-color: #F43F5E; box-shadow: 0 0 0 3px rgba(244,63,94,.25), 0 2px 8px rgba(244,63,94,.3); }
+  [data-theme="teal"] .dot.on { border-color: #14B8A6; box-shadow: 0 0 0 3px rgba(20,184,166,.25), 0 2px 8px rgba(20,184,166,.3); }
+  [data-theme="red"] .dot.on { border-color: #EF4444; box-shadow: 0 0 0 3px rgba(239,68,68,.25), 0 2px 8px rgba(239,68,68,.3); }
+
+  [data-theme="purple"] .foot-ico { background: linear-gradient(135deg, #8B5CF6, #A78BFA); box-shadow: 0 4px 16px rgba(139,92,246,.2); }
+  [data-theme="blue"] .foot-ico { background: linear-gradient(135deg, #3B82F6, #60A5FA); box-shadow: 0 4px 16px rgba(59,130,246,.2); }
+  [data-theme="pink"] .foot-ico { background: linear-gradient(135deg, #EC4899, #F472B6); box-shadow: 0 4px 16px rgba(236,72,153,.2); }
+  [data-theme="rose"] .foot-ico { background: linear-gradient(135deg, #F43F5E, #FB7185); box-shadow: 0 4px 16px rgba(244,63,94,.2); }
+  [data-theme="teal"] .foot-ico { background: linear-gradient(135deg, #14B8A6, #2DD4BF); box-shadow: 0 4px 16px rgba(20,184,166,.2); }
+  [data-theme="red"] .foot-ico { background: linear-gradient(135deg, #EF4444, #F87171); box-shadow: 0 4px 16px rgba(239,68,68,.2); }
+
+  /* 底部版本 */
+  .foot {
+    text-align: center; padding: 32px 0 0;
+  }
+  .foot-ico {
+    width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 10px;
+    background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 4px 16px rgba(139,92,246,.2);
+  }
+  .foot-name { font-size: 16px; font-weight: 600; }
+  .foot-ver { font-size: 12px; color: var(--text-sec); margin-top: 2px; }
+
+  /* === 选择器弹窗 === */
+  .picker-mask {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,.35); z-index: 999;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .picker-mask.show { opacity: 1; pointer-events: auto; }
+  .picker-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000;
+    background: var(--card-bg);
+    border-radius: 16px 16px 0 0;
+    padding: 0 0 env(safe-area-inset-bottom, 16px);
+    transform: translateY(100%);
+    transition: transform .28s cubic-bezier(.32,.72,0,1);
+  }
+  .picker-sheet.show { transform: translateY(0); }
+  .picker-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px 12px; border-bottom: 1px solid var(--divider);
+  }
+  .picker-head .picker-title { font-size: 16px; font-weight: 700; }
+  .picker-head .picker-done {
+    font-size: 15px; font-weight: 600; color: var(--primary);
+    background: none; border: none; cursor: pointer; padding: 4px 8px;
+  }
+  .picker-list {
+    max-height: 320px; overflow-y: auto; padding: 8px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .picker-opt {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px; font-size: 16px; cursor: pointer;
+    transition: background .1s;
+  }
+  .picker-opt:active { background: var(--divider); }
+  .picker-opt .check { color: var(--primary); font-size: 18px; font-weight: 700; opacity: 0; }
+  .picker-opt.active .check { opacity: 1; }
+
+  /* 自定义时间滚轮选择器 */
+  .time-wheel-wrap {
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px 0 8px; position: relative; height: 220px; gap: 0;
+  }
+  .wheel-col {
+    width: 80px; height: 220px; overflow-y: scroll;
+    scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .wheel-col::-webkit-scrollbar { display: none; }
+  .wheel-pad { height: 90px; flex-shrink: 0; }
+  .wheel-item {
+    height: 40px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 500; color: var(--text-sec);
+    scroll-snap-align: center; transition: color .15s, transform .15s, font-weight .15s;
+    flex-shrink: 0;
+  }
+  .wheel-item.active {
+    color: var(--text); font-weight: 700; font-size: 26px;
+  }
+  .wheel-sep {
+    font-size: 28px; font-weight: 700; color: var(--text);
+    width: 30px; text-align: center; flex-shrink: 0;
+    line-height: 40px;
+  }
+  .wheel-highlight {
+    position: absolute; left: 20px; right: 20px; top: 90px; height: 40px;
+    background: var(--primary); opacity: 0.07; border-radius: 10px;
+    pointer-events: none;
+  }
+
+  /* ===== 备份与恢复 Modal ===== */
+  .br-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45); z-index: 1050;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s;
+  }
+  .br-mask.show { opacity: 1; pointer-events: auto; }
+
+  .br-sheet {
+    position: fixed; left: 50%; top: 50%;
+    transform: translate(-50%,-50%) scale(.92);
+    width: 90%; max-width: 400px; max-height: 85vh;
+    background: var(--card-bg); border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    z-index: 1060; overflow: hidden;
+    opacity: 0; pointer-events: none;
+    transition: all .3s cubic-bezier(.32,.72,0,1);
+    display: flex; flex-direction: column;
+  }
+  .br-sheet.show { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
+
+  .br-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--divider);
+  }
+  .br-head-title { font-size: 18px; font-weight: 700; }
+  .br-close {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: var(--divider); color: var(--text-sec);
+    font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .br-tabs {
+    display: flex; margin: 16px 24px 0; background: var(--bg);
+    border-radius: 12px; padding: 4px;
+  }
+  .br-tab {
+    flex: 1; padding: 10px; border: none; background: transparent;
+    font-size: 15px; font-weight: 600; color: var(--text-sec);
+    border-radius: 10px; cursor: pointer; transition: all .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .br-tab.active { background: var(--card-bg); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+  .br-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .br-pane { display: none; }
+  .br-pane.active { display: block; animation: brFadeIn .3s; }
+  @keyframes brFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .br-card {
+    background: var(--bg); border-radius: 14px; padding: 16px;
+    border: 1px solid var(--divider); margin-bottom: 12px;
+  }
+  .br-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .br-card p { font-size: 13px; color: var(--text-sec); line-height: 1.5; margin-bottom: 12px; }
+
+  .br-btn {
+    width: 100%; padding: 12px; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .br-btn:active { opacity: .7; }
+  .br-btn-primary { background: var(--primary); color: #fff; }
+  .br-btn-danger { background: #EF4444; color: #fff; margin-top: 10px; }
+  .br-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .br-upload {
+    border: 2px dashed var(--divider); border-radius: 12px;
+    padding: 24px; text-align: center; cursor: pointer;
+    transition: border-color .2s; margin-bottom: 12px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .br-upload:active { border-color: var(--primary); }
+  .br-upload-icon { font-size: 28px; margin-bottom: 6px; }
+  .br-upload p { font-size: 13px; color: var(--text-sec); }
+
+  /* === 自定义确认弹窗 === */
+  .cfm-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45); z-index: 2000;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s;
+  }
+  .cfm-mask.show { opacity: 1; pointer-events: auto; }
+  .cfm-box {
+    position: fixed; left: 50%; top: 50%;
+    transform: translate(-50%,-50%) scale(.9);
+    width: 82%; max-width: 320px;
+    background: var(--card-bg); border-radius: 20px;
+    box-shadow: 0 20px 60px var(--primary-shadow), 0 4px 20px rgba(0,0,0,.15);
+    z-index: 2001; overflow: hidden;
+    opacity: 0; pointer-events: none;
+    transition: all .3s cubic-bezier(.32,.72,0,1);
+    text-align: center;
+    padding: 32px 24px 24px;
+  }
+  .cfm-box.show { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
+  .cfm-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: rgba(239,68,68,.12);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px; font-size: 26px;
+    /* 深色模式下稍微提亮 */
+    filter: brightness(1.1);
+  }
+  .cfm-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .cfm-msg { font-size: 14px; color: var(--text-sec); line-height: 1.5; margin-bottom: 24px; }
+  .cfm-btns { display: flex; gap: 12px; }
+  .cfm-btns button {
+    flex: 1; padding: 12px; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: opacity .15s;
+  }
+  .cfm-btns button:active { opacity: .7; }
+  .cfm-cancel { background: var(--divider); color: var(--text-sec); }
+  .cfm-ok { background: var(--primary); color: #fff; }
+
+  .br-status {
+    padding: 10px 12px; border-radius: 10px; font-size: 13px;
+    margin-top: 10px; display: none; line-height: 1.5;
+    word-break: break-all;
+  }
+  .br-status.ok { display: block; background: rgba(16,185,129,.1); color: #10b981; }
+  .br-status.err { display: block; background: rgba(239,68,68,.1); color: #EF4444; }
+
+  .br-warn {
+    font-size: 12px; color: #F59E0B; background: rgba(245,158,11,.1);
+    padding: 10px 12px; border-radius: 8px; margin: 10px 0; line-height: 1.4;
+  }
+  .br-foot { padding: 0 24px 16px; text-align: center; }
+  .br-foot-btn {
+    background: none; border: none; font-size: 13px; color: var(--text-sec);
+    cursor: pointer; padding: 8px 16px; -webkit-tap-highlight-color: transparent;
+  }
+  body.dark-mode .header {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--primary-light));
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>设置</h1>
+</div>
+
+<div class="scroll-content">
+<!-- 外观 -->
+<div class="group">
+  <div class="group-head">外观</div>
+  <div class="row">
+    <div class="ico ico-p">🌙</div>
+    <div class="txt"><div class="txt-main">深色模式</div></div>
+    <label class="sw"><input type="checkbox" id="dm"><span class="sl"></span></label>
+  </div>
+  <div class="row">
+    <div class="ico ico-b">🎨</div>
+    <div class="txt"><div class="txt-main">主题色</div></div>
+  </div>
+  <div class="colors">
+    <div class="dot c1 on" data-c="purple"></div>
+    <div class="dot c2" data-c="blue"></div>
+    <div class="dot c3" data-c="pink"></div>
+    <div class="dot c4" data-c="rose"></div>
+    <div class="dot c5" data-c="teal"></div>
+    <div class="dot c6" data-c="red"></div>
+  </div>
+  <div class="row" style="display:none">
+    <div class="ico ico-o">🔤</div>
+    <div class="txt"><div class="txt-main">字体大小（开发中）</div></div>
+    <div class="right"><span class="val">标准</span><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 纪念日提醒 -->
+<div class="group">
+  <div class="group-head">纪念日提醒</div>
+  <div class="row">
+    <div class="ico ico-k">🔔</div>
+    <div class="txt">
+      <div class="txt-main">纪念日提醒</div>
+      <div class="txt-sub">在纪念日前提醒你</div>
+    </div>
+    <label class="sw"><input type="checkbox" checked><span class="sl"></span></label>
+  </div>
+  <div class="row" id="rowDays">
+    <div class="ico ico-o">⏰</div>
+    <div class="txt"><div class="txt-main">提前提醒</div></div>
+    <div class="right"><span class="val">3 天</span><span class="chev">›</span></div>
+  </div>
+  <div class="row" id="rowTime">
+    <div class="ico ico-b">🕘</div>
+    <div class="txt"><div class="txt-main">提醒时间</div></div>
+    <div class="right"><span class="val">09:00</span><span class="chev">›</span></div>
+  </div>
+  <div class="row" id="rowRepeat">
+    <div class="ico ico-p">🔁</div>
+    <div class="txt"><div class="txt-main">默认重复</div></div>
+    <div class="right"><span class="val">每年</span><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 通知（隐藏）
+<div class="group" style="display:none">
+  <div class="group-head">通知</div>
+  <div class="row">
+    <div class="ico ico-b">📢</div>
+    <div class="txt"><div class="txt-main">通知渠道</div></div>
+    <div class="right"><span class="val">灵动岛</span><span class="chev">›</span></div>
+  </div>
+  <div class="row">
+    <div class="ico ico-g">🔊</div>
+    <div class="txt"><div class="txt-main">声音与振动</div></div>
+    <div class="right"><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 数据 -->
+<div class="group">
+  <div class="group-head">数据</div>
+  <div class="row" id="rowBackup">
+    <div class="ico ico-g">📤</div>
+    <div class="txt"><div class="txt-main">备份与恢复</div></div>
+    <div class="right"><span class="chev">›</span></div>
+  </div>
+  <div class="row" id="rowClearCache">
+    <div class="ico ico-w">🗑️</div>
+    <div class="txt"><div class="txt-main">清除缓存</div></div>
+    <div class="right"><span class="val" id="cacheSize">计算中…</span><span class="chev">›</span></div>
+  </div>
+  <div class="row" id="rowExport">
+    <div class="ico ico-b">📦</div>
+    <div class="txt"><div class="txt-main">导出数据</div></div>
+    <div class="right"><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 关于 -->
+<div class="group">
+  <div class="group-head">关于</div>
+  <div class="row">
+    <div class="ico ico-p">ℹ️</div>
+    <div class="txt"><div class="txt-main">版本信息</div></div>
+    <div class="right"><span class="val" id="versionInfo">--</span><span class="chev">›</span></div>
+  </div>
+</div>
+
+<!-- 底部 -->
+<div class="foot">
+  <div class="foot-ico">🕐</div>
+  <div class="foot-name">TimeMemorial</div>
+  <div class="foot-ver" id="appVer">Version</div>
+</div>
+</div><!-- .scroll-content -->
+
+<!-- === 选择器组件 === -->
+<div class="picker-mask" id="pickerMask"></div>
+
+<!-- 提前提醒天数选择器 -->
+<div class="picker-sheet" id="daysSheet">
+  <div class="picker-head">
+    <span class="picker-title">提前提醒</span>
+    <button class="picker-done" id="daysDone">完成</button>
+  </div>
+  <div class="picker-list" id="daysList"></div>
+</div>
+
+<!-- 提醒时间选择器 -->
+<div class="picker-sheet" id="timeSheet">
+  <div class="picker-head">
+    <span class="picker-title">提醒时间</span>
+    <button class="picker-done" id="timeDone">完成</button>
+  </div>
+  <div class="time-wheel-wrap">
+    <div class="wheel-col" id="hourWheel">
+      <div class="wheel-pad"></div>
+      <div class="wheel-pad"></div>
+      <div class="wheel-pad"></div>
+    </div>
+    <div class="wheel-sep">:</div>
+    <div class="wheel-col" id="minWheel">
+      <div class="wheel-pad"></div>
+      <div class="wheel-pad"></div>
+      <div class="wheel-pad"></div>
+    </div>
+    <div class="wheel-highlight"></div>
+  </div>
+</div>
+
+<!-- 默认重复选择器 -->
+<div class="picker-sheet" id="repeatSheet">
+  <div class="picker-head">
+    <span class="picker-title">默认重复</span>
+    <button class="picker-done" id="repeatDone">完成</button>
+  </div>
+  <div class="picker-list" id="repeatList"></div>
+</div>
+
+<!-- 备份与恢复 Modal -->
+<div class="br-mask" id="brMask"></div>
+<div class="br-sheet" id="brSheet">
+  <div class="br-head">
+    <span class="br-head-title">数据备份与恢复</span>
+    <button class="br-close" id="brClose">✕</button>
+  </div>
+  <div class="br-tabs">
+    <button class="br-tab active" data-tab="backup">备份</button>
+    <button class="br-tab" data-tab="restore">恢复</button>
+  </div>
+  <div class="br-body">
+    <!-- 备份面板 -->
+    <div class="br-pane active" id="paneBackup">
+      <div class="br-card">
+        <h3>📦 导出备份</h3>
+        <p>将所有纪念日与设置导出为 JSON 文件，保存到 Download 目录。</p>
+        <button class="br-btn br-btn-primary" id="brDoBackup">立即备份</button>
+        <div class="br-status" id="brBackupStatus"></div>
+      </div>
+    </div>
+    <!-- 恢复面板 -->
+    <div class="br-pane" id="paneRestore">
+      <div class="br-card">
+        <h3>📂 从文件恢复</h3>
+        <p>选择之前导出的备份文件，将覆盖当前所有数据。</p>
+        <div class="br-upload" id="brUpload">
+          <div class="br-upload-icon">📁</div>
+          <p>点击选择 .json 备份文件</p>
+        </div>
+        <input type="file" id="brFileInput" accept=".json" style="display:none">
+        <button class="br-btn br-btn-danger" id="brDoRestore" disabled>确认恢复</button>
+        <div class="br-warn">⚠️ 恢复会覆盖当前所有数据，不可撤销</div>
+        <div class="br-status" id="brRestoreStatus"></div>
+      </div>
+    </div>
+  </div>
+  <div class="br-foot">
+    <button class="br-foot-btn" id="brFootClose">关闭</button>
+  </div>
+</div>
+
+<!-- 自定义确认弹窗 -->
+<div class="cfm-mask" id="cfmMask"></div>
+<div class="cfm-box" id="cfmBox">
+  <div class="cfm-icon">⚠️</div>
+  <div class="cfm-title" id="cfmTitle"></div>
+  <div class="cfm-msg" id="cfmMsg"></div>
+  <div class="cfm-btns">
+    <button class="cfm-cancel" id="cfmCancel">取消</button>
+    <button class="cfm-ok" id="cfmOk">确定</button>
+  </div>
+</div>
+
+<script>
+// === 主题色定义 ===
+const THEMES = {
+  purple: {
+    light: { primary: '#8B5CF6', light: '#C4B5FD', dark: '#6D28D9', shadow: 'rgba(139,92,246,0.15)' },
+    dark:  { primary: '#A78BFA', light: '#7C3AED', dark: '#5B21B6', shadow: 'rgba(167,139,250,0.2)' }
+  },
+  blue: {
+    light: { primary: '#3B82F6', light: '#93C5FD', dark: '#1D4ED8', shadow: 'rgba(59,130,246,0.15)' },
+    dark:  { primary: '#60A5FA', light: '#2563EB', dark: '#1E40AF', shadow: 'rgba(96,165,250,0.2)' }
+  },
+  pink: {
+    light: { primary: '#EC4899', light: '#F9A8D4', dark: '#BE185D', shadow: 'rgba(236,72,153,0.15)' },
+    dark:  { primary: '#F472B6', light: '#DB2777', dark: '#9D174D', shadow: 'rgba(244,114,182,0.2)' }
+  },
+  rose: {
+    light: { primary: '#F43F5E', light: '#FDA4AF', dark: '#BE123C', shadow: 'rgba(244,63,94,0.15)' },
+    dark:  { primary: '#FB7185', light: '#E11D48', dark: '#9F1239', shadow: 'rgba(251,113,133,0.2)' }
+  },
+  teal: {
+    light: { primary: '#14B8A6', light: '#5EEAD4', dark: '#0F766E', shadow: 'rgba(20,184,166,0.15)' },
+    dark:  { primary: '#2DD4BF', light: '#0D9488', dark: '#115E59', shadow: 'rgba(45,212,191,0.2)' }
+  },
+  red: {
+    light: { primary: '#EF4444', light: '#FCA5A5', dark: '#B91C1C', shadow: 'rgba(239,68,68,0.15)' },
+    dark:  { primary: '#F87171', light: '#DC2626', dark: '#991B1B', shadow: 'rgba(248,113,113,0.2)' }
+  }
+};
+
+// === 应用主题色 ===
+function applyTheme(themeName, isDark) {
+  const theme = THEMES[themeName] || THEMES.purple;
+  const mode = isDark ? 'dark' : 'light';
+  const c = theme[mode];
+  const s = document.documentElement.style;
+  s.setProperty('--primary', c.primary);
+  s.setProperty('--primary-light', c.light);
+  s.setProperty('--primary-dark', c.dark);
+  s.setProperty('--shadow', '0 4px 20px ' + c.shadow);
+  // 标记当前主题色，供 CSS 规则使用
+  document.documentElement.setAttribute('data-theme', themeName);
+  // 更新圆点选中状态
+  document.querySelectorAll('.dot').forEach(function(d) {
+    d.classList.toggle('on', d.getAttribute('data-c') === themeName);
+  });
+  // 同步主题色到底栏（Kotlin 原生）
+  if (window.nativeBridge && window.nativeBridge.setThemeColor) {
+    window.nativeBridge.setThemeColor(themeName);
+  }
+}
+
+// === 深色模式逻辑 ===
+const dmSwitch = document.getElementById('dm');
+const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+function applyDark(dark, animate) {
+  function doApply() {
+    const s = document.documentElement.style;
+    if (dark) {
+      s.setProperty('--bg','#111827'); s.setProperty('--card-bg','#1F2937');
+      s.setProperty('--text','#F9FAFB'); s.setProperty('--text-sec','#6B7280');
+      s.setProperty('--divider','#374151'); s.setProperty('--switch-off','#4B5563');
+    } else {
+      s.setProperty('--bg','#F8F6FF'); s.setProperty('--card-bg','#FFFFFF');
+      s.setProperty('--text','#1F2937'); s.setProperty('--text-sec','#9CA3AF');
+      s.setProperty('--divider','#F3F4F6'); s.setProperty('--switch-off','#E5E7EB');
+    }
+    document.documentElement.style.backgroundColor = dark ? '#111827' : '#F8F6FF';
+    applyTheme(localStorage.getItem('themeColor') || 'purple', dark);
+  }
+  if (animate) {
+    document.body.style.opacity = '0';
+    setTimeout(function() { doApply(); document.body.style.opacity = '1'; }, 200);
+  } else {
+    doApply();
+  }
+}
+
+// 初始化深色模式
+const saved = localStorage.getItem('darkMode');
+if (saved === 'on') {
+  dmSwitch.checked = true;
+  applyDark(true, false);
+} else if (saved === 'off') {
+  dmSwitch.checked = false;
+  applyDark(false, false);
+} else {
+  dmSwitch.checked = sysDark.matches;
+  applyDark(sysDark.matches, false);
+}
+
+// 用户手动切换深色模式 → 保存偏好
+dmSwitch.onchange = function() {
+  applyDark(this.checked);
+  localStorage.setItem('darkMode', this.checked ? 'on' : 'off');
+  try { nativeBridge.setDarkMode(this.checked); } catch(e) {}
+};
+
+// 监听系统深色模式变化
+sysDark.addEventListener('change', (e) => {
+  const pref = localStorage.getItem('darkMode');
+  if (!pref) {
+    dmSwitch.checked = e.matches;
+    applyDark(e.matches);
+  }
+});
+
+// === 主题色选择 ===
+document.querySelectorAll('.dot').forEach(function(d) {
+  d.onclick = function() {
+    var themeName = d.getAttribute('data-c');
+    localStorage.setItem('themeColor', themeName);
+    var isDark = dmSwitch.checked;
+    applyTheme(themeName, isDark);
+  };
+});
+
+// === 提前提醒 / 提醒时间 / 默认重复 交互 ===
+const DAYS_OPTS = [1, 2, 3, 5, 7, 10, 15, 30];
+const REPEAT_OPTS = [
+  { v: 'none',   label: '不重复' },
+  { v: 'weekly', label: '每周' },
+  { v: 'monthly',label: '每月' },
+  { v: 'yearly', label: '每年' }
+];
+
+// 从 localStorage 读取
+let reminderDays  = parseInt(localStorage.getItem('reminderDays'))  || 3;
+let reminderTime  = localStorage.getItem('reminderTime') || '09:00';
+let repeatType    = localStorage.getItem('repeatType')   || 'yearly';
+
+// 初始化显示值
+function updateLabels() {
+  document.querySelector('#rowDays .val').textContent  = reminderDays + ' 天';
+  document.querySelector('#rowTime .val').textContent  = reminderTime;
+  var rep = REPEAT_OPTS.find(r => r.v === repeatType);
+  document.querySelector('#rowRepeat .val').textContent = rep ? rep.label : '每年';
+}
+updateLabels();
+
+// 通知 nativeBridge 同步设置
+function syncSettings() {
+  var s = { reminderDays: reminderDays, reminderTime: reminderTime, repeatType: repeatType };
+  try { nativeBridge.saveReminderSettings(JSON.stringify(s)); } catch(e) {}
+}
+
+// 弹窗控制
+var mask = document.getElementById('pickerMask');
+function openSheet(id) {
+  mask.classList.add('show');
+  document.getElementById(id).classList.add('show');
+}
+function closeAll() {
+  mask.classList.remove('show');
+  document.querySelectorAll('.picker-sheet').forEach(s => s.classList.remove('show'));
+}
+mask.onclick = closeAll;
+mask.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+
+// --- 提前提醒 ---
+(function() {
+  var list = document.getElementById('daysList');
+  DAYS_OPTS.forEach(function(d) {
+    var div = document.createElement('div');
+    div.className = 'picker-opt' + (d === reminderDays ? ' active' : '');
+    div.setAttribute('data-v', d);
+    div.innerHTML = '<span>' + d + ' 天</span><span class="check">✓</span>';
+    div.onclick = function() {
+      list.querySelectorAll('.picker-opt').forEach(o => o.classList.remove('active'));
+      div.classList.add('active');
+      reminderDays = d;
+    };
+    list.appendChild(div);
+  });
+  document.getElementById('rowDays').onclick = function() {
+    // 刷新选中态
+    list.querySelectorAll('.picker-opt').forEach(function(o) {
+      o.classList.toggle('active', parseInt(o.getAttribute('data-v')) === reminderDays);
+    });
+    openSheet('daysSheet');
+  };
+  document.getElementById('daysDone').onclick = function() {
+    localStorage.setItem('reminderDays', reminderDays);
+    updateLabels(); syncSettings(); closeAll();
+  };
+})();
+
+// --- 提醒时间（自定义滚轮）---
+(function() {
+  var hourWheel = document.getElementById('hourWheel');
+  var minWheel  = document.getElementById('minWheel');
+  var MINS = Array.from({length:60}, function(_,i){return i});
+  var ITEM_H = 40;
+
+  // 生成滚轮选项
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  for (var h = 0; h < 24; h++) {
+    var d = document.createElement('div');
+    d.className = 'wheel-item'; d.textContent = pad2(h); d.setAttribute('data-v', h);
+    hourWheel.appendChild(d);
+  }
+  MINS.forEach(function(m) {
+    var d = document.createElement('div');
+    d.className = 'wheel-item'; d.textContent = pad2(m); d.setAttribute('data-v', m);
+    minWheel.appendChild(d);
+  });
+  // 底部 padding
+  hourWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  hourWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  hourWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  minWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  minWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+  minWheel.appendChild(document.createElement('div')).className = 'wheel-pad';
+
+  // 解析当前时间
+  function parseTime(str) {
+    var p = str.split(':');
+    return { h: parseInt(p[0]) || 0, m: parseInt(p[1]) || 0 };
+  }
+
+  // 滚到指定值（index = 值本身，因为 0-23 和 0-55/5 对应 index）
+  function scrollToVal(wheel, valIdx) {
+    wheel.scrollTop = valIdx * ITEM_H;
+  }
+
+  // 更新高亮
+  function updateHighlight(wheel) {
+    var items = wheel.querySelectorAll('.wheel-item');
+    var center = wheel.scrollTop + 110; // 中心线位置
+    var best = null, bestDist = 9999;
+    items.forEach(function(it) {
+      var top = it.offsetTop;
+      var mid = top + ITEM_H / 2;
+      var dist = Math.abs(mid - center);
+      if (dist < bestDist) { bestDist = dist; best = it; }
+    });
+    items.forEach(function(it) { it.classList.toggle('active', it === best); });
+  }
+
+  // 获取当前选中值
+  function getSelected(wheel) {
+    var active = wheel.querySelector('.wheel-item.active');
+    return active ? parseInt(active.getAttribute('data-v')) : 0;
+  }
+
+  // 滚动事件（防抖更新高亮）
+  var scrollTimer;
+  function onScroll(wheel) {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function() { updateHighlight(wheel); }, 60);
+  }
+  hourWheel.onscroll = function() { onScroll(hourWheel); };
+  minWheel.onscroll  = function() { onScroll(minWheel); };
+
+  // 打开时滚到当前值
+  document.getElementById('rowTime').onclick = function() {
+    var t = parseTime(reminderTime);
+    scrollToVal(hourWheel, t.h);
+    scrollToVal(minWheel, MINS.indexOf(t.m) >= 0 ? MINS.indexOf(t.m) : 0);
+    // 延迟一帧再更新高亮，等 scrollTop 生效
+    setTimeout(function() {
+      updateHighlight(hourWheel);
+      updateHighlight(minWheel);
+    }, 50);
+    openSheet('timeSheet');
+  };
+
+  // 完成
+  document.getElementById('timeDone').onclick = function() {
+    var h = getSelected(hourWheel);
+    var m = getSelected(minWheel);
+    reminderTime = pad2(h) + ':' + pad2(m);
+    localStorage.setItem('reminderTime', reminderTime);
+    updateLabels(); syncSettings(); closeAll();
+  };
+})();
+
+// --- 默认重复 ---
+(function() {
+  var list = document.getElementById('repeatList');
+  REPEAT_OPTS.forEach(function(r) {
+    var div = document.createElement('div');
+    div.className = 'picker-opt' + (r.v === repeatType ? ' active' : '');
+    div.setAttribute('data-v', r.v);
+    div.innerHTML = '<span>' + r.label + '</span><span class="check">✓</span>';
+    div.onclick = function() {
+      list.querySelectorAll('.picker-opt').forEach(o => o.classList.remove('active'));
+      div.classList.add('active');
+      repeatType = r.v;
+    };
+    list.appendChild(div);
+  });
+  document.getElementById('rowRepeat').onclick = function() {
+    list.querySelectorAll('.picker-opt').forEach(function(o) {
+      o.classList.toggle('active', o.getAttribute('data-v') === repeatType);
+    });
+    openSheet('repeatSheet');
+  };
+  document.getElementById('repeatDone').onclick = function() {
+    localStorage.setItem('repeatType', repeatType);
+    updateLabels(); syncSettings(); closeAll();
+  };
+})();
+
+// === 底部版本号：从版本信息行动态同步 ===
+(function() {
+  var verSpan = document.querySelector('.row .val'); // 版本信息行的 span
+  var footVer = document.getElementById('appVer');
+  if (verSpan && footVer) {
+    footVer.textContent = verSpan.textContent;
+  }
+})();
+
+// 监听其他页面修改设置
+window.addEventListener('storage', function(e) {
+  if (e.key === 'themeColor') {
+    applyTheme(e.newValue || 'purple', dmSwitch.checked);
+  }
+  if (e.key === 'darkMode') {
+    if (e.newValue === 'on') { dmSwitch.checked = true; applyDark(true); }
+    else if (e.newValue === 'off') { dmSwitch.checked = false; applyDark(false); }
+    else { dmSwitch.checked = sysDark.matches; applyDark(sysDark.matches); }
+  }
+});
+
+/* ===== 导出数据 ===== */
+document.getElementById('rowExport').onclick = function() {
+  try {
+    var result = nativeBridge.exportData();
+    var res = JSON.parse(result);
+    if (res.ok) {
+      alert('导出成功 ✅\n\n' + res.path);
+    } else {
+      alert('导出失败：' + (res.error || '未知错误'));
+    }
+  } catch(e) {
+    alert('导出异常：' + e.message);
+  }
+};
+
+/* ===== 自定义确认弹窗 ===== */
+function showConfirm(title, msg) {
+  return new Promise(function(resolve) {
+    var mask = document.getElementById('cfmMask');
+    var box = document.getElementById('cfmBox');
+    document.getElementById('cfmTitle').textContent = title;
+    document.getElementById('cfmMsg').textContent = msg;
+    mask.classList.add('show');
+    box.classList.add('show');
+    function close(val) {
+      mask.classList.remove('show');
+      box.classList.remove('show');
+      document.getElementById('cfmOk').onclick = null;
+      document.getElementById('cfmCancel').onclick = null;
+      mask.onclick = null;
+      resolve(val);
+    }
+    document.getElementById('cfmOk').onclick = function() { close(true); };
+    document.getElementById('cfmCancel').onclick = function() { close(false); };
+    mask.onclick = function() { close(false); };
+  });
+}
+
+/* ===== 备份与恢复 Modal ===== */
+(function(){
+  var mask = document.getElementById('brMask');
+  var sheet = document.getElementById('brSheet');
+  var fileInput = document.getElementById('brFileInput');
+  var selectedFile = null;
+
+  function openBR() {
+    mask.classList.add('show');
+    sheet.classList.add('show');
+  }
+  function closeBR() {
+    mask.classList.remove('show');
+    sheet.classList.remove('show');
+    resetBR();
+  }
+  function resetBR() {
+    selectedFile = null;
+    fileInput.value = '';
+    document.getElementById('brDoRestore').disabled = true;
+    document.getElementById('brUpload').innerHTML = '<div class="br-upload-icon">📁</div><p>点击选择 .json 备份文件</p>';
+    var bs = document.getElementById('brBackupStatus');
+    bs.className = 'br-status'; bs.textContent = '';
+    var rs = document.getElementById('brRestoreStatus');
+    rs.className = 'br-status'; rs.textContent = '';
+    switchTab('backup');
+  }
+  function switchTab(name) {
+    document.querySelectorAll('.br-tab').forEach(function(t){
+      t.classList.toggle('active', t.getAttribute('data-tab')===name);
+    });
+    document.querySelectorAll('.br-pane').forEach(function(p){
+      p.classList.remove('active');
+    });
+    document.getElementById(name==='backup'?'paneBackup':'paneRestore').classList.add('active');
+  }
+
+  // 打开弹窗
+  document.getElementById('rowBackup').onclick = openBR;
+
+  // 关闭
+  document.getElementById('brClose').onclick = closeBR;
+  document.getElementById('brFootClose').onclick = closeBR;
+  mask.onclick = closeBR;
+  mask.addEventListener('touchmove', function(e){ e.preventDefault(); }, {passive:false});
+
+  // Tab 切换
+  document.querySelectorAll('.br-tab').forEach(function(t){
+    t.onclick = function(){ switchTab(t.getAttribute('data-tab')); };
+  });
+
+  // === 备份 ===
+  document.getElementById('brDoBackup').onclick = function(){
+    var st = document.getElementById('brBackupStatus');
+    st.className = 'br-status'; st.textContent = '';
+    try {
+      var result = nativeBridge.exportData();
+      var res = JSON.parse(result);
+      if (res.ok) {
+        st.className = 'br-status ok';
+        st.textContent = '✅ 备份成功！\n' + (res.path || '');
+      } else {
+        st.className = 'br-status err';
+        st.textContent = '❌ ' + (res.error || '备份失败');
+      }
+    } catch(e) {
+      st.className = 'br-status err';
+      st.textContent = '❌ ' + e.message;
+    }
+  };
+
+  // === 恢复 ===
+  document.getElementById('brUpload').onclick = function(){ fileInput.click(); };
+
+  fileInput.onchange = function(e){
+    var f = e.target.files[0];
+    if (!f) return;
+    selectedFile = f;
+    document.getElementById('brDoRestore').disabled = false;
+    document.getElementById('brUpload').innerHTML =
+      '<div class="br-upload-icon">✅</div><p>已选择：' + f.name + ' (' + (f.size/1024).toFixed(1) + ' KB)</p>';
+  };
+
+  document.getElementById('brDoRestore').onclick = async function(){
+    if (!selectedFile) return;
+    var confirmed = await showConfirm('恢复数据', '将覆盖当前所有数据，确定恢复？');
+    if (!confirmed) return;
+    var st = document.getElementById('brRestoreStatus');
+    st.className = 'br-status'; st.textContent = '正在读取文件...';
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try {
+        var json = ev.target.result;
+        // 验证 JSON 格式
+        JSON.parse(json);
+        // 调用 nativeBridge 恢复
+        var result = nativeBridge.restoreData(json);
+        var res = JSON.parse(result);
+        if (res.ok) {
+          st.className = 'br-status ok';
+          st.textContent = '✅ 恢复成功！页面将刷新...';
+          setTimeout(function(){ location.reload(); }, 1500);
+        } else {
+          st.className = 'br-status err';
+          st.textContent = '❌ ' + (res.error || '恢复失败');
+        }
+      } catch(e) {
+        st.className = 'br-status err';
+        st.textContent = '❌ 文件格式错误：' + e.message;
+      }
+    };
+    reader.onerror = function(){
+      st.className = 'br-status err';
+      st.textContent = '❌ 读取文件失败';
+    };
+    reader.readAsText(selectedFile);
+  };
+})();
+
+/* ===== 清除缓存 ===== */
+(function(){
+  var cacheSizeEl = document.getElementById('cacheSize');
+  var clearRow = document.getElementById('rowClearCache');
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/(1024*1024)).toFixed(1) + ' MB';
+  }
+
+  function refreshCacheSize() {
+    try {
+      var sizeStr = nativeBridge.getCacheSize();
+      var size = JSON.parse(sizeStr);
+      if (size.ok) {
+        cacheSizeEl.textContent = formatSize(size.bytes);
+      } else {
+        cacheSizeEl.textContent = '未知';
+      }
+    } catch(e) {
+      cacheSizeEl.textContent = '未知';
+    }
+  }
+
+  refreshCacheSize();
+
+  clearRow.onclick = function() {
+    showConfirm('清除缓存', '确定要清除应用缓存吗？').then(function(ok) {
+      if (!ok) return;
+      try {
+        nativeBridge.clearCache();
+        cacheSizeEl.textContent = '0 B';
+      } catch(e) {}
+    });
+  };
+})();
+</script>
+</body>
+</html>

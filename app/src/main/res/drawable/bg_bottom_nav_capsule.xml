@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 外层柔和阴影（模拟高斯模糊效果） -->
+    <item android:top="2dp" android:left="4dp" android:right="4dp" android:bottom="4dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#1A000000" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+    <!-- 中层模糊扩散层 -->
+    <item android:top="1dp" android:left="2dp" android:right="2dp" android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#12000000" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+    <!-- 内层主体：半透明 #F0F0F0 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#D9F0F0F0" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+</layer-list>

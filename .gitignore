@@ -1,0 +1,18 @@
+# Built outputs
+*.apk
+*.aab
+*.ap_
+
+# Gradle
+.gradle/
+build/
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Signing (keep debug keystore for CI)
+*.jks
+!debug.keystore

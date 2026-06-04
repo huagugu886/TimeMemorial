@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">纪念日</string>
+    <string name="nav_home">首页</string>
+    <string name="nav_calendar">日历</string>
+    <string name="nav_add">添加</string>
+    <string name="nav_settings">设置</string>
+</resources>

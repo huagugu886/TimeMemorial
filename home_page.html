@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>时光纪念</title>
+<style>
+:root {
+  --primary: #7C5CFC;
+  --primary-light: #A78BFA;
+  --primary-dark: #5B3FD4;
+  --bg: #F5F5FA;
+  --card-bg: #FFFFFF;
+  --text: #1A1A2E;
+  --text-secondary: #6B7280;
+  --tag-love: #FF6B9D;
+  --tag-birthday: #FF9F43;
+  --tag-travel: #54A0FF;
+  --tag-work: #5F27CD;
+  --tag-other: #636E72;
+  --tag-favorite: #EE5A24;
+  --tag-collection: #EE5A24;
+  --shadow: 0 4px 20px rgba(124, 92, 252, 0.15);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 可滚动内容区 ========== */
+.scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ========== 头部 ========== */
+.header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  padding: 48px 20px 24px;
+  border-radius: 0 0 28px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.header h1 {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.header p {
+  color: rgba(255,255,255,0.8);
+  font-size: 13px;
+}
+
+/* ========== 搜索栏 ========== */
+.search-bar {
+  margin: -16px 16px 0;
+  position: relative;
+  z-index: 10;
+}
+.search-bar input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border: none;
+  border-radius: 14px;
+  background: var(--card-bg);
+  font-size: 15px;
+  color: var(--text);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  outline: none;
+}
+.search-bar input::placeholder { color: #C4C4C4; }
+.search-bar .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #C4C4C4;
+}
+
+/* ========== 分类标签 ========== */
+.tabs {
+  display: flex;
+  gap: 8px;
+  padding: 16px 16px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  border: 1px solid #EEE;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 3px 12px rgba(124, 92, 252, 0.3);
+}
+
+/* ========== 精选回忆 ========== */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px 8px;
+}
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+.section-header .sort-btn {
+  font-size: 13px;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.section-header .sort-btn:active { background: rgba(124, 92, 252, 0.1); }
+
+.featured-scroll {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.featured-scroll::-webkit-scrollbar { display: none; }
+.featured-card {
+  flex-shrink: 0;
+  width: 200px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.featured-card:active { transform: scale(0.96); }
+.featured-card .card-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+.featured-card .card-info {
+  padding: 10px 12px;
+}
+.featured-card .card-tag {
+  display: inline-block;
+  font-size: 10px;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 4px;
+}
+.featured-card .card-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.featured-card .card-date {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* ========== 纪念日列表 ========== */
+.memorial-list {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.memorial-card {
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.memorial-card:active { transform: scale(0.98); }
+.memorial-card .card-cover {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+}
+.memorial-card .card-body {
+  padding: 14px 16px;
+}
+.memorial-card .tag-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.memorial-card .tag {
+  display: inline-block;
+  font-size: 11px;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+.memorial-card .card-name {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.memorial-card .card-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.memorial-card .card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.memorial-card .days {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+.memorial-card .days span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-left: 2px;
+}
+.memorial-card .date-info {
+  text-align: right;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ========== 空状态 ========== */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+.empty-state .empty-icon { font-size: 56px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* ========== FAB ========== */
+.fab {
+  position: fixed !important;
+  bottom: 80px !important;
+  right: 20px !important;
+  width: clamp(52px, 8vw, 64px) !important;
+  height: clamp(52px, 8vw, 64px) !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #7C5CFC, #A78BFA) !important;
+  color: #fff !important;
+  font-size: 28px !important;
+  border: none !important;
+  box-shadow: 0 6px 24px rgba(124, 92, 252, 0.45) !important;
+  cursor: pointer !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.2s !important;
+  line-height: 1 !important;
+  -webkit-tap-highlight-color: transparent !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+.fab:active { transform: scale(0.9) !important; }
+
+/* ========== 添加弹窗 ========== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.modal-overlay.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-sheet {
+  background: var(--card-bg);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 0;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 12px;
+  position: sticky;
+  top: 0;
+  background: var(--card-bg);
+  border-radius: 24px 24px 0 0;
+  z-index: 10;
+}
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #F3F4F6;
+  border: none;
+  font-size: 18px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  padding: 0 20px 24px;
+}
+.form-group {
+  margin-bottom: 18px;
+}
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.form-group label .required {
+  color: #EF4444;
+  margin-left: 2px;
+}
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--text);
+  background: #FAFAFC;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus {
+  border-color: var(--primary);
+  background: #fff;
+}
+textarea.form-input {
+  resize: none;
+  height: 80px;
+}
+
+/* 分类选择 */
+.category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cat-option {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #F3F4F6;
+  color: var(--text-secondary);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cat-option.active {
+  border-color: var(--primary);
+  background: rgba(124, 92, 252, 0.08);
+  color: var(--primary);
+}
+.cat-option-add {
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px dashed var(--primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+.cat-option-add:hover, .cat-option-add:active {
+  opacity: 1;
+  background: rgba(124, 92, 252, 0.06);
+}
+
+/* 图片上传 */
+.image-upload-area {
+  border: 2px dashed #D1D5DB;
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #FAFAFC;
+  position: relative;
+  overflow: hidden;
+}
+.image-upload-area:active {
+  border-color: var(--primary);
+  background: rgba(124, 92, 252, 0.04);
+}
+.image-upload-area .upload-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+.image-upload-area p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.image-upload-area p span {
+  color: var(--primary);
+  font-weight: 600;
+}
+.image-upload-area input[type="file"] {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* 图片预览 */
+.image-preview-container {
+  position: relative;
+  display: none;
+  margin-top: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.image-preview-container.show { display: block; }
+.image-preview-container img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.image-preview-container .remove-img {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 收藏开关 */
+.favorite-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+}
+/* ========== 详情弹窗 ========== */
+.detail-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.detail-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.detail-sheet {
+  background: var(--card-bg);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+.detail-overlay.show .detail-sheet {
+  transform: translateY(0);
+}
+
+/* 防止弹窗打开时页面跳到顶部 */
+.modal-open {
+  position: fixed;
+  width: 100%;
+  top: 0;
+}
+.detail-cover {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 24px 24px 0 0;
+}
+.detail-cover-placeholder {
+  width: 100%;
+  height: 220px;
+  border-radius: 24px 24px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  color: rgba(255,255,255,0.5);
+}
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 0;
+}
+.detail-title {
+  font-size: 22px;
+  font-weight: 700;
+  flex: 1;
+  margin-right: 12px;
+}
+.detail-close {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #F3F4F6;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.detail-info {
+  padding: 16px 20px;
+}
+.detail-tag-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.detail-tag {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #fff;
+  font-weight: 500;
+}
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F3F4F6;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row .label { width: 56px; flex-shrink: 0; }
+.detail-row .value { color: var(--text); font-weight: 500; }
+.detail-desc-box {
+  background: #F8F9FA;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.detail-days {
+  text-align: center;
+  padding: 12px 0;
+}
+.detail-days .num {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--primary);
+}
+.detail-days .unit {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+.detail-actions {
+  padding: 8px 20px 0;
+  display: flex;
+  gap: 12px;
+}
+.btn-edit, .btn-delete {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-edit {
+  background: rgba(124, 92, 252, 0.1);
+  color: var(--primary);
+}
+.btn-delete {
+  background: #FFF0F0;
+  color: #EF4444;
+}
+.btn-delete:active { background: #FEE2E2; }
+
+.favorite-toggle label {
+  margin-bottom: 0 !important;
+}
+.toggle-switch {
+  width: 48px;
+  height: 28px;
+  background: #D1D5DB;
+  border-radius: 14px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+  border: none;
+  padding: 0;
+}
+.toggle-switch.on { background: var(--primary); }
+.toggle-switch::after {
+  content: '';
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.3s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.toggle-switch.on::after { transform: translateX(20px); }
+
+/* 提交按钮 */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(124, 92, 252, 0.3);
+  transition: transform 0.2s, opacity 0.2s;
+  margin-top: 8px;
+}
+.submit-btn:active { transform: scale(0.97); opacity: 0.9; }
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========== 提示Toast ========== */
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  z-index: 999;
+  display: none;
+  animation: toastIn 0.3s ease;
+}
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+</style>
+</head>
+<body>
+
+<!-- ========== 头部 ========== -->
+<div class="header">
+  <h1>✨ 时光纪念</h1>
+  <p>记录每一个值得铭记的日子</p>
+</div>
+
+<!-- ========== 搜索栏 ========== -->
+<div class="search-bar">
+  <span class="search-icon">🔍</span>
+  <input type="text" id="searchInput" placeholder="搜索纪念日...">
+</div>
+
+<!-- ========== 分类标签（动态渲染） ========== -->
+<div class="tabs" id="tabs"></div>
+
+<!-- ========== 可滚动内容区（分割线下方） ========== -->
+<div class="scroll-content">
+
+<!-- ========== 精选回忆 ========== -->
+<div class="section-header">
+  <h2>⭐ 精选回忆</h2>
+</div>
+<div class="featured-scroll" id="featuredScroll"></div>
+
+<!-- ========== 纪念日列表 ========== -->
+<div class="section-header">
+  <h2>📅 全部纪念日</h2>
+  <button class="sort-btn" id="sortBtn">按时间排序 ⇅</button>
+</div>
+<div class="memorial-list" id="memorialList"></div>
+<div class="empty-state" id="emptyState" style="display:none;">
+  <div class="empty-icon">📭</div>
+  <p>还没有纪念日<br>点击右下角 <b>+</b> 添加第一个吧</p>
+</div>
+
+</div><!-- end .scroll-content -->
+
+<!-- ========== FAB按钮 ========== -->
+<button class="fab" id="fabBtn">＋</button>
+
+<!-- ========== 详情弹窗 ========== -->
+<div class="detail-overlay" id="detailModal">
+  <div class="detail-sheet">
+    <div id="detailCover"></div>
+    <div class="detail-header">
+      <div class="detail-title" id="detailTitle"></div>
+      <button class="detail-close" id="detailClose">✕</button>
+    </div>
+    <div class="detail-info" id="detailInfo"></div>
+    <div class="detail-actions">
+      <button class="btn-delete" id="detailDeleteBtn">🗑️ 删除纪念日</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 添加纪念日弹窗 ========== -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h3>✨ 添加纪念日</h3>
+      <button class="modal-close" id="closeModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- 标题 -->
+      <div class="form-group">
+        <label>标题 <span class="required">*</span></label>
+        <input type="text" class="form-input" id="titleInput" placeholder="例如：结婚纪念日" maxlength="30">
+      </div>
+
+      <!-- 日期 -->
+      <div class="form-group">
+        <label>日期 <span class="required">*</span></label>
+        <input type="date" class="form-input" id="dateInput">
+      </div>
+
+      <!-- 描述 -->
+      <div class="form-group">
+        <label>描述</label>
+        <textarea class="form-input" id="descInput" placeholder="记录这个日子的故事..." maxlength="200"></textarea>
+      </div>
+
+      <!-- 分类 -->
+      <div class="form-group">
+        <label>分类 <span class="required">*</span></label>
+        <div class="category-grid" id="categoryGrid"></div>
+      </div>
+
+      <!-- 图片上传 -->
+      <div class="form-group">
+        <label>封面图片</label>
+        <div class="image-upload-area" id="uploadArea">
+          <div class="upload-icon">📸</div>
+          <p>点击或拖拽上传图片<br><span>支持 JPG / PNG</span></p>
+          <input type="file" id="imageInput" accept="image/*">
+        </div>
+        <div class="image-preview-container" id="previewContainer">
+          <img id="previewImg" src="">
+          <button class="remove-img" id="removeImg">✕</button>
+        </div>
+      </div>
+
+      <!-- 收藏 -->
+      <div class="favorite-toggle">
+        <label>❤️ 标记为精选</label>
+        <button class="toggle-switch" id="favToggle"></button>
+      </div>
+
+      <!-- 提交 -->
+      <button class="submit-btn" id="submitBtn">保存纪念日</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Toast提示 ========== -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== 数据层 ==========
+const STORAGE_KEY = 'time_memorial_data';
+
+const CUSTOM_CATS_KEY = 'time_memorial_custom_cats';
+const CUSTOM_COLORS = ['#FF6B9D','#FF9F43','#54A0FF','#5F27CD','#636E72','#00B894','#E17055','#0984E3','#6C5CE7','#FD79A8'];
+
+function loadCustomCats() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_CATS_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveCustomCats(cats) { localStorage.setItem(CUSTOM_CATS_KEY, JSON.stringify(cats)); }
+
+const builtinCategoryMap = {
+  love:     { label: '💕 恋爱', cls: 'tag-love',     color: '#FF6B9D' },
+  birthday: { label: '🎂 生日', cls: 'tag-birthday',  color: '#FF9F43' },
+  travel:   { label: '✈️ 旅行', cls: 'tag-travel',   color: '#54A0FF' },
+  work:     { label: '💼 工作', cls: 'tag-work',      color: '#5F27CD' },
+  other:    { label: '📌 其他', cls: 'tag-other',     color: '#636E72' }
+};
+
+let customCats = loadCustomCats();
+let categoryMap = { ...builtinCategoryMap, ...customCats };
+
+function renderTabs() {
+  const tabsEl = document.getElementById('tabs');
+  const fixedTabs = [
+    { filter: 'all', label: '全部' },
+    { filter: 'favorite', label: '❤️ 收藏' }
+  ];
+  let html = fixedTabs.map((t, i) =>
+    `<div class="tab${i === 0 ? ' active' : ''}" data-filter="${t.filter}">${t.label}</div>`
+  ).join('');
+  Object.keys(categoryMap).forEach(key => {
+    const cat = categoryMap[key];
+    html += `<div class="tab" data-filter="${key}">${cat.label}</div>`;
+  });
+  tabsEl.innerHTML = html;
+}
+
+function renderCategoryGrid() {
+  const grid = document.getElementById('categoryGrid');
+  let html = '';
+  Object.keys(categoryMap).forEach((key, idx) => {
+    html += `<div class="cat-option${key === selectedCategory ? ' active' : ''}" data-cat="${key}">${categoryMap[key].label}</div>`;
+  });
+  html += `<div class="cat-option-add" id="addCatBtn">＋ 新分类</div>`;
+  grid.innerHTML = html;
+}
+
+document.addEventListener('click', e => {
+  const addBtn = e.target.closest('#addCatBtn');
+  if (!addBtn) return;
+  const name = prompt('输入新分类名称（如：🎬 电影）');
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  const key = 'custom_' + Date.now();
+  const color = CUSTOM_COLORS[Object.keys(customCats).length % CUSTOM_COLORS.length];
+  customCats[key] = { label: trimmed, cls: 'tag-other', color };
+  saveCustomCats(customCats);
+  categoryMap = { ...builtinCategoryMap, ...customCats };
+  selectedCategory = key;
+  renderCategoryGrid();
+  renderTabs();
+  showToast('✅ 分类已添加');
+});
+
+// 默认示例数据已移除，新用户首次打开为空白状态
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let memorials = loadData() || [];
+if (!loadData()) saveData(memorials);
+
+let currentFilter = 'all';
+let sortOrder = 'asc'; // asc=最早的在前, desc=最新的在前
+let searchQuery = '';
+let selectedCategory = 'love';
+let selectedImage = '';
+let isFavorite = false;
+
+// ========== 工具函数 ==========
+function daysBetween(dateStr) {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const target = new Date(dateStr);
+  target.setHours(0,0,0,0);
+  return Math.floor((now - target) / (1000 * 60 * 60 * 24));
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.display = 'none'; }, 1800);
+}
+
+function getFilteredData() {
+  let list = [...memorials];
+  // 分类筛选
+  if (currentFilter === 'favorite') {
+    list = list.filter(m => m.favorite);
+  } else if (currentFilter !== 'all') {
+    list = list.filter(m => m.category === currentFilter);
+  }
+  // 搜索筛选
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(m =>
+      m.title.toLowerCase().includes(q) ||
+      (m.desc && m.desc.toLowerCase().includes(q))
+    );
+  }
+  // 排序
+  list.sort((a, b) => {
+    const da = new Date(a.date), db = new Date(b.date);
+    return sortOrder === 'asc' ? da - db : db - da;
+  });
+  return list;
+}
+
+// 默认封面颜色
+const coverColors = [
+  'linear-gradient(135deg, #667eea, #764ba2)',
+  'linear-gradient(135deg, #f093fb, #f5576c)',
+  'linear-gradient(135deg, #4facfe, #00f2fe)',
+  'linear-gradient(135deg, #43e97b, #38f9d7)',
+  'linear-gradient(135deg, #fa709a, #fee140)',
+  'linear-gradient(135deg, #a18cd1, #fbc2eb)',
+  'linear-gradient(135deg, #fccb90, #d57eeb)',
+];
+function coverBg(id) {
+  return coverColors[id % coverColors.length];
+}
+
+// ========== 渲染精选回忆 ==========
+function renderFeatured() {
+  const container = document.getElementById('featuredScroll');
+  const favs = memorials.filter(m => m.favorite);
+  if (favs.length === 0) {
+    container.innerHTML = '<div style="padding:20px;color:#999;font-size:13px;">暂无精选，添加纪念日后标记 ❤️ 即可展示</div>';
+    return;
+  }
+  container.innerHTML = favs.map(m => {
+    const cat = categoryMap[m.category] || categoryMap.other;
+    const imgHtml = m.image
+      ? `<img class="card-img" src="${m.image}" alt="">`
+      : `<div class="card-img" style="background:${coverBg(m.id)};display:flex;align-items:center;justify-content:center;font-size:32px;">${cat.label.charAt(0)}${cat.label.charAt(1)}</div>`;
+    return `
+      <div class="featured-card" onclick="openDetail(${m.id})">
+        ${imgHtml}
+        <div class="card-info">
+          <span class="card-tag" style="background:${cat.color}">${cat.label}</span>
+          <div class="card-title">${m.title}</div>
+          <div class="card-date">${formatDate(m.date)} · ${Math.abs(daysBetween(m.date))}天</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ========== 渲染列表 ==========
+function renderList() {
+  const list = getFilteredData();
+  const container = document.getElementById('memorialList');
+  const emptyState = document.getElementById('emptyState');
+
+  if (list.length === 0) {
+    container.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  container.innerHTML = list.map(m => {
+    const cat = categoryMap[m.category] || categoryMap.other;
+    const days = daysBetween(m.date);
+    const daysLabel = days >= 0 ? '天前' : '天后';
+    const absDays = Math.abs(days);
+    const imgHtml = m.image
+      ? `<img class="card-cover" src="${m.image}" alt="">`
+      : `<div class="card-cover" style="background:${coverBg(m.id)};display:flex;align-items:center;justify-content:center;font-size:48px;color:rgba(255,255,255,0.6);">${cat.label.slice(0,2)}</div>`;
+    const tagsHtml = `
+      <span class="tag" style="background:${cat.color}">${cat.label}</span>
+      ${m.favorite ? '<span class="tag" style="background:#EE5A24">❤️ 精选</span>' : ''}
+    `;
+    return `
+      <div class="memorial-card" onclick="openDetail(${m.id})">
+        ${imgHtml}
+        <div class="card-body">
+          <div class="tag-row">${tagsHtml}</div>
+          <div class="card-name">${m.title}</div>
+          ${m.desc ? `<div class="card-desc">${m.desc}</div>` : ''}
+          <div class="card-footer">
+            <div class="days">${absDays}<span> ${daysLabel}</span></div>
+            <div class="date-info">${formatDate(m.date)}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ========== 详情弹窗 ==========
+let currentDetailId = null;
+
+function openDetail(id) {
+  const m = memorials.find(x => x.id === id);
+  if (!m) return;
+  currentDetailId = id;
+
+  const cat = categoryMap[m.category] || categoryMap.other;
+  const days = daysBetween(m.date);
+  const daysLabel = days >= 0 ? '天前' : '天后';
+  const absDays = Math.abs(days);
+
+  // 封面
+  document.getElementById('detailCover').innerHTML = m.image
+    ? `<img class="detail-cover" src="${m.image}" alt="">`
+    : `<div class="detail-cover-placeholder" style="background:${coverBg(m.id)};">${cat.label.slice(0,2)}</div>`;
+
+  // 标题
+  document.getElementById('detailTitle').textContent = m.title;
+
+  // 信息
+  let infoHtml = `<div class="detail-days"><span class="num">${absDays}</span><span class="unit">${daysLabel}</span></div>`;
+  infoHtml += `<div class="detail-tag-row">`;
+  infoHtml += `<span class="detail-tag" style="background:${cat.color}">${cat.label}</span>`;
+  if (m.favorite) infoHtml += `<span class="detail-tag" style="background:#EE5A24">❤️ 精选</span>`;
+  infoHtml += `</div>`;
+  infoHtml += `<div class="detail-row"><span class="label">📅 日期</span><span class="value">${formatDate(m.date)}</span></div>`;
+  if (m.desc) {
+    infoHtml += `<div class="detail-desc-box">${m.desc}</div>`;
+  }
+  document.getElementById('detailInfo').innerHTML = infoHtml;
+
+  document.body.dataset.scrollY = document.querySelector('.scroll-content').scrollTop;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+// 关闭详情
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('show');
+  document.querySelector('.scroll-content').scrollTop = parseInt(document.body.dataset.scrollY || '0');
+  currentDetailId = null;
+}
+document.getElementById('detailClose').addEventListener('click', closeDetailModal);
+document.getElementById('detailModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('detailModal')) closeDetailModal();
+});
+
+// 删除纪念日
+document.getElementById('detailDeleteBtn').addEventListener('click', () => {
+  if (currentDetailId == null) return;
+  const m = memorials.find(x => x.id === currentDetailId);
+  if (!m) return;
+  if (!confirm(`确定删除「${m.title}」吗？`)) return;
+
+  memorials = memorials.filter(x => x.id !== currentDetailId);
+  saveData(memorials);
+  closeDetailModal();
+  renderFeatured();
+  renderList();
+  showToast('🗑️ 已删除');
+});
+
+// ========== 事件：分类标签 ==========
+document.getElementById('tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  currentFilter = tab.dataset.filter;
+  renderList();
+});
+
+// ========== 事件：搜索 ==========
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  renderList();
+});
+
+// ========== 事件：排序 ==========
+document.getElementById('sortBtn').addEventListener('click', () => {
+  sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+  document.getElementById('sortBtn').textContent = sortOrder === 'asc' ? '按时间排序 ↑' : '按时间排序 ↓';
+  renderList();
+});
+
+// ========== 事件：FAB 导航到 AddFragment ==========
+document.getElementById('fabBtn').addEventListener('click', () => {
+  if (window.Android && window.Android.navigateToAdd) {
+    window.Android.navigateToAdd();
+  } else {
+    // 降级方案：如果不在 Android 环境，打开内置弹窗
+    const addModal = document.getElementById('addModal');
+    document.getElementById('titleInput').value = '';
+    document.getElementById('dateInput').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('descInput').value = '';
+    selectedCategory = 'love';
+    selectedImage = '';
+    isFavorite = false;
+    document.querySelectorAll('.cat-option').forEach(c => {
+      c.classList.toggle('active', c.dataset.cat === 'love');
+    });
+    document.getElementById('previewContainer').classList.remove('show');
+    document.getElementById('uploadArea').style.display = '';
+    document.getElementById('favToggle').classList.remove('on');
+    addModal.classList.add('show');
+  }
+});
+
+// ========== 事件：关闭弹窗 ==========
+document.getElementById('closeModal').addEventListener('click', () => {
+  addModal.classList.remove('show');
+});
+addModal.addEventListener('click', e => {
+  if (e.target === addModal) addModal.classList.remove('show');
+});
+
+// ========== 事件：选择分类 ==========
+document.getElementById('categoryGrid').addEventListener('click', e => {
+  const opt = e.target.closest('.cat-option');
+  if (!opt) return;
+  document.querySelectorAll('.cat-option').forEach(c => c.classList.remove('active'));
+  opt.classList.add('active');
+  selectedCategory = opt.dataset.cat;
+});
+
+// ========== 事件：图片上传 ==========
+const imageInput = document.getElementById('imageInput');
+const previewContainer = document.getElementById('previewContainer');
+const previewImg = document.getElementById('previewImg');
+const uploadArea = document.getElementById('uploadArea');
+
+imageInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    showToast('请选择图片文件');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    showToast('图片不能超过10MB');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    selectedImage = ev.target.result;
+    previewImg.src = selectedImage;
+    previewContainer.classList.add('show');
+    uploadArea.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('removeImg').addEventListener('click', () => {
+  selectedImage = '';
+  previewContainer.classList.remove('show');
+  uploadArea.style.display = '';
+  imageInput.value = '';
+});
+
+// ========== 事件：收藏开关 ==========
+document.getElementById('favToggle').addEventListener('click', function() {
+  isFavorite = !isFavorite;
+  this.classList.toggle('on', isFavorite);
+});
+
+// ========== 事件：保存纪念日 ==========
+document.getElementById('submitBtn').addEventListener('click', () => {
+  const title = document.getElementById('titleInput').value.trim();
+  const date = document.getElementById('dateInput').value;
+  const desc = document.getElementById('descInput').value.trim();
+
+  if (!title) {
+    showToast('请输入标题');
+    return;
+  }
+  if (!date) {
+    showToast('请选择日期');
+    return;
+  }
+  if (!selectedCategory) {
+    showToast('请选择分类');
+    return;
+  }
+
+  const newItem = {
+    id: Date.now(),
+    title,
+    date,
+    desc,
+    category: selectedCategory,
+    image: selectedImage,
+    favorite: isFavorite
+  };
+
+  memorials.unshift(newItem);
+  saveData(memorials);
+
+  addModal.classList.remove('show');
+  renderFeatured();
+  renderList();
+  showToast('✅ 添加成功！');
+});
+
+// ========== 初始化 ==========
+renderTabs();
+renderCategoryGrid();
+renderFeatured();
+renderList();
+</script>
+</body>
+</html>
