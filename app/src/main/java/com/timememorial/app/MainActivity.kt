@@ -46,16 +46,10 @@ class MainActivity : AppCompatActivity() {
         refreshBottomNavColors()
 
         // ====== 毛玻璃模糊效果 ======
-        val decorView = window.decorView
-        val windowBackground = decorView.background
         binding.blurView.setupWith(binding.blurTarget)
-            .setFrameClearDrawable(windowBackground)
-            .setBlurRadius(16f)
+            .setBlurRadius(20f)
             .setBlurAutoUpdate(true)
-        val nightMode = resources.configuration.uiMode and
-            android.content.res.Configuration.UI_MODE_NIGHT_MASK
-        val isDark = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        binding.blurView.setOverlayColor(if (isDark) 0x10000000 else 0x10FFFFFF)
+        // overlay 由 XML blurOverlayColor 统一控制
 
         // 底栏 insets：吃掉导航栏底部 padding，防止键盘把它顶上去
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
