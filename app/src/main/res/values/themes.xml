@@ -24,6 +24,6 @@
 
     <style name="BottomNavText" parent="TextAppearance.Material3.LabelSmall">
         <item name="android:textSize">10sp</item>
-        <item name="android:lineSpacingExtra">-2dp</item>
+        <item name="android:lineSpacingExtra">0dp</item>
     </style>
 </resources>
