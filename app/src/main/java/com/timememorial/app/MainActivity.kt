@@ -103,18 +103,11 @@ class MainActivity : AppCompatActivity() {
                 else android.graphics.Color.parseColor("#FFFFFF")
         // 使用 GradientDrawable 保留圆角，避免 setBackgroundColor 覆盖 drawable
         val density = resources.displayMetrics.density
-        val corner = 28f * density // 28dp 圆角
-        val noCorner = 0f
+        val radius = 28f * density
         val bgDrawable = android.graphics.drawable.GradientDrawable().apply {
             shape = android.graphics.drawable.GradientDrawable.RECTANGLE
             setColor(bg)
-            // 只圆上面两个角，下面贴底不需要圆角
-            cornerRadii = floatArrayOf(
-                corner, corner,   // 左上
-                corner, corner,   // 右上
-                noCorner, noCorner, // 右下
-                noCorner, noCorner  // 左下
-            )
+            cornerRadii = FloatArray(8) { radius }
         }
         binding.bottomNav.background = bgDrawable
         binding.bottomNav.elevation = 0f

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg">
+    android:background="@android:color/transparent">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
@@ -23,8 +23,11 @@
         style="@style/Widget.TimeMemorial.BottomNav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
         android:paddingTop="0dp"
-        android:paddingBottom="0dp"
+        android:paddingBottom="8dp"
         android:background="@drawable/bg_bottom_nav_rounded"
         app:elevation="0dp"
         app:itemIconTint="@color/bottom_nav_color"
