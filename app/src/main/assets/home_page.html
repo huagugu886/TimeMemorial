@@ -2222,15 +2222,24 @@ function openDetail(id) {
   const days = daysBetween(m.date, m.dateType);
   const absDays = Math.abs(days);
 
-  // 计算年月
+  // 计算年月（精确）
   const actualDate = (m.dateType === 'lunar') ? lunarToSolar(m.date) : m.date;
   const targetDate = new Date(actualDate);
   const now = new Date();
   const diffMs = Math.abs(now - targetDate);
   const totalDays = Math.floor(diffMs / (1000*60*60*24));
-  const years = Math.floor(totalDays / 365);
-  const months = Math.floor((totalDays % 365) / 30);
-  const remainDays = totalDays % 30;
+  let years = now.getFullYear() - targetDate.getFullYear();
+  let months = now.getMonth() - targetDate.getMonth();
+  let remainDays = now.getDate() - targetDate.getDate();
+  if (remainDays < 0) {
+    months--;
+    const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    remainDays += prevMonth.getDate();
+  }
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
 
   // 星期几
   const weekDays = ['日','一','二','三','四','五','六'];
@@ -2251,11 +2260,9 @@ function openDetail(id) {
   else if (absDays === 1) relativeText = isPast ? '昨天刚过' : '明天就到';
   else if (absDays < 7) relativeText = isPast ? absDays + '天前' : '还有' + absDays + '天';
   else if (absDays < 30) relativeText = isPast ? Math.floor(absDays/7) + '周前' : '还有' + Math.floor(absDays/7) + '周';
-  else if (absDays < 365) relativeText = isPast ? Math.floor(absDays/30) + '个月前' : '还有' + Math.floor(absDays/30) + '个月';
   else {
-    const y = Math.floor(absDays/365);
-    const rm = Math.floor((absDays%365)/30);
-    relativeText = isPast ? y + '年' + (rm > 0 ? rm + '个月' : '') + '前' : '还有' + y + '年' + (rm > 0 ? rm + '个月' : '');
+    // 复用上面计算好的 years 和 months
+    relativeText = isPast ? years + '年' + (months > 0 ? months + '个月' : '') + '前' : '还有' + years + '年' + (months > 0 ? months + '个月' : '');
   }
 
   // 封面
@@ -3118,6 +3125,23 @@ window.__handleBackPress = function() {
 
 <!-- 操作结果弹窗 -->
 <div class="al-overlay" id="alOverlay">
+  <div class="al-box">
+    <div class="al-icon">✅</div>
+    <h4>操作成功</h4>
+    <p id="alText"></p>
+    <button class="al-btn-ok" id="alOk">好的</button>
+  </div>
+</div>
+
+<!-- 全屏图片查看器 -->
+<div class="fullscreen-img-viewer" id="fullscreenImgViewer">
+  <button class="fv-close" id="fvClose">✕</button>
+  <img class="fv-img" id="fvImg" src="">
+</div>
+
+</body>
+</html>
+Overlay">
   <div class="al-box">
     <div class="al-icon">✅</div>
     <h4>操作成功</h4>
