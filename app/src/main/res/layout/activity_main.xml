@@ -39,8 +39,6 @@
         app:itemTextColor="@color/bottom_nav_color"
         app:itemBackground="@drawable/bg_nav_item_selector"
         app:itemRippleColor="@android:color/transparent"
-        app:itemPaddingStart="12dp"
-        app:itemPaddingEnd="12dp"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"
