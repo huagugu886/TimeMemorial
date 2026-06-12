@@ -1,25 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="miui_bg">#0A0A0F</color>
-    <color name="miui_card">#0DFFFFFF</color>
-    <color name="miui_card_surface">#14FFFFFF</color>
-    <color name="miui_border">#0FFFFFFF</color>
-    <color name="miui_text_primary">#EBFFFFFF</color>
-    <color name="miui_text_secondary">#8CFFFFFF</color>
-    <color name="miui_text_tertiary">#4DFFFFFF</color>
-    <color name="miui_brand">#8B5CF6</color>
-    <color name="miui_brand_light">#A78BFA</color>
-    <color name="miui_nav_bg">#C70A0A0F</color>
-    <color name="miui_search_bg">#0DFFFFFF</color>
-    <color name="miui_progress_bg">#14FFFFFF</color>
-    <color name="miui_tag_love">#FF6B9D</color>
-    <color name="miui_tag_birthday">#FF9F43</color>
-    <color name="miui_tag_travel">#54A0FF</color>
-    <color name="miui_tag_work">#7C5CFC</color>
-    <color name="miui_tag_other">#636E72</color>
-    <color name="miui_tag_favorite">#EE5A24</color>
-    <color name="miui_green_start">#34D399</color>
-    <color name="miui_green_end">#06B6D4</color>
-    <color name="miui_fab_glow">#668B5CF6</color>
-    <color name="miui_card_shadow">#0A000000</color>
+    <!-- MIUI 品牌色 -->
+    <color name="miui_brand">#FF6900</color>
+    <color name="miui_brand_light">#FFF0E6</color>
+    <color name="miui_brand_dark">#CC5400</color>
+
+    <!-- 背景色 -->
+    <color name="miui_bg">#FFF5F5F5</color>
+    <color name="miui_card">#FFFFFFFF</color>
+    <color name="miui_search_bg">#1A000000</color>
+    <color name="miui_divider">#1A000000</color>
+
+    <!-- 文字色 -->
+    <color name="miui_text_primary">#DE000000</color>
+    <color name="miui_text_secondary">#99000000</color>
+    <color name="miui_text_tertiary">#61000000</color>
+
+    <!-- 功能色 - 蓝 -->
+    <color name="miui_blue_bg">#1A2196F3</color>
+    <color name="miui_blue_fg">#FF2196F3</color>
+    <!-- 功能色 - 绿 -->
+    <color name="miui_green_bg">#1A4CAF50</color>
+    <color name="miui_green_fg">#FF4CAF50</color>
+    <!-- 功能色 - 橙（accent） -->
+    <color name="miui_accent_bg">#1AFF9800</color>
+    <color name="miui_accent_fg">#FFFF9800</color>
+    <!-- 功能色 - 紫 -->
+    <color name="miui_purple_bg">#1A9C27B0</color>
+    <color name="miui_purple_fg">#FF9C27B0</color>
+
+    <!-- 兼容旧引用 -->
+    <color name="purple_primary">#FF6900</color>
+    <color name="text_primary">#DE000000</color>
+    <color name="text_secondary">#99000000</color>
+    <color name="card">#FFFFFFFF</color>
+    <color name="divider">#1A000000</color>
+
+    <!-- 底部导航 -->
+    <color name="nav_active">#FF6900</color>
+    <color name="nav_inactive">#99000000</color>
+    <color name="nav_bg">#D9F0F0F0</color>
 </resources>
