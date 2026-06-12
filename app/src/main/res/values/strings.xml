@@ -21,4 +21,5 @@
     <string name="modal_create">创建</string>
     <string name="days_unit">天</string>
     <string name="expired">已过期</string>
+    <string name="nav_calendar">日历</string>
 </resources>

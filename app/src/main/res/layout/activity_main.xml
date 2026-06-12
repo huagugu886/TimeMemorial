@@ -45,7 +45,6 @@
                 android:background="@drawable/selector_nav_item"
                 android:clickable="true"
                 android:focusable="true"
-                android:selected="true">
                 <ImageView
                     android:id="@+id/iconHome"
                     android:layout_width="24dp"
