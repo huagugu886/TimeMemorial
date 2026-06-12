@@ -6,13 +6,11 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
     }
 }
-
 rootProject.name = "TimeMemorial"
 include(":app")
