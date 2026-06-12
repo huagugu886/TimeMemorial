@@ -1,7 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">纪念日</string>
+    <string name="app_name">TimeMemorial</string>
     <string name="nav_home">首页</string>
-    <string name="nav_calendar">日历</string>
+    <string name="nav_category">分类</string>
     <string name="nav_add">添加</string>
+    <string name="nav_anniversary">纪念</string>
     <string name="nav_settings">设置</string>
+    <string name="greeting">今天也是值得纪念的一天</string>
+    <string name="search_hint">搜索纪念日...</string>
+    <string name="stat_upcoming">即将到来</string>
+    <string name="stat_completed">已完成</string>
+    <string name="section_memories">精选回忆</string>
+    <string name="section_anniversaries">纪念日</string>
+    <string name="view_all">查看全部</string>
+    <string name="modal_new">新建纪念日</string>
+    <string name="modal_name">名称</string>
+    <string name="modal_date">日期</string>
+    <string name="modal_desc">描述</string>
+    <string name="modal_category">分类</string>
+    <string name="modal_create">创建</string>
+    <string name="days_unit">天</string>
+    <string name="expired">已过期</string>
 </resources>

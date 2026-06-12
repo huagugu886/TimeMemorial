@@ -2,20 +2,17 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/nav_home">
-
+    app:startDestination="@id/navHome">
     <fragment
-        android:id="@+id/nav_home"
+        android:id="@+id/navHome"
         android:name="com.timememorial.app.ui.home.HomeFragment"
-        android:label="首页" />
-
+        android:label="@string/nav_home" />
     <fragment
-        android:id="@+id/nav_calendar"
+        android:id="@+id/navCalendar"
         android:name="com.timememorial.app.ui.calendar.CalendarFragment"
-        android:label="日历" />
-
+        android:label="@string/nav_category" />
     <fragment
-        android:id="@+id/nav_settings"
+        android:id="@+id/navSettings"
         android:name="com.timememorial.app.ui.settings.SettingsFragment"
-        android:label="设置" />
+        android:label="@string/nav_settings" />
 </navigation>

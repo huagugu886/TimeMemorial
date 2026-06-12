@@ -1,282 +1,150 @@
 package com.timememorial.app.ui.home
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.webkit.WebViewClient
-import android.os.Environment
-import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
-import android.webkit.WebSettings
-import android.webkit.WebView
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.FileProvider
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.timememorial.app.databinding.FragmentHomeBinding
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.timememorial.app.R
-import com.timememorial.app.ui.getStatusBarHeightDp
-import androidx.activity.OnBackPressedCallback
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.timememorial.app.data.model.Anniversary
+import com.timememorial.app.data.model.Memory
 
 class HomeFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var rvMemories: RecyclerView
+    private lateinit var rvAnniversaries: RecyclerView
+    private lateinit var etSearch: EditText
+    private lateinit var catTagsContainer: LinearLayout
+    private lateinit var tvStatUpcoming: TextView
+    private lateinit var tvStatCompleted: TextView
 
-    // 文件选择回调
-    private var fileUploadCallback: ValueCallback<Array<Uri>>? = null
-    // 拍照临时文件
-    private var cameraPhotoUri: Uri? = null
+    private var allAnniversaries = listOf<Anniversary>()
+    private var allMemories = listOf<Memory>()
+    private var selectedCategory = "all"
 
-    // 文件选择器
-    private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
-    
-    // WebView 页面是否加载完成（防止 onPageFinished 前标志被清掉）
-    @Volatile
-    private var pageReady = false
+    private val categories = listOf(
+        "all" to "全部",
+        "love" to "爱情",
+        "birthday" to "生日",
+        "travel" to "旅行",
+        "work" to "工作",
+        "favorite" to "收藏",
+        "other" to "其他"
+    )
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        fileChooserLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            handleFileChooserResult(result.resultCode, result.data)
-        }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        rvMemories = view.findViewById(R.id.rvMemories)
+        rvAnniversaries = view.findViewById(R.id.rvAnniversaries)
+        etSearch = view.findViewById(R.id.etSearch)
+        catTagsContainer = view.findViewById(R.id.catTagsContainer)
+        tvStatUpcoming = view.findViewById(R.id.tvStatUpcoming)
+        tvStatCompleted = view.findViewById(R.id.tvStatCompleted)
 
-        binding.webView.apply {
-            setBackgroundColor(android.graphics.Color.TRANSPARENT)
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
-            settings.allowFileAccess = true
-            settings.allowContentAccess = true
-            settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            settings.cacheMode = WebSettings.LOAD_DEFAULT
-            settings.useWideViewPort = true
-            settings.loadWithOverviewMode = true
-            settings.setSupportZoom(false)
+        loadData()
+        setupCategoryTags()
+        setupRecyclerViews()
+        setupSearch()
+        updateStats()
+    }
 
-            webViewClient = WebViewClient()
-            webChromeClient = object : WebChromeClient() {
-                override fun onShowFileChooser(
-                    webView: WebView?,
-                    filePathCallback: ValueCallback<Array<Uri>>?,
-                    fileChooserParams: FileChooserParams?
-                ): Boolean {
-                    // 取消上一次未完成的回调
-                    fileUploadCallback?.onReceiveValue(null)
-                    fileUploadCallback = filePathCallback
-
-                    // 构建文件选择 Intent
-                    val acceptTypes = fileChooserParams?.acceptTypes ?: arrayOf("image/*")
-                    val isImageOnly = acceptTypes.any {
-                        it.contains("image") || it.isEmpty()
-                    }
-
-                    val chooserIntents = mutableListOf<Intent>()
-
-                    // 图库选择
-                    val galleryIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = if (isImageOnly) "image/*" else "*/*"
-                    }
-                    chooserIntents.add(galleryIntent)
-
-                    // 拍照（仅图片模式）
-                    if (isImageOnly) {
-                        val cameraIntent = createCameraIntent()
-                        if (cameraIntent != null) {
-                            chooserIntents.add(cameraIntent)
-                        }
-                    }
-
-                    val chooser = Intent.createChooser(
-                        chooserIntents.removeAt(0),
-                        "选择图片"
-                    ).apply {
-                        putExtra(Intent.EXTRA_INITIAL_INTENTS, chooserIntents.toTypedArray())
-                    }
-
-                    try {
-                        fileChooserLauncher.launch(chooser)
-                    } catch (e: Exception) {
-                        fileUploadCallback?.onReceiveValue(null)
-                        fileUploadCallback = null
-                    }
-
-                    return true
-                }
-            }
-
-            // 注册 Native 桥接
-            addJavascriptInterface(WebBridge(requireContext()) { visible ->
-                activity?.runOnUiThread {
-                    activity?.findViewById<View>(R.id.bottom_nav)?.visibility =
-                        if (visible) View.VISIBLE else View.GONE
-                }
-            }, "nativeBridge")
-
-            // 暗色模式主题
-            val isDarkMode = resources.configuration.uiMode and
-                    android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
-                    android.content.res.Configuration.UI_MODE_NIGHT_YES
-            webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    if (isDarkMode) {
-                        view?.evaluateJavascript("document.body.setAttribute('data-theme','dark');", null)
-                    }
-
-                    // 标记页面就绪，再检查恢复同步
-                    pageReady = true
-                    syncRestoreDataIfNeeded(view)
-                }
-            }
-
-            loadUrl("file:///android_asset/home_page.html?v=10&sat=${getStatusBarHeightDp()}")
-        }
-
-        // 注册系统返回手势/按键处理（SPA 子页面返回）
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner, object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    // 优先检查 WebView 内是否有打开的弹窗（添加/编辑/详情等）
-                    // 有则关闭弹窗（保留 CSS 过渡动画），不走 goBack()
-                    binding.webView.evaluateJavascript(
-                        "(function(){ if(typeof window.__handleBackPress==='function') return window.__handleBackPress(); return 'exit'; })()"
-                    ) { result ->
-                        val r = result?.trim('"') ?: "exit"
-                        if (r != "handled") {
-                            // JS 侧没有需要关闭的弹窗，走原生返回逻辑
-                            if (binding.webView.canGoBack()) {
-                                binding.webView.goBack()
-                            } else {
-                                isEnabled = false
-                                requireActivity().onBackPressedDispatcher.onBackPressed()
-                            }
-                        }
-                        // r == "handled"：弹窗已关闭（带动画），消费本次返回
-                    }
-                }
-            }
+    private fun loadData() {
+        allMemories = listOf(
+            Memory(1, "第一次约会", "2024-03-14", "love", R.drawable.bg_memory_cover_love),
+            Memory(2, "毕业旅行", "2024-06-20", "travel", R.drawable.bg_memory_cover_travel),
+            Memory(3, "生日派对", "2024-09-15", "birthday", R.drawable.bg_memory_cover_birthday),
+            Memory(4, "项目上线", "2024-11-01", "work", R.drawable.bg_memory_cover_work)
+        )
+        allAnniversaries = listOf(
+            Anniversary(1, "结婚纪念日", "携手走过的每一天都是最好的礼物", "2024-06-15", "love", 128, 365),
+            Anniversary(2, "妈妈的生日", "记得买蛋糕和花", "2026-07-20", "birthday", 45, 365),
+            Anniversary(3, "东京之旅", "去看樱花和霓虹灯下的城市", "2026-12-22", "travel", 200, 365),
+            Anniversary(4, "项目里程碑", "已完成", "2025-12-01", "work", 0, 180, true),
+            Anniversary(5, "读书笔记100篇", "每天进步一点点", "2026-09-10", "favorite", 89, 200)
         )
     }
 
-    /**
-     * 创建拍照 Intent，返回 null 表示不支持
-     */
-    private fun createCameraIntent(): Intent? {
-        return try {
-            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-            val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-            val photoFile = File.createTempFile("IMG_${timeStamp}_", ".jpg", storageDir)
-
-            cameraPhotoUri = FileProvider.getUriForFile(
-                requireContext(),
-                "${requireContext().packageName}.fileprovider",
-                photoFile
-            )
-
-            Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                putExtra(MediaStore.EXTRA_OUTPUT, cameraPhotoUri)
+    private fun setupCategoryTags() {
+        catTagsContainer.removeAllViews()
+        val ctx = requireContext()
+        for ((key, label) in categories) {
+            val tag = TextView(ctx).apply {
+                text = label
+                textSize = 13f
+                setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8))
+                isClickable = true
+                isFocusable = true
+                tag = key
+                setBackgroundResource(R.drawable.bg_tag_pill_selector)
+                if (key == selectedCategory) {
+                    isSelected = true
+                    setTextColor(ContextCompat.getColor(ctx, android.R.color.white))
+                    elevation = dpToPx(4).toFloat()
+                } else {
+                    isSelected = false
+                    setTextColor(ContextCompat.getColor(ctx, R.color.miui_text_secondary))
+                    elevation = 0f
+                }
             }
-        } catch (e: Exception) {
-            null
+            tag.setOnClickListener { v ->
+                selectedCategory = v.tag as String
+                setupCategoryTags()
+                filterData()
+            }
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { marginEnd = dpToPx(8) }
+            catTagsContainer.addView(tag, params)
         }
     }
 
-    /**
-     * 处理文件选择结果
-     */
-    private fun handleFileChooserResult(resultCode: Int, data: Intent?) {
-        if (resultCode != Activity.RESULT_OK || fileUploadCallback == null) {
-            // 用户取消
-            fileUploadCallback?.onReceiveValue(null)
-            fileUploadCallback = null
-            return
+    private fun setupRecyclerViews() {
+        rvMemories.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        rvMemories.adapter = MemoryAdapter(allMemories)
+        rvAnniversaries.layoutManager = LinearLayoutManager(requireContext())
+        rvAnniversaries.adapter = AnniversaryAdapter(allAnniversaries)
+        rvAnniversaries.isNestedScrollingEnabled = false
+    }
+
+    private fun setupSearch() {
+        etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) { filterData() }
+        })
+    }
+
+    private fun filterData() {
+        val query = etSearch.text.toString().trim().lowercase()
+        val filteredA = allAnniversaries.filter { item ->
+            (selectedCategory == "all" || item.tag == selectedCategory) &&
+            (query.isEmpty() || item.title.lowercase().contains(query) || item.desc.lowercase().contains(query))
         }
-
-        val result = when {
-            // 从 Intent data 中获取 Uri（图库选择）
-            data?.data != null -> arrayOf(data.data!!)
-            // 拍照结果
-            cameraPhotoUri != null -> arrayOf(cameraPhotoUri!!)
-            else -> null
+        val filteredM = allMemories.filter { item ->
+            (selectedCategory == "all" || item.tag == selectedCategory) &&
+            (query.isEmpty() || item.title.lowercase().contains(query))
         }
-
-        fileUploadCallback?.onReceiveValue(result)
-        fileUploadCallback = null
+        rvAnniversaries.adapter = AnniversaryAdapter(filteredA)
+        rvMemories.adapter = MemoryAdapter(filteredM)
     }
 
-    override fun onResume() {
-        super.onResume()
-        // 保留 onResume 检查：当页面已加载时，用户从设置页返回也能立即同步
-        syncRestoreDataIfNeeded(_binding?.webView)
+    private fun updateStats() {
+        tvStatUpcoming.text = allAnniversaries.count { !it.isExpired }.toString()
+        tvStatCompleted.text = allAnniversaries.count { it.isExpired }.toString()
     }
 
-    /**
-     * 检查是否有待同步的恢复数据，有则注入 WebView。
-     * 在 onPageFinished 和 onResume 中调用，确保 WebView 已加载。
-     */
-    private fun syncRestoreDataIfNeeded(webView: WebView?) {
-        if (!isAdded || webView == null) return
-        if (!pageReady) return  // 页面还没加载完，跳过（标志不清除，等 onPageFinished 再试）
-        val prefs = requireContext().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
-        if (!prefs.getBoolean("pending_restore_sync", false)) return
-
-        prefs.edit().putBoolean("pending_restore_sync", false).apply()
-        android.widget.Toast.makeText(requireContext(), "数据恢复成功，正在刷新首页…", android.widget.Toast.LENGTH_SHORT).show()
-
-        // 直接用 SettingsFragment.restoreData() 提前存好的首页格式 JSON
-        // 不能从 AnniversaryRepository 读——页面初始化时 syncToNative() 已经
-        // 把 localStorage（空的）同步回 native 覆盖了 anniversaries.json
-        val pendingData = prefs.getString("pending_restore_data", null)
-        if (pendingData.isNullOrEmpty()) {
-            android.util.Log.w("HomeFragment", "pending_restore_data is empty, skip restore")
-            return
-        }
-
-        val jsonStr = pendingData
-            .replace("\\", "\\\\")
-            .replace("'", "\\'")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-        // 先调 JS 端函数注入（更新内存+localStorage），再 reload 确保渲染
-        val js = "window.__injectRestoreData && __injectRestoreData('$jsonStr'); setTimeout(function(){ window.location.reload(); }, 200);"
-        webView.evaluateJavascript(js, null)
-    }
-
-    override fun onDestroyView() {
-        pageReady = false
-        fileUploadCallback?.onReceiveValue(null)
-        fileUploadCallback = null
-        _binding?.webView?.destroy()
-        _binding = null
-        super.onDestroyView()
-    }
+    private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
 }

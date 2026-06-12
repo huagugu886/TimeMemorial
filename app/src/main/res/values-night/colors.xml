@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="card">#1F2937</color>
-    <color name="card_elevated">#374151</color>
-    <color name="cardBorder">#374151</color>
-    <color name="bg">#111827</color>
-    <color name="text_primary">#F9FAFB</color>
-    <color name="text_secondary">#94A3B8</color>
-    <color name="divider">#374151</color>
+    <color name="miui_bg">#F5F5F7</color>
+    <color name="miui_card">#D9FFFFFF</color>
+    <color name="miui_card_surface">#F2FFFFFF</color>
+    <color name="miui_border">#0F000000</color>
+    <color name="miui_text_primary">#E0000000</color>
+    <color name="miui_text_secondary">#80000000</color>
+    <color name="miui_text_tertiary">#40000000</color>
+    <color name="miui_brand">#7C3AED</color>
+    <color name="miui_brand_light">#6D28D9</color>
+    <color name="miui_nav_bg">#C7F5F5F7</color>
+    <color name="miui_search_bg">#0A000000</color>
+    <color name="miui_progress_bg">#0A000000</color>
+    <color name="miui_tag_love">#FF6B9D</color>
+    <color name="miui_tag_birthday">#FF9F43</color>
+    <color name="miui_tag_travel">#54A0FF</color>
+    <color name="miui_tag_work">#7C3AED</color>
+    <color name="miui_tag_other">#636E72</color>
+    <color name="miui_tag_favorite">#EE5A24</color>
+    <color name="miui_green_start">#34D399</color>
+    <color name="miui_green_end">#06B6D4</color>
+    <color name="miui_fab_glow">#4D7C3AED</color>
+    <color name="miui_card_shadow">#0A000000</color>
 </resources>

@@ -2,13 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/transparent">
-
-    <WebView
-        android:id="@+id/webView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent" />
-
+    android:background="@color/miui_bg"
+    android:gravity="center"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/nav_category"
+        android:textSize="20sp"
+        android:textColor="@color/miui_text_primary"
+        android:fontFamily="sans-serif-bold" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="分类页面开发中..."
+        android:textSize="14sp"
+        android:textColor="@color/miui_text_secondary"
+        android:layout_marginTop="8dp" />
 </LinearLayout>
