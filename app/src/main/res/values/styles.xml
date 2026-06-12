@@ -2,4 +2,15 @@
     <style name="RoundedCorner" parent="">
         <item name="cornerSize">12dp</item>
     </style>
+
+    <!-- MiUIX Bottom Nav Indicator -->
+    <style name="MiuixActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/miuix_nav_active_bg</item>
+        <item name="android:shapeAppearance">@style/ShapeAppearance.Miuix.Rounded</item>
+    </style>
+
+    <style name="ShapeAppearance.Miuix.Rounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
 </resources>

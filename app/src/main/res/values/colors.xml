@@ -20,4 +20,14 @@
     <color name="accent">#6C63FF</color>
     <color name="text_hint">#9CA3AF</color>
     <color name="white">#FFFFFF</color>
+
+    <!-- MiUIX Bottom Nav -->
+    <color name="miuix_nav_active_bg">#E8F0FE</color>
+    <color name="miuix_nav_active_bg_dark">#1E2A3A</color>
+    <color name="miuix_nav_active_text">#3373FF</color>
+    <color name="miuix_nav_active_text_dark">#6BA4FF</color>
+    <color name="miuix_nav_inactive_text">#888888</color>
+    <color name="miuix_nav_inactive_text_dark">#94A3B8</color>
+    <color name="miuix_nav_bar_bg">#F8F8FA</color>
+    <color name="miuix_nav_bar_bg_dark">#1A1A28</color>
 </resources>

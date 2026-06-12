@@ -30,7 +30,7 @@ echo "   ✅ aapt2: $TERMUX_AAPT2 ($($TERMUX_AAPT2 version 2>&1 | head -1))"
 # 安装 JDK 17
 if ! java -version 2>&1 | grep -q "17"; then
     echo "   安装 OpenJDK 17..."
-    pkg install -y openjdk-17 2>/dev/null || pkg install -y openjdk-17-jdk 2>/dev/null
+    # Java already installed
 fi
 echo "   ✅ Java: $(java -version 2>&1 | head -1)"
 echo ""
