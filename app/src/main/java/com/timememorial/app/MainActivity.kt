@@ -12,8 +12,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.timememorial.app.databinding.ActivityMainBinding
 import com.timememorial.app.reminder.ReminderManager
-import eightbitlab.com.blurview.BlurView
-import eightbitlab.com.blurview.RenderScriptBlur
+import android.view.WindowManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,13 +28,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // ===== BlurView 毛玻璃初始化 =====
-        val blurView = findViewById<BlurView>(R.id.blur_view)
-        val windowBackground = window.decorView.background
-        blurView.setupWith(binding.root, RenderScriptBlur(this))
-            .setFrameClearDrawable(windowBackground)
-            .setBlurRadius(16f)
-            .setBlurAutoUpdate(true)
+        // ===== 原生窗口级毛玻璃效果 =====
+        window.setBackgroundBlurRadius(24)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        window.attributes = window.attributes.apply { dimAmount = 0f }
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -58,8 +54,8 @@ class MainActivity : AppCompatActivity() {
         // 深色模式切换后强制刷新底栏颜色
         refreshBottomNavColors()
 
-        // 底栏容器：只吃导航栏底部 insets
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavBackground) { view, insets ->
+        // 底栏：只吃导航栏底部 insets
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updatePadding(bottom = systemBars.bottom)
             WindowInsetsCompat.Builder(insets)
@@ -103,8 +99,10 @@ class MainActivity : AppCompatActivity() {
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
 
-        // 胶囊底色（由 BlurView 提供毛玻璃背景，底栏本身透明）
-        binding.bottomNav.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        // 胶囊底色（半透明，让窗口级毛玻璃效果透出）
+        val barBg = if (night) android.graphics.Color.parseColor("#801A1A28")
+                    else android.graphics.Color.parseColor("#80F8F8FA")
+        binding.bottomNav.setBackgroundColor(barBg)
 
         // 读取用户主题色
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
