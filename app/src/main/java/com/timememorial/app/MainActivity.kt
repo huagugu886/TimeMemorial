@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // ===== 原生窗口级毛玻璃效果 =====
-        window.setBackgroundBlurRadius(24)
+        window.setBackgroundBlurRadius(45)
         window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         window.attributes = window.attributes.apply { dimAmount = 0f }
 
@@ -114,7 +114,13 @@ class MainActivity : AppCompatActivity() {
         // 胶囊底色（半透明，让窗口级毛玻璃效果透出）
         val barBg = if (night) android.graphics.Color.parseColor("#801A1A28")
                     else android.graphics.Color.parseColor("#80F8F8FA")
-        binding.bottomNav.setBackgroundColor(barBg)
+        val density = resources.displayMetrics.density
+        val barBgDrawable = android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            cornerRadius = 28f * density
+            setColor(if (night) 0x401A1A28.toInt() else 0x30F8F8FA.toInt())
+        }
+        binding.bottomNav.background = barBgDrawable
 
         // 读取用户主题色
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
