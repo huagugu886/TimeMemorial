@@ -13,6 +13,10 @@ import androidx.navigation.ui.setupWithNavController
 import com.timememorial.app.databinding.ActivityMainBinding
 import com.timememorial.app.reminder.ReminderManager
 import android.view.WindowManager
+import android.view.View
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Color
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,6 +36,14 @@ class MainActivity : AppCompatActivity() {
         window.setBackgroundBlurRadius(24)
         window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         window.attributes = window.attributes.apply { dimAmount = 0f }
+
+        // MIUIX 风格圆角毛玻璃底栏：用 OutlineProvider 裁剪圆角，保留半透明背景让窗口级模糊透出
+        binding.bottomNav.outlineProvider = object : android.view.ViewOutlineProvider() {
+            override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
+                outline.setRoundRect(0, 0, view.width, view.height, 28 * resources.displayMetrics.density)
+            }
+        }
+        binding.bottomNav.clipToOutline = true
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -134,7 +146,7 @@ class MainActivity : AppCompatActivity() {
             intArrayOf()
         )
         val indicatorColors = intArrayOf(activeBg, android.graphics.Color.TRANSPARENT)
-        binding.bottomNav.background = createCapsuleBackground(activeBg)
+        // 圆角已由 OutlineProvider 裁剪，不再用 createCapsuleBackground 覆盖背景（否则毛玻璃失效）
     }
 
     /** 创建胶囊圆角背景 Drawable */
