@@ -7,20 +7,10 @@
         <item name="colorSecondary">@color/purple_primary</item>
         <item name="android:windowBackground">@color/surface</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowLightStatusBar">false</item>
-    </style>
-
-    <style name="Theme.TimeMemorial.Dark" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/purple_primary</item>
-        <item name="colorPrimaryVariant">@color/purple_dark</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorSecondary">@color/purple_primary</item>
-        <item name="android:windowBackground">@color/dark_bg</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/dark_card</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
     </style>
 </resources>

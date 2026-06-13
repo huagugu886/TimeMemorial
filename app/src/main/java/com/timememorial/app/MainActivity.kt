@@ -1,166 +1,224 @@
 package com.timememorial.app
 
+import android.Manifest
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.content.res.Configuration
+import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.view.View
+import android.view.ViewOutlineProvider
+import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.timememorial.app.databinding.ActivityMainBinding
-import com.timememorial.app.reminder.ReminderManager
-import android.view.WindowManager
-import android.view.View
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Color
+import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var prefs: SharedPreferences
+
+    private val colorMap = mapOf(
+        "purple" to "#8B5CF6",
+        "blue"   to "#3B82F6",
+        "pink"   to "#EC4899",
+        "rose"   to "#F43F5E",
+        "teal"   to "#14B8A6",
+        "red"    to "#EF4444"
+    )
+    private val colorMapDark = mapOf(
+        "purple" to "#A78BFA",
+        "blue"   to "#60A5FA",
+        "pink"   to "#F472B6",
+        "rose"   to "#FB7185",
+        "teal"   to "#2DD4BF",
+        "red"    to "#F87171"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 深色模式由 TimeMemorialApp.onCreate() 统一读取 SharedPreferences 并设置
-
-        // 沉浸式状态栏：让内容绘制到状态栏下方
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // ===== 原生窗口级毛玻璃效果 =====
-        window.setBackgroundBlurRadius(45)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        window.attributes = window.attributes.apply { dimAmount = 0f }
+        prefs = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
 
-        // MIUIX 风格圆角毛玻璃底栏：用 OutlineProvider 裁剪圆角，保留半透明背景让窗口级模糊透出
-        binding.bottomNav.outlineProvider = object : android.view.ViewOutlineProvider() {
-            override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
-                outline.setRoundRect(0, 0, view.width, view.height, 28 * resources.displayMetrics.density)
-            }
-        }
-        binding.bottomNav.clipToOutline = true
+        // ── 沉浸式 ──
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
-        binding.bottomNav.setupWithNavController(navController)
-
-        // 冷启动时恢复纪念日提醒闹钟
-        val prefs = getSharedPreferences("reminder_settings", MODE_PRIVATE)
-        if (prefs.getBoolean("enabled", false)) {
-            ReminderManager.scheduleDaily(this)
+        // ── 窗口级毛玻璃（API 31+）──
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            window.setBackgroundBlurRadius(40)
+            window.attributes = window.attributes.apply { dimAmount = 0f }
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         }
 
-        // Android 13+ 请求通知权限
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
-            }
-        }
-
-        // 深色模式切换后强制刷新底栏颜色
-        refreshBottomNavColors()
-
-        // 底栏：只吃导航栏底部 insets
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.updatePadding(bottom = systemBars.bottom)
-            WindowInsetsCompat.Builder(insets)
-                .setInsets(WindowInsetsCompat.Type.ime(), androidx.core.graphics.Insets.NONE)
-                .build()
-        }
-
-        // FragmentContainerView 转发 insets
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            for (i in 0 until binding.navHostFragment.childCount) {
-                ViewCompat.dispatchApplyWindowInsets(binding.navHostFragment.getChildAt(i), insets)
-            }
-
-            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-            if (imeHeight > 0) {
-                val fragment = navHostFragment.childFragmentManager
-                    .primaryNavigationFragment
-                if (fragment?.view is WebView) {
-                    (fragment.view as WebView).evaluateJavascript(
-                        """
-                        var el = document.activeElement;
-                        if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
-                            el.scrollIntoView({block: 'center', behavior: 'smooth'});
-                        }
-                        """.trimIndent(), null
-                    )
+        // ── 系统栏 Inset 处理（合并为一个监听器）──
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(bars.left, bars.top, bars.right, 0)
+            // 底栏加导航栏高度 padding
+            binding.bottomNav.setPadding(
+                binding.bottomNav.paddingLeft,
+                binding.bottomNav.paddingTop,
+                binding.bottomNav.paddingRight,
+                bars.bottom + (4 * resources.displayMetrics.density).toInt()
+            )
+            // 分发给 Fragment
+            for (i in 0 until v.childCount) {
+                val child = (v as android.view.ViewGroup).getChildAt(i)
+                if (child.id != R.id.bottom_nav) {
+                    ViewCompat.dispatchApplyWindowInsets(child, insets)
                 }
             }
             insets
+        }
+
+        // ── 导航 ──
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        binding.bottomNav.setupWithNavController(navHostFragment.navController)
+
+        // ── 底栏外观 ──
+        setupBottomNavAppearance()
+
+        // ── 纪念日提醒 ──
+        scheduleDailyReminder()
+
+        // ── 通知权限 ──
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1001
+                )
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        refreshBottomNavColors()
+        setupBottomNavAppearance()
     }
 
-    /** 强制刷新底栏颜色（MiUIX 风格） */
-    fun refreshBottomNavColors() {
-        val nightMode = resources.configuration.uiMode and
-            android.content.res.Configuration.UI_MODE_NIGHT_MASK
-        val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+    // ═══════════════════════════════════════════════
+    //  MiUIX 胶囊底栏
+    // ═══════════════════════════════════════════════
 
-        // 胶囊底色（半透明，让窗口级毛玻璃效果透出）
-        val barBg = if (night) android.graphics.Color.parseColor("#801A1A28")
-                    else android.graphics.Color.parseColor("#80F8F8FA")
+    private fun setupBottomNavAppearance() {
+        val night = (resources.configuration.uiMode
+                and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         val density = resources.displayMetrics.density
-        val barBgDrawable = android.graphics.drawable.GradientDrawable().apply {
-            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-            cornerRadius = 28f * density
-            setColor(if (night) 0x401A1A28.toInt() else 0x30F8F8FA.toInt())
+        val themeColor = prefs.getString("theme_color", "purple") ?: "purple"
+
+        // ── 圆角裁剪 ──
+        binding.bottomNav.outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: android.graphics.Outline) {
+                outline.setRoundRect(0, 0, view.width, view.height, 26 * density)
+            }
         }
-        binding.bottomNav.background = barBgDrawable
+        binding.bottomNav.clipToOutline = true
 
-        // 读取用户主题色
-        val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
-            .getString("theme_color", "purple") ?: "purple"
-        val primaryMap = mapOf(
-            "purple" to if (night) "#A78BFA" else "#8B5CF6",
-            "blue"   to if (night) "#60A5FA" else "#3B82F6",
-            "pink"   to if (night) "#F472B6" else "#EC4899",
-            "rose"   to if (night) "#FB7185" else "#F43F5E",
-            "teal"   to if (night) "#2DD4BF" else "#14B8A6",
-            "red"    to if (night) "#F87171" else "#EF4444"
-        )
-        val checked = android.graphics.Color.parseColor(primaryMap[themeName] ?: primaryMap["purple"]!!)
-        val unchecked = if (night) android.graphics.Color.parseColor("#94A3B8")
-                        else android.graphics.Color.parseColor("#888888")
-        val states = arrayOf(
+        // ── 背景：半透明 + 毛玻璃透出 ──
+        val bgRes = if (night) R.drawable.bg_bottom_nav_miui_dark else R.drawable.bg_bottom_nav_miui
+        binding.bottomNav.setBackgroundResource(bgRes)
+
+        // ── 胶囊指示器颜色：跟随主题色 ──
+        val activeColor = if (night) colorMapDark[themeColor] ?: "#A78BFA" else colorMap[themeColor] ?: "#8B5CF6"
+        val accentInt = android.graphics.Color.parseColor(activeColor)
+        val indicatorBg = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 16 * density
+            setColor(accentInt)
+        }
+        binding.bottomNav.itemActiveIndicatorDrawable = indicatorBg
+
+        // ── 激活时文字变白（在胶囊上）──
+        val activeTextColor = if (night) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
+        val inactiveTextColor = if (night) 0xFF8899AA.toInt() else 0xFF999999.toInt()
+
+        val tintStates = arrayOf(
             intArrayOf(android.R.attr.state_checked),
             intArrayOf()
         )
-        val colors = intArrayOf(checked, unchecked)
-        binding.bottomNav.itemIconTintList = android.content.res.ColorStateList(states, colors)
-        binding.bottomNav.itemTextColor = android.content.res.ColorStateList(states, colors)
+        val tintColors = intArrayOf(accentInt, inactiveTextColor)
+        binding.bottomNav.itemIconTint = ColorStateList(tintStates, tintColors)
+        binding.bottomNav.itemTextColor = ColorStateList(tintStates, tintColors)
 
-        // 胶囊指示器背景色（选中态底色）
-        val activeBg = if (night) android.graphics.Color.parseColor("#1E2A3A")
-                       else android.graphics.Color.parseColor("#E8F0FE")
-        val indicatorStates = arrayOf(
-            intArrayOf(android.R.attr.state_checked),
-            intArrayOf()
-        )
-        val indicatorColors = intArrayOf(activeBg, android.graphics.Color.TRANSPARENT)
-        // 圆角已由 OutlineProvider 裁剪，不再用 createCapsuleBackground 覆盖背景（否则毛玻璃失效）
+        // ── elevation 阴影（浮起感）──
+        binding.bottomNav.elevation = 8 * density
     }
 
-    /** 创建胶囊圆角背景 Drawable */
-    private fun createCapsuleBackground(activeBgColor: Int): android.graphics.drawable.GradientDrawable {
-        return android.graphics.drawable.GradientDrawable().apply {
-            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-            setColor(android.graphics.Color.TRANSPARENT)
-            cornerRadius = 28 * resources.displayMetrics.density
+    // ═══════════════════════════════════════════════
+    //  纪念日提醒
+    // ═══════════════════════════════════════════════
+
+    private fun scheduleDailyReminder() {
+        val reminderPrefs = getSharedPreferences("reminder_settings", MODE_PRIVATE)
+        if (!reminderPrefs.getBoolean("enabled", false)) return
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, ReminderReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 12)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            if (timeInMillis <= System.currentTimeMillis()) add(Calendar.DAY_OF_YEAR, 1)
+        }
+
+        alarmManager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            AlarmManager.INTERVAL_DAY,
+            pendingIntent
+        )
+
+        reminderPrefs.edit().putLong("scheduled_time", calendar.timeInMillis).apply()
+        registerReceiver(
+            android.content.BroadcastReceiver(),
+            android.content.IntentFilter("com.timememorial.ACTION_REMINDER")
+        )
+    }
+
+    // ═══════════════════════════════════════════════
+    //  通知渠道
+    // ═══════════════════════════════════════════════
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "anniversary_reminders",
+                "纪念日提醒",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "纪念日提醒通知"
+            }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
         }
     }
 }

@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg">
@@ -18,27 +19,25 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- MiUIX 风格毛玻璃底栏（原生窗口级模糊） -->
+    <!-- MiUIX 胶囊导航栏：浮起 + 圆角 + 毛玻璃 + 胶囊指示器 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="8dp"
-        android:clipChildren="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="12dp"
         android:clipToOutline="true"
-        android:background="@drawable/bg_bottom_nav_capsule_outline"
-        app:elevation="6dp"
-        app:itemIconTint="@color/bottom_nav_color"
-        app:itemTextColor="@color/bottom_nav_color"
+        android:background="@drawable/bg_bottom_nav_miui"
+        app:itemActiveIndicatorStyle="@style/MiuiCapsuleIndicator"
+        app:itemBackground="@drawable/ripple_nav_item"
+        app:itemIconTint="@color/bottom_nav_tint"
+        app:itemTextColor="@color/bottom_nav_tint"
         app:labelVisibilityMode="labeled"
-        app:itemIconSize="22dp"
-        app:itemPaddingTop="6dp"
-        app:itemPaddingBottom="2dp"
-        app:itemTextAppearanceInactive="@style/BottomNavText"
-        app:itemTextAppearanceActive="@style/BottomNavText"
+        app:itemIconSize="24dp"
+        app:itemRippleColor="@color/miuix_nav_ripple"
         app:menu="@menu/bottom_nav_menu"
+        app:elevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
