@@ -27,15 +27,31 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-disabled: true
+
+      - name: Clear Gradle Cache
+        run: rm -rf ~/.gradle/caches/transforms-* ~/.gradle/caches/modules-2/files-* ~/.gradle/caches/modules-2/metadata-*
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Diagnose - show current commit
+        run: |
+          echo "=== COMMIT INFO ==="
+          git log --oneline -3
+          echo "=== CURRENT COMMIT ==="
+          git rev-parse HEAD
+          echo "=== build.gradle.kts HEAD ==="
+          head -50 app/build.gradle.kts
+          echo "=== themes.xml ==="
+          cat app/src/main/res/values/themes.xml
+
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --no-build-cache --refresh-dependencies
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease --no-build-cache
 
       - name: Check APK size
         run: |
@@ -78,28 +94,12 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           mv ./apk/app-release.apk ./apk/TimeMemorial-v${VERSION}.apk 2>/dev/null || \
-          mv ./apk/*.apk ./apk/TimeMemorial-v${VERSION}.apk
-          ls -lh ./apk/
+          mv ./apk/*.apk .
 
-      - name: Get version name
-        id: version
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: "TimeMemorial v${{ steps.version.outputs.version }}"
-          body: |
-            ## TimeMemorial v${{ steps.version.outputs.version }}
-            
-            ### 📱 APK 安装
-            下载 `TimeMemorial-v${{ steps.version.outputs.version }}.apk` 安装即可。
-            
-            ### 🔄 更新内容
-            - 自动构建发布
-          files: ./apk/TimeMemorial-v${{ steps.version.outputs.version }}.apk
+          files: ./apk/*.apk
+          generate_release_notes: true
           draft: false
           prerelease: false

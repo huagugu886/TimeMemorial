@@ -38,7 +38,7 @@ if [ -d "/sdcard/Download/TimeMemorial" ]; then
 fi
 
 # 在 Ubuntu 内执行环境配置
-proot-distro login ubuntu -- bash -c '
+proot-distro login ubuntu --bind /sdcard/Download/TimeMemorial:/root/TimeMemorial -- bash -c '
 set -e
 echo "📦 安装基础工具..."
 apt update -y
@@ -46,7 +46,7 @@ apt install -y wget unzip openjdk-17-jdk-headless
 
 echo ""
 echo "📦 配置 Java 17..."
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
 export PATH=$JAVA_HOME/bin:$PATH
 
 echo "   Java 版本："
@@ -71,7 +71,7 @@ echo "📦 接受 SDK 许可证..."
 yes | sdkmanager --licenses > /dev/null 2>&1 || true
 
 echo "📦 安装 Android SDK 组件..."
-sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
 
 echo ""
 echo "✅ 环境配置完成！"
@@ -83,11 +83,8 @@ echo ""
 echo "🔨 [Step 3] 开始编译..."
 cd /root/TimeMemorial
 
-# 确保 gradlew 可执行
-chmod +x gradlew
-
 # 编译
-./gradlew assembleDebug --no-daemon 2>&1
+bash gradlew assembleDebug --no-daemon 2>&1
 
 echo ""
 echo "=================================="

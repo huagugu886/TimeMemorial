@@ -68,12 +68,28 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.15.0")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation("androidx.fragment:fragment-ktx:1.8.6")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.8.9")
-    implementation("androidx.navigation:navigation-ui-ktx:2.8.9")
-    implementation("androidx.webkit:webkit:1.12.1")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+    implementation("androidx.webkit:webkit:1.8.0")
+    implementation("androidx.cardview:cardview:1.0.0")
+}
+
+configurations.all {
+    resolutionStrategy.force(
+        "androidx.core:core-ktx:1.12.0",
+        "androidx.appcompat:appcompat:1.6.1",
+        "androidx.appcompat:appcompat-resources:1.6.1",
+        "com.google.android.material:material:1.11.0",
+        "androidx.constraintlayout:constraintlayout:2.1.4",
+        "androidx.fragment:fragment-ktx:1.6.2",
+        "androidx.navigation:navigation-fragment-ktx:2.7.7",
+        "androidx.navigation:navigation-ui-ktx:2.7.7",
+        "androidx.webkit:webkit:1.8.0",
+        "androidx.cardview:cardview:1.0.0"
+    )
 }

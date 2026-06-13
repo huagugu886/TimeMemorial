@@ -1,16 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="RoundedCorner" parent="">
-        <item name="cornerSize">12dp</item>
+
+    <!-- 底部导航文字样式 -->
+    <style name="BottomNavText" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">10sp</item>
+        <item name="android:lineSpacingExtra">0dp</item>
     </style>
 
-    <!-- MiUIX Bottom Nav Indicator -->
-    <style name="MiuixActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">@color/miuix_nav_active_bg</item>
-        <item name="android:shapeAppearance">@style/ShapeAppearance.Miuix.Rounded</item>
+    <style name="BottomNavTextAppearance" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/bottom_nav_color</item>
     </style>
 
-    <style name="ShapeAppearance.Miuix.Rounded" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">12dp</item>
+    <style name="BottomNavIndicator" parent="">
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:background">@drawable/bg_nav_item_selected</item>
     </style>
+
 </resources>
