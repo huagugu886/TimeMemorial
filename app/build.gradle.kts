@@ -78,7 +78,7 @@ dependencies {
     implementation("androidx.webkit:webkit:1.8.0")
     implementation("androidx.cardview:cardview:1.0.0")
     // MIUIX 风格毛玻璃底栏 - 实时模糊底栏背后内容
-    implementation("com.github.Dimezis:BlurView:2.0.6")
+    implementation("com.github.Dimezis:BlurView:version-2.0.6")
 }
 
 configurations.all {
@@ -93,6 +93,6 @@ configurations.all {
         "androidx.navigation:navigation-ui-ktx:2.7.7",
         "androidx.webkit:webkit:1.8.0",
         "androidx.cardview:cardview:1.0.0",
-        "com.github.Dimezis:BlurView:2.0.6",
+        "com.github.Dimezis:BlurView:version-2.0.6",
     )
 }
