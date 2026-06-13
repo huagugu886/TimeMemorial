@@ -18,38 +18,46 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- MiUIX 风格胶囊底栏容器 -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- MiUIX 风格胶囊底栏容器（BlurView 实现毛玻璃） -->
+    <FrameLayout
         android:id="@+id/bottom_nav_background"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
         android:paddingBottom="8dp"
-        android:background="@android:color/transparent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottom_nav"
-            android:layout_width="0dp"
+        <eightbitlab.com.blurview.BlurView
+            android:id="@+id/blur_view"
+            android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="@drawable/bg_bottom_nav_capsule"
-            android:elevation="4dp"
-            app:itemIconTint="@color/bottom_nav_color"
-            app:itemTextColor="@color/bottom_nav_color"
-            app:labelVisibilityMode="labeled"
-            app:itemIconSize="22dp"
-            app:itemPaddingTop="6dp"
-            app:itemPaddingBottom="2dp"
-            app:itemTextAppearanceInactive="@style/BottomNavText"
-            app:itemTextAppearanceActive="@style/BottomNavText"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:menu="@menu/bottom_nav_menu" />
+            android:clipChildren="true"
+            android:clipToOutline="true"
+            android:outlineProvider="@drawable/bg_bottom_nav_capsule_outline"
+            android:elevation="6dp">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottom_nav"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                app:itemIconTint="@color/bottom_nav_color"
+                app:itemTextColor="@color/bottom_nav_color"
+                app:labelVisibilityMode="labeled"
+                app:itemIconSize="22dp"
+                app:itemPaddingTop="6dp"
+                app:itemPaddingBottom="2dp"
+                app:itemTextAppearanceInactive="@style/BottomNavText"
+                app:itemTextAppearanceActive="@style/BottomNavText"
+                app:menu="@menu/bottom_nav_menu" />
+
+        </eightbitlab.com.blurview.BlurView>
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

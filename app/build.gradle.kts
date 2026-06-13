@@ -77,6 +77,8 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
     implementation("androidx.webkit:webkit:1.8.0")
     implementation("androidx.cardview:cardview:1.0.0")
+    // MIUIX 风格毛玻璃底栏
+    implementation("com.eightbitlab:blurview:1.6.6")
 }
 
 configurations.all {
@@ -90,6 +92,7 @@ configurations.all {
         "androidx.navigation:navigation-fragment-ktx:2.7.7",
         "androidx.navigation:navigation-ui-ktx:2.7.7",
         "androidx.webkit:webkit:1.8.0",
-        "androidx.cardview:cardview:1.0.0"
+        "androidx.cardview:cardview:1.0.0",
+        "com.eightbitlab:blurview:1.6.6"
     )
 }

@@ -12,6 +12,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.timememorial.app.databinding.ActivityMainBinding
 import com.timememorial.app.reminder.ReminderManager
+import eightbitlab.com.blurview.BlurView
+import eightbitlab.com.blurview.RenderScriptBlur
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,6 +28,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // ===== BlurView 毛玻璃初始化 =====
+        val blurView = findViewById<BlurView>(R.id.blur_view)
+        val windowBackground = window.decorView.background
+        blurView.setupWith(binding.root, RenderScriptBlur(this))
+            .setFrameClearDrawable(windowBackground)
+            .setBlurRadius(16f)
+            .setBlurAutoUpdate(true)
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -93,10 +103,8 @@ class MainActivity : AppCompatActivity() {
             android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val night = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
 
-        // 胶囊底色
-        val barBg = if (night) android.graphics.Color.parseColor("#1A1A28")
-                    else android.graphics.Color.parseColor("#F8F8FA")
-        binding.bottomNav.setBackgroundColor(barBg)
+        // 胶囊底色（由 BlurView 提供毛玻璃背景，底栏本身透明）
+        binding.bottomNav.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
         // 读取用户主题色
         val themeName = getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
