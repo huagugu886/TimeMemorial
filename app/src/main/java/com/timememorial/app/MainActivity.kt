@@ -151,7 +151,6 @@ class MainActivity : AppCompatActivity() {
             cornerRadius = 16 * density
             setColor(accentInt)
         }
-        binding.bottomNav.itemActiveIndicatorDrawable = indicatorBg
 
         // ── 激活时文字变白（在胶囊上）──
         val activeTextColor = if (night) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
