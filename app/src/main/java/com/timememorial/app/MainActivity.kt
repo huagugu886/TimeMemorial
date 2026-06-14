@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity() {
             cornerRadius = 16 * density
             setColor(accentInt)
         }
-        binding.bottomNav.itemActiveIndicatorDrawable = indicatorBg
+        binding.bottomNav.setItemActiveIndicatorDrawable(indicatorBg)
 
         // ── 激活时文字变白（在胶囊上）──
         val activeTextColor = if (night) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
             intArrayOf()
         )
         val tintColors = intArrayOf(accentInt, inactiveTextColor)
-        binding.bottomNav.itemIconTint = ColorStateList(tintStates, tintColors)
+        binding.bottomNav.itemIconTintList = ColorStateList(tintStates, tintColors)
         binding.bottomNav.itemTextColor = ColorStateList(tintStates, tintColors)
 
         // ── elevation 阴影（浮起感）──
