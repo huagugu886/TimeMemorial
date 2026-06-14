@@ -29,12 +29,12 @@
         android:layout_marginBottom="12dp"
         android:clipToOutline="true"
         android:background="@drawable/bg_bottom_nav_capsule"
-        app:itemActiveIndicatorStyle="@style/MiuiCapsuleIndicator"
         app:itemBackground="@drawable/ripple_nav_item"
         app:itemIconTint="@color/bottom_nav_tint"
         app:itemTextColor="@color/bottom_nav_tint"
         app:labelVisibilityMode="labeled"
         app:itemIconSize="24dp"
+        app:backgroundTint="@null"
         app:itemRippleColor="@color/miuix_nav_ripple"
         app:menu="@menu/bottom_nav_menu"
         
