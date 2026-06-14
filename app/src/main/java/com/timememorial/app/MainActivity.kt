@@ -143,47 +143,42 @@ class MainActivity : AppCompatActivity() {
         val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         val density = resources.displayMetrics.density
         val themeColor = getThemeColor(this)
+        val capsuleContainer = findViewById<View>(R.id.nav_capsule_container)
 
-        // 1. 背景 — MIUIX surfaceContainer 风格 squircle 胶囊
+        // 1. 胶囊壳背景 — surfaceContainer 风格
         val bgColor = if (night) Color.parseColor("#1A1A1A") else Color.parseColor("#F0F0F5")
         val capsule = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = 28 * density
             setColor(bgColor)
         }
-        binding.bottomNav.background = capsule
+        capsuleContainer.background = capsule
 
-        // 2. 圆角裁剪
-        binding.bottomNav.outlineProvider = object : ViewOutlineProvider() {
+        // 2. 圆角裁剪 — 用 Path 做 squircle
+        capsuleContainer.outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
                 val rect = RectF(0f, 0f, view.width.toFloat(), view.height.toFloat())
-                val path = Path()
-                path.addRoundRect(rect, 28 * density, 28 * density, Path.Direction.CW)
+                val path = Path().apply {
+                    addRoundRect(rect, 28 * density, 28 * density, Path.Direction.CW)
+                }
                 outline.setPath(path)
             }
         }
-        binding.bottomNav.clipToOutline = true
+        capsuleContainer.clipToOutline = true
 
-        // 3. 阴影 — MIUIX 风格仅 1dp
-        binding.bottomNav.elevation = 1 * density
+        // 3. 阴影 — MIUIX 风格 1dp
+        capsuleContainer.elevation = 1 * density
 
-        // 4. 选中效果 — MIUIX 风格：透明度变化，无 indicator pill
-        //    选中 100% 不透明，未选中 40% 不透明
-        val unselectedAlpha = (255 * 0.4f).toInt()  // 102
+        // 4. 底部导航图标着色 — 选中 100%，未选中 40%
+        val unselectedAlpha = (255 * 0.4f).toInt()
         val selectedColor = themeColor
         val unselectedColor = androidx.core.graphics.ColorUtils.setAlphaComponent(themeColor, unselectedAlpha)
-
         val navTint = ColorStateList(
-            arrayOf(
-                intArrayOf(android.R.attr.state_checked),
-                intArrayOf()
-            ),
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
             intArrayOf(selectedColor, unselectedColor)
         )
         binding.bottomNav.itemIconTintList = navTint
         binding.bottomNav.itemTextColor = navTint
-
-        // 5. 清除 Material 默认 item 背景
         binding.bottomNav.itemBackground = null
     }
 

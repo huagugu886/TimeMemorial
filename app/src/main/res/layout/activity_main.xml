@@ -13,30 +13,38 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:defaultNavHost="true"
-        app:layout_constraintBottom_toTopOf="@id/bottom_nav"
+        app:layout_constraintBottom_toTopOf="@id/nav_capsule_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- MiUIX 胶囊导航栏：浮起 + 圆角 + 毛玻璃 + 胶囊指示器 -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav"
+    <!-- MIUIX 胶囊壳：负责形状 + 阴影 + 圆角 -->
+    <FrameLayout
+        android:id="@+id/nav_capsule_container"
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="12dp"
-        
-        android:background="@android:color/transparent"
-        app:labelVisibilityMode="labeled"
-        app:itemIconSize="28dp"
-        app:backgroundTint="@null"
-        app:itemRippleColor="@color/miuix_nav_ripple"
-        app:menu="@menu/bottom_nav_menu"
-        
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- 底部导航：纯透明，只管图标 -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            app:itemIconSize="28dp"
+            app:backgroundTint="@null"
+            app:itemRippleColor="@color/miuix_nav_ripple"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_nav_menu" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
