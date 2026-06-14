@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.clipToOutline = true
 
         // ── 背景：半透明 + 毛玻璃透出 ──
-        val bgRes = if (night) R.drawable.bg_bottom_nav_miui_dark else R.drawable.bg_bottom_nav_miui
+        val bgRes = if (night) R.drawable.bg_bottom_nav_miui_dark else R.drawable.bg_bottom_nav_capsule
         binding.bottomNav.setBackgroundResource(bgRes)
 
         // ── 胶囊指示器颜色：跟随主题色 ──

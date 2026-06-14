@@ -28,7 +28,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="12dp"
         android:clipToOutline="true"
-        android:background="@drawable/bg_bottom_nav_miui"
+        android:background="@drawable/bg_bottom_nav_capsule"
         app:itemActiveIndicatorStyle="@style/MiuiCapsuleIndicator"
         app:itemBackground="@drawable/ripple_nav_item"
         app:itemIconTint="@color/bottom_nav_tint"
@@ -37,7 +37,7 @@
         app:itemIconSize="24dp"
         app:itemRippleColor="@color/miuix_nav_ripple"
         app:menu="@menu/bottom_nav_menu"
-        app:elevation="0dp"
+        
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
