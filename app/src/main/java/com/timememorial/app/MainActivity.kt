@@ -25,6 +25,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.timememorial.app.reminder.ReminderReceiver
 import com.timememorial.app.databinding.ActivityMainBinding
 import java.util.Calendar
 
@@ -79,8 +81,9 @@ class MainActivity : AppCompatActivity() {
                 bars.bottom + (4 * resources.displayMetrics.density).toInt()
             )
             // 分发给 Fragment
-            for (i in 0 until v.childCount) {
-                val child = (v as android.view.ViewGroup).getChildAt(i)
+            val vg = v as android.view.ViewGroup
+            for (i in 0 until vg.childCount) {
+                val child = vg.getChildAt(i)
                 if (child.id != R.id.bottom_nav) {
                     ViewCompat.dispatchApplyWindowInsets(child, insets)
                 }
@@ -166,6 +169,13 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.elevation = 8 * density
     }
 
+    /**
+     * 供 SettingsFragment 调用的公开方法
+     */
+    fun refreshBottomNavColors() {
+        setupBottomNavAppearance()
+    }
+
     // ═══════════════════════════════════════════════
     //  纪念日提醒
     // ═══════════════════════════════════════════════
@@ -198,10 +208,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         reminderPrefs.edit().putLong("scheduled_time", calendar.timeInMillis).apply()
-        registerReceiver(
-            android.content.BroadcastReceiver(),
-            android.content.IntentFilter("com.timememorial.ACTION_REMINDER")
-        )
+        // Removed empty BroadcastReceiver registration
     }
 
     // ═══════════════════════════════════════════════
