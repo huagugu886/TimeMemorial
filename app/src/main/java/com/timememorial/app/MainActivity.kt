@@ -159,7 +159,7 @@ class MainActivity : AppCompatActivity() {
                 val rect = RectF(0f, 0f, view.width.toFloat(), view.height.toFloat())
                 val path = Path()
                 path.addRoundRect(rect, 28 * density, 28 * density, Path.Direction.CW)
-                outline.setPath(path, 0f)
+                outline.setPath(path)
             }
         }
         binding.bottomNav.clipToOutline = true
