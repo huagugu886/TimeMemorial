@@ -12,6 +12,10 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.drawable.GradientDrawable
+import android.graphics.Color
+import android.graphics.Outline
+import android.graphics.Path
+import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -124,6 +128,16 @@ class MainActivity : AppCompatActivity() {
     // ═══════════════════════════════════════════════
     //  MiUIX 胶囊底栏
     // ═══════════════════════════════════════════════
+
+    
+    private fun getThemeColor(context: android.content.Context): Int {
+        val prefs = context.getSharedPreferences("timememorial_prefs", MODE_PRIVATE)
+        val colorName = prefs.getString("theme_color", "purple") ?: "purple"
+        val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val map = if (night) colorMapDark else colorMap
+        val hex = map[colorName] ?: map["purple"]!!
+        return Color.parseColor(hex)
+    }
 
     private fun setupBottomNavAppearance() {
         val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
