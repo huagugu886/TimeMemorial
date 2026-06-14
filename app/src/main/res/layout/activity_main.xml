@@ -29,11 +29,8 @@
         android:layout_marginBottom="12dp"
         
         android:background="@android:color/transparent"
-        app:itemBackground="@drawable/ripple_nav_item"
-        app:itemIconTint="@color/bottom_nav_tint"
-        app:itemTextColor="@color/bottom_nav_tint"
         app:labelVisibilityMode="labeled"
-        app:itemIconSize="24dp"
+        app:itemIconSize="28dp"
         app:backgroundTint="@null"
         app:itemRippleColor="@color/miuix_nav_ripple"
         app:menu="@menu/bottom_nav_menu"

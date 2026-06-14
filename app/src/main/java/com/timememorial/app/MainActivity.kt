@@ -126,46 +126,51 @@ class MainActivity : AppCompatActivity() {
     // ═══════════════════════════════════════════════
 
     private fun setupBottomNavAppearance() {
-        val night = (resources.configuration.uiMode
-                and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         val density = resources.displayMetrics.density
-        val themeColor = prefs.getString("theme_color", "purple") ?: "purple"
+        val themeColor = getThemeColor(this)
 
-        // ── 圆角裁剪 ──
+        // 1. 背景 — MIUIX surfaceContainer 风格 squircle 胶囊
+        val bgColor = if (night) Color.parseColor("#1A1A1A") else Color.parseColor("#F0F0F5")
+        val capsule = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 28 * density
+            setColor(bgColor)
+        }
+        binding.bottomNav.background = capsule
+
+        // 2. 圆角裁剪
         binding.bottomNav.outlineProvider = object : ViewOutlineProvider() {
-            override fun getOutline(view: View, outline: android.graphics.Outline) {
-                outline.setRoundRect(0, 0, view.width, view.height, 26 * density)
+            override fun getOutline(view: View, outline: Outline) {
+                val rect = RectF(0f, 0f, view.width.toFloat(), view.height.toFloat())
+                val path = Path()
+                path.addRoundRect(rect, 28 * density, 28 * density, Path.Direction.CW)
+                outline.setPath(path, 0f)
             }
         }
         binding.bottomNav.clipToOutline = true
 
-        // ── 背景：半透明 + 毛玻璃透出 ──
-        val bgRes = if (night) R.drawable.bg_bottom_nav_miui_dark else R.drawable.bg_bottom_nav_capsule
-        binding.bottomNav.setBackgroundResource(bgRes)
+        // 3. 阴影 — MIUIX 风格仅 1dp
+        binding.bottomNav.elevation = 1 * density
 
-        // ── 胶囊指示器颜色：跟随主题色 ──
-        val activeColor = if (night) colorMapDark[themeColor] ?: "#A78BFA" else colorMap[themeColor] ?: "#8B5CF6"
-        val accentInt = android.graphics.Color.parseColor(activeColor)
-        val indicatorBg = GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            cornerRadius = 16 * density
-            setColor(accentInt)
-        }
+        // 4. 选中效果 — MIUIX 风格：透明度变化，无 indicator pill
+        //    选中 100% 不透明，未选中 40% 不透明
+        val unselectedAlpha = (255 * 0.4f).toInt()  // 102
+        val selectedColor = themeColor
+        val unselectedColor = androidx.core.graphics.ColorUtils.setAlphaComponent(themeColor, unselectedAlpha)
 
-        // ── 激活时文字变白（在胶囊上）──
-        val activeTextColor = if (night) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
-        val inactiveTextColor = if (night) 0xFF8899AA.toInt() else 0xFF999999.toInt()
-
-        val tintStates = arrayOf(
-            intArrayOf(android.R.attr.state_checked),
-            intArrayOf()
+        val navTint = ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_checked),
+                intArrayOf()
+            ),
+            intArrayOf(selectedColor, unselectedColor)
         )
-        val tintColors = intArrayOf(accentInt, inactiveTextColor)
-        binding.bottomNav.itemIconTintList = ColorStateList(tintStates, tintColors)
-        binding.bottomNav.itemTextColor = ColorStateList(tintStates, tintColors)
+        binding.bottomNav.itemIconTintList = navTint
+        binding.bottomNav.itemTextColor = navTint
 
-        // ── elevation 阴影（浮起感）──
-        binding.bottomNav.elevation = 8 * density
+        // 5. 清除 Material 默认 item 背景
+        binding.bottomNav.itemBackground = null
     }
 
     /**
