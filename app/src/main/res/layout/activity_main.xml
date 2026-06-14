@@ -35,7 +35,6 @@
         app:labelVisibilityMode="labeled"
         app:itemIconSize="24dp"
         app:backgroundTint="@null"
-        app:itemActiveIndicator="@null"
         app:itemRippleColor="@color/miuix_nav_ripple"
         app:menu="@menu/bottom_nav_menu"
         
