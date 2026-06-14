@@ -145,16 +145,18 @@ class MainActivity : AppCompatActivity() {
         val themeColor = getThemeColor(this)
         val capsuleContainer = findViewById<View>(R.id.nav_capsule_container)
 
-        // 1. 胶囊壳背景 — surfaceContainer 风格
-        val bgColor = if (night) Color.parseColor("#1A1A1A") else Color.parseColor("#F0F0F5")
+        // 1. 胶囊背景 — 白色，和页面背景 #F8F6FF 形成对比
+        val bgColor = if (night) Color.parseColor("#1E1E28") else Color.WHITE
+        val strokeColor = if (night) Color.parseColor("#2A2A3A") else Color.parseColor("#E8E8EE")
         val capsule = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = 28 * density
             setColor(bgColor)
+            setStroke((1 * density).toInt(), strokeColor)
         }
         capsuleContainer.background = capsule
 
-        // 2. 圆角裁剪 — 用 Path 做 squircle
+        // 2. 圆角裁剪
         capsuleContainer.outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
                 val rect = RectF(0f, 0f, view.width.toFloat(), view.height.toFloat())
@@ -166,10 +168,10 @@ class MainActivity : AppCompatActivity() {
         }
         capsuleContainer.clipToOutline = true
 
-        // 3. 阴影 — MIUIX 风格 1dp
-        capsuleContainer.elevation = 1 * density
+        // 3. 阴影 — 2dp，比之前更明显
+        capsuleContainer.elevation = 2 * density
 
-        // 4. 底部导航图标着色 — 选中 100%，未选中 40%
+        // 4. 图标着色 — 选中 100%，未选中 40%
         val unselectedAlpha = (255 * 0.4f).toInt()
         val selectedColor = themeColor
         val unselectedColor = androidx.core.graphics.ColorUtils.setAlphaComponent(themeColor, unselectedAlpha)
